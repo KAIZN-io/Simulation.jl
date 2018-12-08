@@ -1,0 +1,9 @@
+V = 4 / 3 * np.pi * 10 **(-15) * r ** 3
+pi_i = c_i / V * R * T
+V_ref = 4 / 3 * np.pi * 10 **(-15) * R_ref ** 3
+G = 4 * np.pi * r ** 2
+R_ref = r / (1 + (1 - nu) * (pi_t * r) / (E * 2 * d))
+R_refdt = phi * R_ref * r / (2 * d) * max(pi_t - pi_c, 0)
+r_osdt = - Lp * (pi_t + pi_e - pi_i)
+r_bdt = 0.2 * R_refdt
+rdt = 0.2 * R_refdt - Lp * (pi_t + pi_e - pi_i)

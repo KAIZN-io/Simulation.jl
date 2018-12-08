@@ -1,0 +1,3 @@
+t0_glucose = dict_time.get('Glucose_impuls_start')
+t1_glucose = dict_time.get('Glucose_impuls_end')
+Glucose = glucose_switch[0]

@@ -1,0 +1,15 @@
+{
+    "ODE": {
+        "domega": {
+            "component": {
+                "patomega1": "-b*omega",
+                "patomega2": "-c*np.sin(theta)"
+            }
+        },
+        "dtheta": {
+            "component": {
+                "pattheta1": "omega"
+            }
+        }
+    }
+}

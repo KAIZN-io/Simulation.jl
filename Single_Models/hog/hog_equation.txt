@@ -1,0 +1,9 @@
+V_cell = V_os + V_b
+V_cyt = 0.5 * V_cell
+V_nuc = 0.07 * V_cell
+PI_e = PI_e0 + w * NaCl
+PI_t = max(PI_t0 * (V_os - V_osPIt) / (V_os0 - V_osPIt), 0)
+PI_i = ((n_0 + Glyc_in * V_cyt) / V_os) * R * T
+V_ratio = -G * Lp * (PI_e + PI_t - PI_i) / V_cell
+n_totalHog1 = (Hog1c * V_cyt + Hog1n * V_nuc + Hog1PPc * V_cyt + Hog1PPn * V_nuc)
+totalHog1PP = (Hog1PPc * V_cyt + Hog1PPn * V_nuc) * 602 / 6780

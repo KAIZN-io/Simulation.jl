@@ -5,7 +5,6 @@ __license__ = 'private'
 
 """the only source for ADaM is SDTM or other ADaM databases"""
 
-
 """import the standard used packages"""
 exec(open("SYSTEM/py_packages.py").read())
 import ADaM_preparation

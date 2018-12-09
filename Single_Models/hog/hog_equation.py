@@ -22,7 +22,7 @@ if signal_type == 4:
     NaCl = 0 if t < t0 else single_impuls_NaCl * math.ceil((t - t0) / t1)
     NaCl = max_NaCl if NaCl > max_NaCl else NaCl
 
-# in json file
+# in json file (with NaCl)
 V_cell = V_os + V_b
 V_cyt = 0.5 * V_cell
 V_nuc = 0.07 * V_cell

@@ -1,6 +1,7 @@
 import json
 import re
 import os
+exec(open("SYSTEM/py_packages.py").read())
 
 
 cwd = os.getcwd()
@@ -124,10 +125,6 @@ for system in system_comp:
 
                 dict_spec[key]['component']['pat{}{}'.format(key_surrogate,i+1)] = a
 
-            """get the corresponding units of the variables(keys) """
-            with open('Single_Models/{0}/{0}.py'.format(model)) as g:
-                pass
-
            
             """last step: remove keys without values --> remove zombies"""
             keys_to_delete = []
@@ -136,6 +133,16 @@ for system in system_comp:
                     keys_to_delete.append(remove_key)
             for remove_key in keys_to_delete:
                 dict_spec[key]['component'].pop(remove_key, None)
+
+        """sql to json 
+        
+        get the corresponding units of the variables(keys)
+        """
+        if system == 'ODE':
+            pass
+ 
+
+         
 
 if model == 'hog':
 

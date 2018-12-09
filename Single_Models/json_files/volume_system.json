@@ -3,81 +3,96 @@
         "V": {
             "component": {
                 "patV1": "4/3*np.pi*10**(-15)*r**3"
-            }
+            },
+            "unit": "fL"
         },
         "pi_i": {
             "component": {
                 "patpi_i1": "c_i/V*R*T"
-            }
+            },
+            "unit": "Pa"
         },
         "V_ref": {
             "component": {
                 "patV_ref1": "4/3*np.pi*10**(-15)*R_ref**3"
-            }
+            },
+            "unit": "fL"
         },
         "G": {
             "component": {
                 "patG1": "4*np.pi*r**2"
-            }
+            },
+            "unit": "(um)^2"
         },
         "R_ref": {
             "component": {
                 "patR_ref1": "r/(1+(1-nu)*(pi_t*r)/(E*2*d))"
-            }
+            },
+            "unit": "um s^-1"
         },
         "R_refdt": {
             "component": {
                 "patR_refdt1": "phi*R_ref*r/(2*d)*max(pi_t-pi_c,0)"
-            }
+            },
+            "unit": "um"
         },
         "r_osdt": {
             "component": {
                 "patr_osdt2": "-Lp*(pi_t+pi_e-pi_i)"
-            }
+            },
+            "unit": "um"
         },
         "r_bdt": {
             "component": {
                 "patr_bdt1": "0.2*R_refdt"
-            }
+            },
+            "unit": "um"
         },
         "rdt": {
             "component": {
                 "patrdt1": "0.2*R_refdt",
                 "patrdt2": "-Lp*(pi_t+pi_e-pi_i)"
-            }
+            },
+            "unit": "um"
         }
     },
     "ODE": {
         "dR_ref": {
             "component": {
                 "patR_ref1": "R_refdt"
-            }
+            },
+            "unit": "um s^-1"
         },
         "dc_i": {
             "component": {
                 "patc_i1": "(k_uptake*G-k_consumption*V*(10**15))"
-            }
+            },
+            "unit": "mmol"
         },
         "dpi_t": {
             "component": {
                 "patpi_t1": "E*2*d/(1-nu)*(rdt/r**2-R_refdt/(R_ref*r))",
                 "patpi_t2": "-rdt/r*pi_t"
-            }
+            },
+            "unit": "Pa"
         },
         "dr": {
             "component": {
                 "patr1": "rdt"
-            }
+            },
+            "unit": "um"
         },
         "dr_os": {
             "component": {
                 "patr_os1": "r_osdt"
-            }
+            },
+            "unit": "um"
         },
         "dr_b": {
             "component": {
                 "patr_b1": "r_bdt"
-            }
+            },
+            "unit": "um"
         }
     }
 }

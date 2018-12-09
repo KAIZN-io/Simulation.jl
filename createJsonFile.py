@@ -6,7 +6,7 @@ exec(open("SYSTEM/py_packages.py").read())
 
 cwd = os.getcwd()
 
-model = 'ion'
+model = 'hog'
 
 system_comp = ['copa','equation','ODE']
 dict_system = {}
@@ -20,6 +20,30 @@ for system in system_comp:
 for i in system_comp_remove:
     system_comp.remove(i)
 
+
+"""sql to json 
+
+get the corresponding units of the models 
+"""
+conn = psycopg2.connect(host='localhost', dbname='simulation_results',
+                        user='janpiotraschke')
+cur = conn.cursor()
+
+cur.execute(sql.SQL("""
+    SELECT testcd, orresu 
+    FROM {}.orresu_equations;
+    """).format(sql.Identifier(model)))
+
+ORRESU_column_names = [desc[0] for desc in cur.description]
+
+"""the values from the sql database in a dict"""
+ORRESU_dict = {}
+for i in cur.fetchall():
+    ORRESU_dict[i[ORRESU_column_names.index(
+        'testcd')]] = i[ORRESU_column_names.index('orresu')]
+
+cur.close()
+conn.close()
 
 for system in system_comp:
     f = open('{0}/Single_Models/{1}/{1}_{2}.txt'.format(cwd, model,system))
@@ -57,8 +81,6 @@ for system in system_comp:
             dict_spec[key] = {}
             dict_spec[key]['component'] = {}
             splitted = value.split()
-
-            
 
             """step 1 : "dont touch that"""
             parenthese_open = 0
@@ -115,17 +137,21 @@ for system in system_comp:
             join_marker.insert(len(join_marker),len(splitted))
 
             dict_spec[key]['component'] = {}
+
             """next step: remove the differential d"""
             if key[0] == 'd':
                 key_surrogate = key[1:]
             else:
                 key_surrogate = key
+
             for i in range(len(join_marker)-1):
                 a = ''.join(splitted[join_marker[i]:join_marker[i+1]])
-
                 dict_spec[key]['component']['pat{}{}'.format(key_surrogate,i+1)] = a
 
-           
+            """gibe the unit of the substance the dict"""
+            dict_spec[key]['unit'] = ORRESU_dict[key_surrogate]
+            print(key_surrogate)
+
             """last step: remove keys without values --> remove zombies"""
             keys_to_delete = []
             for remove_key, value in dict_spec[key]['component'].items():
@@ -134,13 +160,6 @@ for system in system_comp:
             for remove_key in keys_to_delete:
                 dict_spec[key]['component'].pop(remove_key, None)
 
-        """sql to json 
-        
-        get the corresponding units of the variables(keys)
-        """
-        if system == 'ODE':
-            pass
- 
 
          
 
@@ -150,6 +169,7 @@ if model == 'hog':
     hog_stimulus['copa'] = dict_system['copa']
     hog_stimulus['equation'] = {}
     hog_stimulus['equation']['NaCl'] = {'component':{'patNaCl1' : "(0 if t < t0 else single_impuls_NaCl) if signal_type == 1 else ((single_impuls_NaCl if (t0 <= t and t < (t0 + t1)) else 0) if signal_type == 2 else ((single_impuls_NaCl if ((t - t0 - math.floor((t - t0) / (t1 + t2)) * (t1 + t2)) <= t1) else 0) if signal_type == 3 else ((max_NaCl if (0 if t < t0 else single_impuls_NaCl * math.ceil((t - t0) / t1)) > max_NaCl else (0 if t < t0 else single_impuls_NaCl * math.ceil((t - t0) / t1))) if signal_type == 4 else 0)))"}}
+    hog_stimulus['equation']['NaCl']['unit'] = ORRESU_dict['NaCl']
     hog_stimulus['ODE'] = dict_system['ODE']
 
     for key,value in dict_system['equation'].items():
@@ -160,6 +180,7 @@ if model == 'hog':
 
 
 """create json format"""
+
 
 s = json.dumps(dict_system, indent=4)
 with open('{0}/Single_Models/json_files/{1}_system.json'.format(cwd, model),"w") as f:

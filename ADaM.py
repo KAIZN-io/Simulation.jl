@@ -205,6 +205,10 @@ TESTCD = 'Hog1n'
 get_terms = dict_visualisation.get('get_terms')
 EquationTerms_list = []
 if len(get_terms) > 0:
+
+    TermsOrresuGrouped = {}
+    
+
     with open('Single_Models/json_files/{0}_system.json'.format(sql_USUBJID)) as json_data:
         data_from_json = json.load(json_data)
 
@@ -221,6 +225,7 @@ if len(get_terms) > 0:
         a = i[::-1]
         if (a[:2] == 'td' and a[2:][::-1] in get_terms)\
         or i in get_terms:
+            print('equation',i)
             EquationTerms_list.append(j['component'])
 
     """iterate over the models ODEs
@@ -229,6 +234,8 @@ if len(get_terms) > 0:
     """
     for i,j in data_from_json['ODE'].items():
         if i[1:] in get_terms:
+            print(i)
+
             EquationTerms_list.append(j['component'])
 
 
@@ -445,7 +452,7 @@ for RUN_SEQ in ADaM_dict.values():
         PDORRESU_grouped = {}
         for key, value in sorted(PDORRESU.items()):
             PDORRESU_grouped.setdefault(value, []).append(key)
-
+        print(PDORRESU_grouped)
         """plot the time series"""
         VisualisationDesign.plotTimeSeries(TimeSeriesData_df=ODE_RESULTS,
                                             SubplotLogic=PDORRESU_grouped)

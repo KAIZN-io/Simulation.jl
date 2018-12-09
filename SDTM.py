@@ -204,7 +204,7 @@ if __name__ == "__main__":
     EXCAT = 'Salz'
 
     dict_model_switch = {
-                        'combined_models': False,
+                        'combined_models': True,
                         'dummie': False,
                         'hog': False,
                         'ion': False,
@@ -262,7 +262,7 @@ if __name__ == "__main__":
     dict_system_switch = {
                         # TEMP: only works for model with stimuli !!!
                         'export_data_to_sql' : True,
-                        'export_terms_data_to_sql' : False
+                        'export_terms_data_to_sql' : True
                          }
 
     """activated stimuli

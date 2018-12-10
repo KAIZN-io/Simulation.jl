@@ -153,11 +153,11 @@
             },
             "unit": "s^-1"
         },
-        "R_refx": {
+        "R_ref": {
             "component": {
-                "patR_refx1": "r/(1+(1-nu)*(pi_t*r)/(E*2*d))"
+                "patR_ref1": "r/(1+(1-nu)*(pi_t*r)/(E*2*d))"
             },
-            "unit": "um s^-1"
+            "unit": "um"
         },
         "V_ref": {
             "component": {
@@ -167,7 +167,7 @@
         },
         "R_refdt": {
             "component": {
-                "patR_refdt1": "phi*R_refx*r/(2*d)*max(pi_t-pi_c,0)"
+                "patR_refdt1": "phi*R_ref*r/(2*d)*max(pi_t-pi_c,0)"
             },
             "unit": "um"
         },
@@ -336,7 +336,7 @@
         "dpi_t": {
             "component": {
                 "patpi_t1": "E*2*d/(1-nu)*rdt/(r**2)",
-                "patpi_t2": "-E*2*d/(1-nu)*R_refdt/(R_refx*r)",
+                "patpi_t2": "-E*2*d/(1-nu)*R_refdt/(R_ref*r)",
                 "patpi_t3": "-rdt/r*pi_t"
             },
             "unit": "Pa"

@@ -3,6 +3,7 @@ __email__ = 'jan.piotraschke@mail.de'
 __version__ = 'bachelor_thesis'
 __license__ = 'private'
 
+
 """the only source for ADaM is SDTM or other ADaM databases"""
 
 """import the standard used packages"""
@@ -11,7 +12,8 @@ import ADaM_preparation
 
 class VisualisationDesign:
     def plotTimeSeries(TimeSeriesData_df = pd.DataFrame(),
-                     SubplotLogic = {}):
+                     SubplotLogic = {},
+                     Terms = False):
 
         """ def description
         
@@ -41,6 +43,9 @@ class VisualisationDesign:
             exec('ax{}.spines["top"].set_visible(False)'.format(iter_num))
             exec('ax{}.spines["right"].set_visible(False)'.format(iter_num))
             exec('ax{}.set_xlabel("time [s]",fontsize=12)'.format(iter_num))
+            
+            """fix the y-axis lim for pictures for latex / publicationPT"""
+            exec('ax{}.set_ylim(bottom=-20000, top=50000)'.format(iter_num))
 
             if GeneralizePlot == True:
                 exec("ax{}.set_ylabel('no unit',fontsize=12)".format(iter_num))
@@ -58,9 +63,9 @@ class VisualisationDesign:
         with sns.color_palette('cubehelix',len(TimeSeriesData_df.columns.tolist())):
 
             """make the fig more fittet"""
-            fig.tight_layout(pad = 3,
-                            rect = [0,0,0.85,1]
-                            )
+            # fig.tight_layout(pad = 3,
+            #                 rect = [0,0,0.85,1]
+            #                 )
 
             """show the version of the plot"""
             fig.text(0.99, 0.01,
@@ -85,8 +90,13 @@ class VisualisationDesign:
                             exec("ax{}.plot(TimeSeriesData_df[i],label='Hog1PPn (*1E5)')".format(axis_index))
 
                         else:
-                            exec('ax{0}.plot(TimeSeriesData_df[i],label=i)'.format(
-                                axis_index))
+                            if Terms==True:
+                                exec("ax{0}.plot(TimeSeriesData_df[i],label=EquationTerms_dict[i])".format(
+                                    axis_index))
+                                
+                            else:
+                                exec('ax{0}.plot(TimeSeriesData_df[i],label=i)'.format(
+                                    axis_index))
 
                         exec('ax{0}.legend(ncol=1,borderaxespad = 0,bbox_to_anchor=(1.01, 0.5), \
                             frameon = True,loc={1!r},fontsize=12)'.format(axis_index,'center left'))
@@ -99,7 +109,7 @@ class VisualisationDesign:
                                 frameon = True,loc='center left',fontsize=12)")
 
             """"save the plot"""
-            save_fig = dict_visualisation.get('save_figures')
+            save_fig = dict_system_switch.get('save_figures')
 
             if save_fig[0] == True:
                 plt.savefig('Pictures/{0}.{1}'.format(sql_USUBJID, save_fig[1]),
@@ -107,6 +117,8 @@ class VisualisationDesign:
                             format = save_fig[1],
                             bbox_inches='tight'
                             )
+
+        fig.tight_layout(pad=3)
 
         plt.show()
         plt.clf()
@@ -165,18 +177,17 @@ dict_system_switch = {
                     'export_data_to_sql' : False,
                     'create_ADaM_csv' : False,
                     'df_to_latex' : False,
+                    'save_figures': [True, 'png'],
                      }
 
 dict_visualisation = {
-                    'save_figures' : [False, 'png'],
-
                     # NOTE: heat_map not implemted yet
                     'heat_map' : False,
                     'graph' : False,
                     'subplots' : False,
                     'dose_response' : False,
-                    'get_terms' : ['r_os','pi_t'],
-                    'dont_do' : True,
+                    'get_terms' : ['pi_t'],
+                    'dont_do' : False,
 
                     'not_to_visualize' : ['Yt','z1','z2','z3','z4','L_ArH','L_HH',
                                             'Na_in','Na_out','K_out','K_in','Cl_in',
@@ -196,7 +207,7 @@ sql_STUDYID = 'Yeast_BSc'
 sql_USUBJID = 'combined_models'
 
 # sql_SEQ_list = list(range(3,5))
-sql_SEQ_list = [3]
+sql_SEQ_list = [27]
 
 """tracking substance"""
 TESTCD = 'Hog1n'
@@ -204,6 +215,7 @@ TESTCD = 'Hog1n'
 """"get the wanted equation terms from SQL"""
 get_terms = dict_visualisation.get('get_terms')
 EquationTerms_list = []
+WantedDataJson_dict = {}
 if len(get_terms) > 0:
 
     TermsOrresuGrouped = {}
@@ -212,6 +224,11 @@ if len(get_terms) > 0:
     with open('Single_Models/json_files/{0}_system.json'.format(sql_USUBJID)) as json_data:
         data_from_json = json.load(json_data)
 
+    """all ODEs of the System"""
+    ODESystem_list = []
+    for i in data_from_json['ODE'].keys():
+        ODESystem_list.append(i[1:])
+
     """iterate over the model equations
     
     note: equations are saved with a 'dt' at the end, if the must be just in 
@@ -219,31 +236,54 @@ if len(get_terms) > 0:
     """    
 
     # note : get the terms units!
+    RenameTerms_dict = {}
     for i,j in data_from_json['equation'].items():
        
         """ignore 'dt' at the end of the dict keys"""
         a = i[::-1]
         if (a[:2] == 'td' and a[2:][::-1] in get_terms)\
         or i in get_terms:
-            print('equation',i)
+            WantedDataJson_dict[i] = j
             EquationTerms_list.append(j['component'])
 
     """iterate over the models ODEs
     
     note: ODE are saved with a 'd' as a prefix
     """
+
     for i,j in data_from_json['ODE'].items():
         if i[1:] in get_terms:
-            print(i)
+            """check whether the ODE has only its equation as an input"""
+            ComponentJson_list = list(j['component'].values())
 
-            EquationTerms_list.append(j['component'])
-
-
+            if i[1:] != ComponentJson_list[0][::-1][2:][::-1]:
+                EquationTerms_list.append(j['component'])
+                WantedDataJson_dict[i[1:]] = j
+            else:
+                """for renaming of the algebraic equation"""
+                RenameTerms_dict[ComponentJson_list[0]] = i[1:]
+                
 """merge the ODE and the equation dict into one dict"""
 EquationTerms_dict = {k: v for d in EquationTerms_list for k, v in d.items()}
+
+"""the list for the query"""
 SqlQueryTerms_list = list(EquationTerms_dict.keys())
-# SubplotLogic = {ylabel_str: correspondingSubstance_list}
-# print(EquationTerms_dict)
+
+"""correct the name of the TESTCD"""
+for old_key, new_key in RenameTerms_dict.items():
+    WantedDataJson_dict[new_key] = WantedDataJson_dict.pop(old_key)
+
+# todo : i now leave it like this but it should be changed in json file
+for i in WantedDataJson_dict.keys():
+    if i in ODESystem_list:
+        old_unit = WantedDataJson_dict[i]['unit']
+
+        """rename the unit for the ODEs"""
+        WantedDataJson_dict[i]['unit']=old_unit+' *s^-1'
+
+TermsPlotLogic = {}
+for i,j in WantedDataJson_dict.items():
+    TermsPlotLogic[j['unit']]=list(j['component'].keys())
 
 
 if dict_visualisation.get('dont_do') == False:
@@ -254,7 +294,9 @@ if dict_visualisation.get('dont_do') == False:
     """remove multiple rows"""
     QueryTermsData_df = QueryTermsData_df[~QueryTermsData_df.index.duplicated(keep='first')]
 
-    VisualisationDesign.plotTimeSeries(TimeSeriesData_df=QueryTermsData_df)
+    VisualisationDesign.plotTimeSeries(TimeSeriesData_df=QueryTermsData_df,
+                                      SubplotLogic=TermsPlotLogic,
+                                      Terms=True)
 
 
 
@@ -532,7 +574,7 @@ for RUN_SEQ in ADaM_dict.values():
 
             saves the each plot in a file.
             """
-            save_fig = dict_visualisation.get('save_figures')
+            save_fig = dict_system_switch.get('save_figures')
 
             if save_fig[0] == True:
                 plt.savefig('Pictures/combined_{0}_{1}.png'.format(

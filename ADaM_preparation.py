@@ -104,7 +104,7 @@ def getEquationTermsformSQL(sql_USUBJID='', SqlQueryTerms_list=[]):
                         user='janpiotraschke')
 
     sql_USUBJID = sql_USUBJID+'_terms'
-    Query = 'SELECT index, ' + ','.join(SqlQueryTerms_list) +' FROM {}."KCl_10mM_30s";'
+    Query = 'SELECT index, ' + ','.join(SqlQueryTerms_list) +' FROM {}."KCl_10mM_30s_1200s";'
     
     cur = conn.cursor()
     cur.execute(sql.SQL(Query).format(sql.Identifier(sql_USUBJID)))

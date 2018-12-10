@@ -541,7 +541,7 @@ if __name__ == "__main__":
             conn.close()
 
 
-        csv_fingerprint = '{}_{}mM_{}s'.format(EXTRT, EXDOSE, EXSTDTC)
+        csv_fingerprint = '{}_{}mM_{}s_{}s'.format(EXTRT, EXDOSE, EXSTDTC,stop)
 
         init_cond = []
         init_cond_string = []

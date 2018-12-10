@@ -6,7 +6,7 @@ exec(open("SYSTEM/py_packages.py").read())
 
 cwd = os.getcwd()
 
-model = 'hog'
+model = 'combined_models'
 
 system_comp = ['copa','equation','ODE']
 dict_system = {}

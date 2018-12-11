@@ -44,8 +44,8 @@ class VisualisationDesign:
             exec('ax{}.spines["right"].set_visible(False)'.format(iter_num))
             exec('ax{}.set_xlabel("time [s]",fontsize=12)'.format(iter_num))
             
-            """fix the y-axis lim for pictures for latex / publicationPT"""
-            exec('ax{}.set_ylim(bottom=-20000, top=50000)'.format(iter_num))
+            """fix the y-axis lim for pictures for latex / publication"""
+            # exec('ax{}.set_ylim(bottom=-20000, top=50000)'.format(iter_num))
 
             if GeneralizePlot == True:
                 exec("ax{}.set_ylabel('no unit',fontsize=12)".format(iter_num))
@@ -177,7 +177,7 @@ dict_system_switch = {
                     'export_data_to_sql' : False,
                     'create_ADaM_csv' : False,
                     'df_to_latex' : False,
-                    'save_figures': [True, 'png'],
+                    'save_figures': [False, 'png'],
                      }
 
 dict_visualisation = {
@@ -185,9 +185,9 @@ dict_visualisation = {
                     'heat_map' : False,
                     'graph' : False,
                     'subplots' : False,
-                    'dose_response' : False,
-                    'get_terms' : ['pi_t'],
-                    'dont_do' : False,
+                    'dose_response' : True,
+                    'get_terms' : ['r_os','pi_t'],
+                    'dont_do' : True,
 
                     'not_to_visualize' : ['Yt','z1','z2','z3','z4','L_ArH','L_HH',
                                             'Na_in','Na_out','K_out','K_in','Cl_in',
@@ -206,8 +206,8 @@ dict_visualisation = {
 sql_STUDYID = 'Yeast_BSc'
 sql_USUBJID = 'combined_models'
 
-# sql_SEQ_list = list(range(3,5))
-sql_SEQ_list = [27]
+sql_SEQ_list = list(range(32, 36)) #+ list(range(3, 11)) 
+# sql_SEQ_list = [31]
 
 """tracking substance"""
 TESTCD = 'Hog1n'
@@ -356,7 +356,7 @@ for RUN_SEQ in ADaM_dict.values():
 
         values_df = min_from_db.loc[(min_from_db['testcd'] == TESTCD)
                                     & (min_from_db['co'] == 'min')]
-        # TODO: list_index out of range
+
         ORRES_min = values_df['orres'].values.tolist()[0]
 
         """Get a list of unique used EXTRT"""
@@ -457,7 +457,7 @@ for RUN_SEQ in ADaM_dict.values():
         EXDOSE_TESTCD_list.append(placeholder_dict)
 
         """plot the single Dose-Response curve"""
-        VisualisationDesign.plotSingleDoseResponse(colour_plot_dict)
+        # VisualisationDesign.plotSingleDoseResponse(colour_plot_dict)
 
 
 

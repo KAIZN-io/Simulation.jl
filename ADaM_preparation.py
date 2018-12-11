@@ -104,7 +104,7 @@ def getEquationTermsformSQL(sql_USUBJID='', SqlQueryTerms_list=[]):
                         user='janpiotraschke')
 
     sql_USUBJID = sql_USUBJID+'_terms'
-    Query = 'SELECT index, ' + ','.join(SqlQueryTerms_list) +' FROM {}."KCl_10mM_30s_1200s";'
+    Query = 'SELECT index, ' + ','.join(SqlQueryTerms_list) +' FROM {}."KCl_0mM_30s_100s";'
     
     cur = conn.cursor()
     cur.execute(sql.SQL(Query).format(sql.Identifier(sql_USUBJID)))
@@ -124,7 +124,7 @@ def getEquationTermsformSQL(sql_USUBJID='', SqlQueryTerms_list=[]):
     return QueryTermsData_df
 
 def create_ADaM_csv(RUN_SEQ = {}):
-    # NOTE: turn the dict keys to variables in the def area
+    """turn the dict keys to variables in the def area"""
     n = Namespace(**RUN_SEQ)
 
     ADaM_column_names = ['USUBJID', 'SEQ', 'EXCAT', 'EXTRT', 'EXDOSE',

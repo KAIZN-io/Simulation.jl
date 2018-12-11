@@ -155,12 +155,16 @@ combined_models_init_values = {
                 'Cl_in' : [0.545 ,'Cl_in' , 'mM','original/ion_model'],
                 'Na_in' : [29.98 , 'Na_in', 'mM','original/ion_model'],
 
+
                 # NOTE: external concentration were normed, that the sum for c_e is approximatly 240mM
                 #       faktor * 1126 ist für die Normierung da
                 'H_out' : [(3.162e-3)* 1126 , 'H_out', 'mM','original/ion_model'],
                 'K_out' : [0.1 * 1126, 'K_out', 'mM','original/ion_model'],
                 'Cl_out' : [0.1 * 1126, 'Cl_out', 'mM','original/ion_model'],
                 'Na_out' : [0.01 * 1126 , 'Na_out', 'mM','original/ion_model'],
+
+                # NOTE: Sorbitol is now implemented as an ODE 
+                'Sorbitol_out': [0, 'Sorbitol_out', 'mM'],
 
                 # energy
                 'ATP' : [2.477, 'ATP', 'mM'],

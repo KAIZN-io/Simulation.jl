@@ -56,7 +56,7 @@ combined_models_orresu_dict = {
     'Cl_outdt': ['Cl_outdt', 'mM'],
     'K_outdt': ['K_outdt', 'mM'],
     'H_outdt': ['H_outdt', 'mM'],
-
+    'Sorbitol_out': ['Sorbitol_out', 'mM'],
 
     'ATP': ['ATP', 'mM'],
     'Deltaphi': ['Deltaphi', 'V'],

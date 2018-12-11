@@ -131,7 +131,7 @@
                 "patc_e2": "+K_out",
                 "patc_e3": "+Cl_out",
                 "patc_e4": "+Na_out",
-                "patc_e5": "+c_ext_extra"
+                "patc_e5": "+Sorbitol_out"
             },
             "unit": "mM"
         },
@@ -420,6 +420,12 @@
         "dNa_out": {
             "component": {
                 "patNa_out1": "Na_outdt"
+            },
+            "unit": "mM"
+        },
+        "dSorbitol_out": {
+            "component": {
+                "patSorbitol_out1": "0"
             },
             "unit": "mM"
         }

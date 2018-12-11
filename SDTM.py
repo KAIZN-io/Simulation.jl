@@ -219,16 +219,16 @@ if __name__ == "__main__":
                 'Glucose_impuls_start' : 60,
                 'Glucose_impuls_end' : 72,
                 'KCL_unique_impuls_start' : 30,
-                'Sorbitol_stimulus_start' : 30,
                 }
 
     """make the dict keys as new variables"""
     locals().update(dict_time)
 
     dict_unique_EXSTDTC = {
-                                # Stimulus = [time] in s
+                                """Stimulus = [time] in s"""
                                 'KCl' : [30],
                                 'NaCl' : [30],
+                                'Sorbitol' : [30],
                                 }
 
     """implementation rules
@@ -237,8 +237,9 @@ if __name__ == "__main__":
     """
     dict_stimulus = {
                     # TODO: bisher funktioniert noch nicht die Funktion (no stimulus)
-                    'KCl' : [[10], 'mM', ['K_out','Cl_out'], True],
+                    'KCl' : [[0], 'mM', ['K_out','Cl_out'], False],
                     'NaCl' : [[0.3,3,30,300,600], 'mM', ['Na_out','Cl_out'], False],
+                    'Sorbitol': [[0.1,1,10,100], 'mM', ['Sorbitol_out'], True],
 
                     """only for the hog model
 
@@ -251,18 +252,12 @@ if __name__ == "__main__":
                     'signal_type' : [3],
                     }
 
-    dict_stimulus_parameter = {
-                                # TODO: generalisieren, wenn entschieden, ob
-                                # entgueltig parameter oder doch ODE
-                                # NOTE: Sorbitol wird bisher nur ein Parameter sein
-                                'Sorbitol_stimulus' : [[1000], 'mM', ['c_ext_extra'], False],
-                                }
 
     """database management system"""
     dict_system_switch = {
                         # TEMP: only works for model with stimuli !!!
                         'export_data_to_sql' : True,
-                        'export_terms_data_to_sql' : True
+                        'export_terms_data_to_sql' : False
                          }
 
     """activated stimuli
@@ -587,10 +582,6 @@ if __name__ == "__main__":
             """
             if i[0] == EXSTDTC\
             and model_name in models_ext_stimulus:
-
-                if dict_stimulus_parameter.get('Sorbitol_stimulus')[-1] == True:
-                    c_ext_extra = dict_stimulus_parameter.get('Sorbitol_stimulus')[0]
-
 
                 for stimulus_name_adding in dict_stimulus.get(EXTRT)[2]:
 

@@ -47,6 +47,7 @@ combined_models_parameter = {
                 'd' : [0.115,'um','cell wall thickness'],
                 'phi' : [1e-4,'Pa^{-1} s^{-1}', 'cell wall extensibility', 'fitted Altenburg 2018'],
                 'pi_c' : [2e5, 'Pa', 'critical turgor pressure'],
+                #'Lp': [0, 'um s^{-1} Pa^{-1}', 'hydraulic conductivity'],
                 'Lp' : [1.19e-6, 'um s^{-1} Pa^{-1}', 'hydraulic conductivity'],
                 'nu' : [0.5, 'dimensionless', 'Poissons ratio'],
                 'k_uptake' : [2e-16, 'mmol s^{-1} um^{-2}'],

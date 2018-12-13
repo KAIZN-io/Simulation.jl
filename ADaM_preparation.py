@@ -10,8 +10,7 @@ from argparse import Namespace
 
 
 def getDatafromSQL(sql_STUDYID = '', sql_USUBJID = '', sql_SEQ_list = []):
-    conn = psycopg2.connect(host='localhost', dbname='simulation_results',\
-                            user='janpiotraschke')
+    conn = psycopg2.connect(host='localhost', dbname='simulation_results')
 
     """open a cursor to perform database operations"""
     cur = conn.cursor()
@@ -100,12 +99,11 @@ def getDatafromSQL(sql_STUDYID = '', sql_USUBJID = '', sql_SEQ_list = []):
 
 def getEquationTermsformSQL(sql_USUBJID='', SqlQueryTerms_list=[]):
     
-    conn = psycopg2.connect(host='localhost', dbname='simulation_results',
-                        user='janpiotraschke')
+    conn = psycopg2.connect(host='localhost', dbname='simulation_results')
 
     sql_USUBJID = sql_USUBJID+'_terms'
-    Query = 'SELECT index, ' + ','.join(SqlQueryTerms_list) +' FROM {}."KCl_0mM_30s_100s";'
-    
+    Query = 'SELECT index, ' + ','.join(SqlQueryTerms_list) +' FROM {}."44";'
+
     cur = conn.cursor()
     cur.execute(sql.SQL(Query).format(sql.Identifier(sql_USUBJID)))
     TermsColumnName_list = [desc[0] for desc in cur.description]

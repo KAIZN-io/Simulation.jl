@@ -25,8 +25,7 @@ for i in system_comp_remove:
 
 get the corresponding units of the models 
 """
-conn = psycopg2.connect(host='localhost', dbname='simulation_results',
-                        user='janpiotraschke')
+conn = psycopg2.connect(host='localhost', dbname='simulation_results')
 cur = conn.cursor()
 
 cur.execute(sql.SQL("""
@@ -150,7 +149,6 @@ for system in system_comp:
 
             """gibe the unit of the substance the dict"""
             dict_spec[key]['unit'] = ORRESU_dict[key_surrogate]
-            print(key_surrogate)
 
             """last step: remove keys without values --> remove zombies"""
             keys_to_delete = []
@@ -180,7 +178,6 @@ if model == 'hog':
 
 
 """create json format"""
-print(dict_system)
 
 s = json.dumps(dict_system, indent=4)
 with open('{0}/Single_Models/json_files/{1}_system.json'.format(cwd, model),"w") as f:

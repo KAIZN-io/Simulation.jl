@@ -183,9 +183,9 @@ dict_system_switch = {
 dict_visualisation = {
                     # NOTE: heat_map not implemted yet
                     'heat_map' : False,
-                    'graph' : False,
+                    'graph' : True,
                     'subplots' : False,
-                    'dose_response' : True,
+                    'dose_response' : False,
                     'get_terms' : ['r_os','pi_t'],
                     'dont_do' : True,
 
@@ -206,11 +206,11 @@ dict_visualisation = {
 sql_STUDYID = 'Yeast_BSc'
 sql_USUBJID = 'combined_models'
 
-sql_SEQ_list = list(range(32, 36)) #+ list(range(3, 11)) 
-# sql_SEQ_list = [31]
+# sql_SEQ_list = list(range(32, 36)) #+ list(range(3, 11)) 
+sql_SEQ_list = [44]
 
 """tracking substance"""
-TESTCD = 'Hog1n'
+TESTCD = 'Hog1PPn'
 
 """"get the wanted equation terms from SQL"""
 get_terms = dict_visualisation.get('get_terms')
@@ -263,40 +263,40 @@ if len(get_terms) > 0:
                 """for renaming of the algebraic equation"""
                 RenameTerms_dict[ComponentJson_list[0]] = i[1:]
                 
-"""merge the ODE and the equation dict into one dict"""
-EquationTerms_dict = {k: v for d in EquationTerms_list for k, v in d.items()}
+    """merge the ODE and the equation dict into one dict"""
+    EquationTerms_dict = {k: v for d in EquationTerms_list for k, v in d.items()}
 
-"""the list for the query"""
-SqlQueryTerms_list = list(EquationTerms_dict.keys())
+    """the list for the query"""
+    SqlQueryTerms_list = list(EquationTerms_dict.keys())
 
-"""correct the name of the TESTCD"""
-for old_key, new_key in RenameTerms_dict.items():
-    WantedDataJson_dict[new_key] = WantedDataJson_dict.pop(old_key)
+    """correct the name of the TESTCD"""
+    for old_key, new_key in RenameTerms_dict.items():
+        WantedDataJson_dict[new_key] = WantedDataJson_dict.pop(old_key)
 
-# todo : i now leave it like this but it should be changed in json file
-for i in WantedDataJson_dict.keys():
-    if i in ODESystem_list:
-        old_unit = WantedDataJson_dict[i]['unit']
+    # todo : i now leave it like this but it should be changed in json file
+    for i in WantedDataJson_dict.keys():
+        if i in ODESystem_list:
+            old_unit = WantedDataJson_dict[i]['unit']
 
-        """rename the unit for the ODEs"""
-        WantedDataJson_dict[i]['unit']=old_unit+' *s^-1'
+            """rename the unit for the ODEs"""
+            WantedDataJson_dict[i]['unit']=old_unit+' *s^-1'
 
-TermsPlotLogic = {}
-for i,j in WantedDataJson_dict.items():
-    TermsPlotLogic[j['unit']]=list(j['component'].keys())
+    TermsPlotLogic = {}
+    for i,j in WantedDataJson_dict.items():
+        TermsPlotLogic[j['unit']]=list(j['component'].keys())
 
 
-if dict_visualisation.get('dont_do') == False:
+    if dict_visualisation.get('dont_do') == False:
 
-    QueryTermsData_df = ADaM_preparation.getEquationTermsformSQL(sql_USUBJID=sql_USUBJID,
-                                            SqlQueryTerms_list=SqlQueryTerms_list)
+        QueryTermsData_df = ADaM_preparation.getEquationTermsformSQL(sql_USUBJID=sql_USUBJID,
+                                                SqlQueryTerms_list=SqlQueryTerms_list)
 
-    """remove multiple rows"""
-    QueryTermsData_df = QueryTermsData_df[~QueryTermsData_df.index.duplicated(keep='first')]
+        """remove multiple rows"""
+        QueryTermsData_df = QueryTermsData_df[~QueryTermsData_df.index.duplicated(keep='first')]
 
-    VisualisationDesign.plotTimeSeries(TimeSeriesData_df=QueryTermsData_df,
-                                      SubplotLogic=TermsPlotLogic,
-                                      Terms=True)
+        VisualisationDesign.plotTimeSeries(TimeSeriesData_df=QueryTermsData_df,
+                                        SubplotLogic=TermsPlotLogic,
+                                        Terms=True)
 
 
 
@@ -315,9 +315,10 @@ for RUN_SEQ in ADaM_dict.values():
         ADaM_preparation.create_ADaM_csv(RUN_SEQ = RUN_SEQ)
 
     """exclude some ODEs from the visualisation"""
-    # for i in dict_visualisation.get('not_to_visualize'):
-    #     RUN_SEQ['ODE_RESULTS'] = RUN_SEQ['ODE_RESULTS'].drop(columns=[i])
-    #     RUN_SEQ['PDORRESU'].pop(i,None)
+    if dict_visualisation.get('dont_do') == True:
+        for i in dict_visualisation.get('not_to_visualize'):
+            RUN_SEQ['ODE_RESULTS'] = RUN_SEQ['ODE_RESULTS'].drop(columns=[i])
+            RUN_SEQ['PDORRESU'].pop(i,None)
 
 
     """make the dict keys as new variables"""
@@ -332,8 +333,7 @@ for RUN_SEQ in ADaM_dict.values():
     and dict_visualisation.get('dose_response') == True:
 
         conn = psycopg2.connect(host='localhost',
-                                dbname='reference_bib',
-                                user='janpiotraschke')
+                                dbname='reference_bib')
 
         cur = conn.cursor()
 
@@ -494,7 +494,7 @@ for RUN_SEQ in ADaM_dict.values():
         PDORRESU_grouped = {}
         for key, value in sorted(PDORRESU.items()):
             PDORRESU_grouped.setdefault(value, []).append(key)
-        print(PDORRESU_grouped)
+
         """plot the time series"""
         VisualisationDesign.plotTimeSeries(TimeSeriesData_df=ODE_RESULTS,
                                             SubplotLogic=PDORRESU_grouped)
@@ -571,14 +571,14 @@ for RUN_SEQ in ADaM_dict.values():
                 fontsize=11)
 
             """saving subset plot
-
+            
             saves the each plot in a file.
             """
             save_fig = dict_system_switch.get('save_figures')
 
             if save_fig[0] == True:
-                plt.savefig('Pictures/combined_{0}_{1}.png'.format(
-                                                model_name, current_date),
+                plt.savefig('Pictures/combined_{0}_SEQ{1}_{2}.png'.format(
+                                                model_name, sql_SEQ_list[0],current_date),
                                                 dpi = 1200,
                                                 format = save_fig[1],
                                                 bbox_inches = 'tight')

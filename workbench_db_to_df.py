@@ -79,8 +79,7 @@ interested_source = ['ion','combined_models']
 
 """chose the right data from the databank"""
 
-conn = psycopg2.connect(host='localhost', dbname='simulation_results', \
-                        user='janpiotraschke')
+conn = psycopg2.connect(host='localhost', dbname='simulation_results')
 engine = create_engine('postgres://janpiotraschke:@localhost:5432/simulation_results', echo=False)
 
 # models_to_analyse = {}
@@ -327,8 +326,7 @@ if interested_source == ['ion','combined_models']:
 
 
 
-conn = psycopg2.connect(host='localhost', dbname='simulation_results',\
-                        user='janpiotraschke')
+conn = psycopg2.connect(host='localhost', dbname='simulation_results')
 # open a cursor to perform database operations
 cur = conn.cursor()
 

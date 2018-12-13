@@ -1,8 +1,7 @@
 # """import the standard used packages"""
 # exec(open("SYSTEM/py_packages.py").read())
 
-# conn = psycopg2.connect(host='localhost', dbname='simulation_results',\
-#                         user='janpiotraschke')
+# conn = psycopg2.connect(host='localhost', dbname='simulation_results')
 
 # # open a cursor to perform database operations
 # cur = conn.cursor()

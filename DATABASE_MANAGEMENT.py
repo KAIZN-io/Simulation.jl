@@ -11,8 +11,7 @@ system
 
 # # NOTE: creates the db reference_bib
 # try:
-#     conn = psycopg2.connect(host='localhost', dbname='postgres',\
-#                             user='janpiotraschke')
+#     conn = psycopg2.connect(host='localhost', dbname='postgres')
 #     dbname = "reference_bib"
 #     cur = conn.cursor()
 #     conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
@@ -60,8 +59,7 @@ system
 # #                 }
 # statistic_data = dict_to_sql
 
-# conn = psycopg2.connect(host='localhost', dbname='reference_bib',\
-#                         user='janpiotraschke')
+# conn = psycopg2.connect(host='localhost', dbname='reference_bib')
 # # open a cursor to perform database operations
 # cur = conn.cursor()
 
@@ -106,8 +104,7 @@ system
 # conn.commit()
 
 # """create tables with the infos above the variables / parameters"""
-# conn = psycopg2.connect(host='localhost', dbname='postgres',
-#                         user='janpiotraschke')
+# conn = psycopg2.connect(host='localhost', dbname='postgres')
 # cur = conn.cursor()
 
 # SystemName = 'ion'
@@ -136,8 +133,7 @@ system
 # # """list of the names of the variables in the model"""
 # # list_of_var_keys = eval('{}_init_values'.format(model_name)).keys()
 
-conn = psycopg2.connect(host='localhost', dbname='simulation_results',
-                        user='janpiotraschke')
+conn = psycopg2.connect(host='localhost', dbname='simulation_results')
 cur = conn.cursor()
 allModels_list = ['ion', 'dummie', 'hog', 'volume', 'combined_models']
 

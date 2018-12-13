@@ -213,7 +213,7 @@ if __name__ == "__main__":
 
     dict_time = {
                 'start' : 0,
-                'stop' : 100,  # 7200 = 2 h (mehr braucht Yeast nicht)
+                'stop' : 100,  
                 'time_steps' : 0.1,
                 'NaCl_impuls_start' : 10,
                 'Glucose_impuls_start' : 60,
@@ -224,12 +224,12 @@ if __name__ == "__main__":
     """make the dict keys as new variables"""
     locals().update(dict_time)
 
-    dict_unique_EXSTDTC = {
-                                """Stimulus = [time] in s"""
+    """Stimulus = [time] in s"""
+    dict_unique_EXSTDTC = {                                
                                 'KCl' : [30],
                                 'NaCl' : [30],
                                 'Sorbitol' : [30],
-                                }
+                            }
 
     """implementation rules
 
@@ -237,9 +237,9 @@ if __name__ == "__main__":
     """
     dict_stimulus = {
                     # TODO: bisher funktioniert noch nicht die Funktion (no stimulus)
-                    'KCl' : [[0], 'mM', ['K_out','Cl_out'], False],
+                    'KCl' : [[100], 'mM', ['K_out','Cl_out'], True],
                     'NaCl' : [[0.3,3,30,300,600], 'mM', ['Na_out','Cl_out'], False],
-                    'Sorbitol': [[0.1,1,10,100], 'mM', ['Sorbitol_out'], True],
+                    'Sorbitol': [[300], 'mM', ['Sorbitol_out'], False],
 
                     """only for the hog model
 
@@ -255,9 +255,8 @@ if __name__ == "__main__":
 
     """database management system"""
     dict_system_switch = {
-                        # TEMP: only works for model with stimuli !!!
                         'export_data_to_sql' : True,
-                        'export_terms_data_to_sql' : False
+                        'export_terms_data_to_sql' : True
                          }
 
     """activated stimuli
@@ -305,6 +304,7 @@ if __name__ == "__main__":
 
             """find the right stimuli-simulation-time-list for this impuls"""
             if key in dict_unique_EXSTDTC.keys():
+
                 dict_of_EXSTDTC[key] = dict_unique_EXSTDTC[key]
 
     dict_stimuli = dict(zip(list_of_stimuli_name, list_of_stimuli_conc))
@@ -331,8 +331,7 @@ if __name__ == "__main__":
     running_chit = []
     for choosen_model in model_test:
 
-        conn = psycopg2.connect(host='localhost', dbname='simulation_results',\
-                                user='janpiotraschke')
+        conn = psycopg2.connect(host='localhost', dbname='simulation_results')
         """open a cursor to perform database operations"""
         cur = conn.cursor()
 
@@ -462,8 +461,7 @@ if __name__ == "__main__":
         simulation_frame = pd.DataFrame()
         model_name = ijj['name']
 
-        conn = psycopg2.connect(host='localhost', dbname='simulation_results',\
-                                user='janpiotraschke')
+        conn = psycopg2.connect(host='localhost', dbname='simulation_results')
 
         cur = conn.cursor()
 
@@ -513,8 +511,7 @@ if __name__ == "__main__":
 
         """export the EX dict to the database"""
         if dict_system_switch.get('export_data_to_sql') == True:
-            conn = psycopg2.connect(host='localhost', dbname='simulation_results',\
-                                    user='janpiotraschke')
+            conn = psycopg2.connect(host='localhost', dbname='simulation_results')
 
             """open a cursor to perform database operations"""
             cur = conn.cursor()
@@ -535,8 +532,8 @@ if __name__ == "__main__":
             cur.close()
             conn.close()
 
-
-        csv_fingerprint = '{}_{}mM_{}s_{}s'.format(EXTRT, EXDOSE, EXSTDTC,stop)
+      
+        csv_fingerprint = str(SEQ)
 
         init_cond = []
         init_cond_string = []
@@ -616,8 +613,7 @@ if __name__ == "__main__":
 
         print(SEQ, "model_name", model_name)
 
-        conn = psycopg2.connect(host='localhost', dbname='simulation_results',\
-                                user='janpiotraschke')
+        conn = psycopg2.connect(host='localhost', dbname='simulation_results')
 
         """open a cursor to perform database operations"""
 

@@ -256,7 +256,7 @@ if __name__ == "__main__":
     """database management system"""
     dict_system_switch = {
                         'export_data_to_sql' : True,
-                        'export_terms_data_to_sql' : True
+                        'export_terms_data_to_sql' : False
                          }
 
     """activated stimuli

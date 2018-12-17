@@ -177,13 +177,13 @@ dict_system_switch = {
                     'export_data_to_sql' : False,
                     'create_ADaM_csv' : False,
                     'df_to_latex' : False,
-                    'save_figures': [False, 'png'],
+                    'save_figures': [True, 'png'],
                      }
 
 dict_visualisation = {
                     # NOTE: heat_map not implemted yet
                     'heat_map' : False,
-                    'graph' : True,
+                    'graph' : False,
                     'subplots' : False,
                     'dose_response' : False,
                     'get_terms' : ['r_os','pi_t'],
@@ -198,7 +198,7 @@ dict_visualisation = {
                     # if empty --> normal plots
                     'special_interest' : [],
 
-                    'each_single_model' : False,
+                    'each_single_model' : True,
                      }
 
 
@@ -207,7 +207,7 @@ sql_STUDYID = 'Yeast_BSc'
 sql_USUBJID = 'combined_models'
 
 # sql_SEQ_list = list(range(32, 36)) #+ list(range(3, 11)) 
-sql_SEQ_list = [44]
+sql_SEQ_list = [20]
 
 """tracking substance"""
 TESTCD = 'Hog1PPn'
@@ -315,7 +315,8 @@ for RUN_SEQ in ADaM_dict.values():
         ADaM_preparation.create_ADaM_csv(RUN_SEQ = RUN_SEQ)
 
     """exclude some ODEs from the visualisation"""
-    if dict_visualisation.get('dont_do') == True:
+    if dict_visualisation.get('dont_do') == True\
+    and dict_visualisation.get('graph') == True:
         for i in dict_visualisation.get('not_to_visualize'):
             RUN_SEQ['ODE_RESULTS'] = RUN_SEQ['ODE_RESULTS'].drop(columns=[i])
             RUN_SEQ['PDORRESU'].pop(i,None)

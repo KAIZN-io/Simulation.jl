@@ -1,0 +1,5 @@
+change of ion concentration (inside) calculation --> V_cell to V_os
+V_os = 4/3 * pi * r_os**3 now
+calculation of protein : change(proteinconcentration) = function fuer aufbau/abbau des Proteins und am Ende noch - Protein * V_ratio
+--> das in Latex einbauen, nach welcher Logik die Hog ODE Gleichungen aufgebaut sind
+--> diese Gleichung gilt allgemein und somit nicht nur für Proteine sonder u.a. auch für Ionenkonzentrationen!!!

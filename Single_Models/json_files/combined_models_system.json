@@ -5,6 +5,16 @@
         "Glucose": " glucose_switch[0]"
     },
     "equation": {
+        "c_e": {
+            "component": {
+                "patc_e1": "H_out",
+                "patc_e2": "+K_out",
+                "patc_e3": "+Cl_out",
+                "patc_e4": "+Na_out",
+                "patc_e5": "+Sorbitol_out"
+            },
+            "unit": "mM"
+        },
         "V_cell": {
             "component": {
                 "patV_cell1": "4/3*np.pi*r**3"
@@ -31,10 +41,27 @@
         },
         "V_os": {
             "component": {
-                "patV_os1": "4/3*np.pi*r**3",
-                "patV_os2": "-4/3*np.pi*r_b**3"
+                "patV_os1": "4/3*np.pi*r_os**3"
             },
             "unit": "fL"
+        },
+        "pi_e": {
+            "component": {
+                "patpi_e1": "c_e*R*T"
+            },
+            "unit": "Pa"
+        },
+        "pi_i": {
+            "component": {
+                "patpi_i1": "c_i*R*T"
+            },
+            "unit": "Pa"
+        },
+        "V_ratio": {
+            "component": {
+                "patV_ratio2": "-G*Lp*(pi_e+pi_t-pi_i)/(V_cell)"
+            },
+            "unit": "s^-1"
         },
         "A_Ar": {
             "component": {
@@ -79,79 +106,55 @@
         },
         "Na_indt": {
             "component": {
-                "patNa_indt2": "-(J_Na*G)/V_cell*1e6"
+                "patNa_indt2": "-(J_Na*G)/V_os*1e9",
+                "patNa_indt3": "-Na_in*V_ratio"
             },
             "unit": "mM"
         },
         "Cl_indt": {
             "component": {
-                "patCl_indt2": "-(J_Cl*G)/V_cell*1e6"
+                "patCl_indt2": "-(J_Cl*G)/V_os*1e9",
+                "patCl_indt3": "-Cl_in*V_ratio"
             },
             "unit": "mM"
         },
         "K_indt": {
             "component": {
-                "patK_indt2": "-(J_K*G)/V_cell*1e6"
+                "patK_indt2": "-(J_K*G)/V_os*1e9",
+                "patK_indt3": "-K_in*V_ratio"
             },
             "unit": "mM"
         },
         "H_indt": {
             "component": {
-                "patH_indt2": "-(J_H*G*np.log(10)*H_in)/(V_cell*pbc)*1e6"
+                "patH_indt2": "-(J_H*G*np.log(10)*H_in)/(V_os*pbc)*1e9",
+                "patH_indt3": "-H_in*V_ratio"
             },
             "unit": "mM"
         },
         "Na_outdt": {
             "component": {
-                "patNa_outdt1": "(J_Na*G)/V_out*1e6"
+                "patNa_outdt1": "(J_Na*G)/V_out*1e9"
             },
             "unit": "mM"
         },
         "Cl_outdt": {
             "component": {
-                "patCl_outdt1": "(J_Cl*G)/V_out*1e6"
+                "patCl_outdt1": "(J_Cl*G)/V_out*1e9"
             },
             "unit": "mM"
         },
         "K_outdt": {
             "component": {
-                "patK_outdt1": "(J_K*G)/V_out*1e6"
+                "patK_outdt1": "(J_K*G)/V_out*1e9"
             },
             "unit": "mM"
         },
         "H_outdt": {
             "component": {
-                "patH_outdt1": "(J_H*G)/V_out*1e6"
+                "patH_outdt1": "(J_H*G)/V_out*1e9"
             },
             "unit": "mM"
-        },
-        "c_e": {
-            "component": {
-                "patc_e1": "H_out",
-                "patc_e2": "+K_out",
-                "patc_e3": "+Cl_out",
-                "patc_e4": "+Na_out",
-                "patc_e5": "+Sorbitol_out"
-            },
-            "unit": "mM"
-        },
-        "pi_e": {
-            "component": {
-                "patpi_e1": "c_e*R*T"
-            },
-            "unit": "Pa"
-        },
-        "pi_i": {
-            "component": {
-                "patpi_i1": "c_i*R*T"
-            },
-            "unit": "Pa"
-        },
-        "V_ratio": {
-            "component": {
-                "patV_ratio2": "-G*Lp*(pi_e+pi_t-pi_i)/(V_cell)"
-            },
-            "unit": "s^-1"
         },
         "R_ref": {
             "component": {

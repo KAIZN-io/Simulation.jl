@@ -237,7 +237,7 @@ if __name__ == "__main__":
     """
     dict_stimulus = {
                     # TODO: bisher funktioniert noch nicht die Funktion (no stimulus)
-                    'KCl' : [[100], 'mM', ['K_out','Cl_out'], True],
+                    'KCl' : [[0], 'mM', ['K_out','Cl_out'], True],
                     'NaCl' : [[0.3,3,30,300,600], 'mM', ['Na_out','Cl_out'], False],
                     'Sorbitol': [[300], 'mM', ['Sorbitol_out'], False],
 
@@ -595,7 +595,9 @@ if __name__ == "__main__":
             elif i[0] == dict_time.get('Glucose_impuls_start')\
             and model_name in models_ext_stimulus:
 
-                glucose_switch= [True]
+                # glucose_switch= [True]
+                # note: i exclueded the glucose stimulus 
+                glucose_switch= [False]
                 simulation_frame = x.simulation(simulation_frame=simulation_frame,
                                                 i=i
                                                 )

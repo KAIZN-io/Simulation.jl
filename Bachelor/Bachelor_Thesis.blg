@@ -1,0 +1,51 @@
+This is BibTeX, Version 0.99d (TeX Live 2018)
+Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
+The top-level auxiliary file: Bachelor_Thesis.aux
+The style file: unsrt.bst
+Illegal, another \bibstyle command---line 11 of file Bachelor_Thesis.aux
+ : \bibstyle
+ :          {siam}
+I'm skipping whatever remains of this command
+Database file #1: Literatur.bib
+You've used 2 entries,
+            1791 wiz_defined-function locations,
+            464 strings with 4080 characters,
+and the built_in function-call counts, 600 in all, are:
+= -- 42
+> -- 46
+< -- 0
++ -- 16
+- -- 14
+* -- 60
+:= -- 110
+add.period$ -- 6
+call.type$ -- 2
+change.case$ -- 2
+chr.to.int$ -- 0
+cite$ -- 2
+duplicate$ -- 18
+empty$ -- 47
+format.name$ -- 14
+if$ -- 119
+int.to.chr$ -- 0
+int.to.str$ -- 2
+missing$ -- 2
+newline$ -- 13
+num.names$ -- 2
+pop$ -- 2
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 6
+stack$ -- 0
+substring$ -- 40
+swap$ -- 2
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 0
+while$ -- 5
+width$ -- 3
+write$ -- 24
+(There was 1 error message)

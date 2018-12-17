@@ -1,0 +1,50 @@
+% Encoding: UTF-8
+
+@book{eigen1973ingo,
+	Author = {Eigen, Manfred},
+	Date-Added = {2017-06-23 07:17:51 +0000},
+	Date-Modified = {2017-06-23 07:17:51 +0000},
+	Publisher = {mit einem Nachwort von Manfred Eigen, Friedrich Frommann Verlag, Struttgart-Bad Cannstatt},
+	Title = {Ingo Rechenberg Evolutionsstrategie Optimierung technischer Systeme nach Prinzipien der biologishen Evolution},
+	Year = {1973}}
+
+@Article{goffeau1996life,
+  author    = {Goffeau, Andr{\'e} and Barrell, Bart G and Bussey, Howard and Davis, RW and Dujon, Bernard and Feldmann, Heinz and Galibert, Francis and Hoheisel, JD and Jacq, Cr and Johnston, Michael and others},
+  title     = {Life with 6000 genes},
+  journal   = {Science},
+  year      = {1996},
+  volume    = {274},
+  number    = {5287},
+  pages     = {546--567},
+  publisher = {American Association for the Advancement of Science},
+}
+
+@Article{Zi_2010,
+  author    = {Zhike Zi and Wolfram Liebermeister and Edda Klipp},
+  title     = {A Quantitative Study of the Hog1 {MAPK} Response to Fluctuating Osmotic Stress in Saccharomyces cerevisiae},
+  journal   = {{PLoS} {ONE}},
+  year      = {2010},
+  volume    = {5},
+  number    = {3},
+  pages     = {e9522},
+  month     = {mar},
+  doi       = {10.1371/journal.pone.0009522},
+  editor    = {Mark Isalan},
+  publisher = {Public Library of Science ({PLoS})},
+}
+
+@Article{Gerber_2016,
+  author    = {Susanne Gerber and Martina Fröhlich and Hella Lichtenberg-Frat{\'{e}} and Sergey Shabala and Lana Shabala and Edda Klipp},
+  title     = {A Thermodynamic Model of Monovalent Cation Homeostasis in the Yeast Saccharomyces cerevisiae},
+  journal   = {{PLOS} Computational Biology},
+  year      = {2016},
+  volume    = {12},
+  number    = {1},
+  pages     = {e1004703},
+  month     = {jan},
+  doi       = {10.1371/journal.pcbi.1004703},
+  editor    = {Satoru Miyano},
+  publisher = {Public Library of Science ({PLoS})},
+}
+
+@Comment{jabref-meta: databaseType:bibtex;}

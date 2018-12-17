@@ -177,14 +177,14 @@ dict_system_switch = {
                     'export_data_to_sql' : False,
                     'create_ADaM_csv' : False,
                     'df_to_latex' : False,
-                    'save_figures': [True, 'png'],
+                    'save_figures': [False, 'png'],
                      }
 
 dict_visualisation = {
                     # NOTE: heat_map not implemted yet
                     'heat_map' : False,
-                    'graph' : False,
-                    'subplots' : False,
+                    'graph' : True,
+                    # 'subplots' : True,
                     'dose_response' : False,
                     'get_terms' : ['r_os','pi_t'],
                     'dont_do' : True,
@@ -198,7 +198,7 @@ dict_visualisation = {
                     # if empty --> normal plots
                     'special_interest' : [],
 
-                    'each_single_model' : True,
+                    'each_single_model' : False,
                      }
 
 
@@ -207,7 +207,7 @@ sql_STUDYID = 'Yeast_BSc'
 sql_USUBJID = 'combined_models'
 
 # sql_SEQ_list = list(range(32, 36)) #+ list(range(3, 11)) 
-sql_SEQ_list = [20]
+sql_SEQ_list = [46]
 
 """tracking substance"""
 TESTCD = 'Hog1PPn'

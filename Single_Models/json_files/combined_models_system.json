@@ -106,53 +106,53 @@
         },
         "Na_indt": {
             "component": {
-                "patNa_indt2": "-(J_Na*G)/V_os*1e9",
+                "patNa_indt2": "-(J_Na*G)/V_os*1e6",
                 "patNa_indt3": "-Na_in*V_ratio"
             },
             "unit": "mM"
         },
         "Cl_indt": {
             "component": {
-                "patCl_indt2": "-(J_Cl*G)/V_os*1e9",
+                "patCl_indt2": "-(J_Cl*G)/V_os*1e6",
                 "patCl_indt3": "-Cl_in*V_ratio"
             },
             "unit": "mM"
         },
         "K_indt": {
             "component": {
-                "patK_indt2": "-(J_K*G)/V_os*1e9",
+                "patK_indt2": "-(J_K*G)/V_os*1e6",
                 "patK_indt3": "-K_in*V_ratio"
             },
             "unit": "mM"
         },
         "H_indt": {
             "component": {
-                "patH_indt2": "-(J_H*G*np.log(10)*H_in)/(V_os*pbc)*1e9",
+                "patH_indt2": "-(J_H*G*np.log(10)*H_in)/(V_os*pbc)*1e6",
                 "patH_indt3": "-H_in*V_ratio"
             },
             "unit": "mM"
         },
         "Na_outdt": {
             "component": {
-                "patNa_outdt1": "(J_Na*G)/V_out*1e9"
+                "patNa_outdt1": "(J_Na*G)/V_out*1e6"
             },
             "unit": "mM"
         },
         "Cl_outdt": {
             "component": {
-                "patCl_outdt1": "(J_Cl*G)/V_out*1e9"
+                "patCl_outdt1": "(J_Cl*G)/V_out*1e6"
             },
             "unit": "mM"
         },
         "K_outdt": {
             "component": {
-                "patK_outdt1": "(J_K*G)/V_out*1e9"
+                "patK_outdt1": "(J_K*G)/V_out*1e6"
             },
             "unit": "mM"
         },
         "H_outdt": {
             "component": {
-                "patH_outdt1": "(J_H*G)/V_out*1e9"
+                "patH_outdt1": "(J_H*G)/V_out*1e6"
             },
             "unit": "mM"
         },

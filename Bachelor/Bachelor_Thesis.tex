@@ -1,0 +1,39 @@
+\documentclass[12pt,a4paper,bibliography=totocnumbered]{scrartcl}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amstext}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{titling}
+\usepackage{color}
+\usepackage{array}
+\usepackage{chemmacros}
+\usepackage{float}
+\usepackage{chemexec}     
+\usepackage{chemfig,chemnum}
+\usepackage{natbib} 
+\usepackage[hyphens,spaces]{url}
+\newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1}}
+\usepackage{multirow}
+\setlength{\parindent}{0em} 
+
+%\addbibresource{literatur.bib}
+
+
+\begin{document}
+
+
+	
+	\input{chapter/Titelblatt}
+	\input{chapter/Einfuehrung}
+	\input{chapter/TheoretischerHintergrund}
+	\input{chapter/Versuchsdurchfuehrung}
+	\input{chapter/Auswertung}
+	\input{chapter/Ergebnisse}
+
+
+	\bibliographystyle{siam} 
+	\renewcommand{\refname}{Literaturverzeichnis} 
+	\bibliography{Literatur}\newpage
+\end{document}

@@ -5,6 +5,7 @@ __license__ = 'private'
 
 """import the standard used packages"""
 exec(open("SYSTEM/py_packages.py").read())
+from decimal import Decimal
 
 class netzwerk_daten_gewinnung:
     def __init__(self):
@@ -256,7 +257,8 @@ if __name__ == "__main__":
     """database management system"""
     dict_system_switch = {
                         'export_data_to_sql' : True,
-                        'export_terms_data_to_sql' : False
+                        'export_terms_data_to_sql' : False,
+                        'SpecificModelVersionSEQ' : [1],
                          }
 
     """activated stimuli
@@ -544,26 +546,58 @@ if __name__ == "__main__":
                     ,encoding="utf-8").read())
 
         if model_name != 'dummie':
-            used_dict_for_modelling = eval('{}_init_values'.format(model_name))
 
-            for key, value in used_dict_for_modelling.items():
-                init_cond.append(value[0])
-                init_cond_string.append(value[1])
-                init_cond_unit.append(value[2])
+            # NOTE: test area
+
+            conn = psycopg2.connect(
+                host='localhost', dbname='simulation_results')
+
+            cur = conn.cursor()
+
+            """get the MAX(seq) value from the database"""
+            cur.execute(sql.SQL("""
+                SELECT MAX(seq)
+                FROM {}.init_values;
+                """).format(sql.Identifier(model_name)))
+
+            SpecificModelVersionSEQ = cur.fetchone()[0]
+
+            """gets the wanted ModelVersion"""
+            if len(dict_system_switch.get('SpecificModelVersionSEQ')) > 0:
+                SpecificModelVersionSEQ = dict_system_switch.get(
+                    'SpecificModelVersionSEQ')[0]
+
+            cur.execute(sql.SQL("""
+                SELECT testcd, orres, orresu
+                FROM {}.init_values 
+                WHERE seq=%s;
+                """).format(sql.Identifier(model_name)), [SpecificModelVersionSEQ])
+
+            TESTCD_ORRESU_tuple = cur.fetchall()
+
+            """init_dict creation"""
+            init_dict = {}
+            unit_dict = {}
+            for i in TESTCD_ORRESU_tuple:
+                init_dict[i[0]] = i[1]
+                unit_dict[i[0]] = i[2]
+
+                        
+            conn.close()
 
         else:
             dict_of_init_values = eval('{}_init_values'.format(model_name))
             items_from_dict = dict_of_init_values.items()
-
             for key, value in items_from_dict:
                 init_cond.append(value[0])
                 init_cond_string.append(value[1])
                 init_cond_unit.append(value[2])
 
+            init_dict = dict(zip(init_cond_string, init_cond))
+            unit_dict = dict(zip(init_cond_string, init_cond_unit))
+        
         """DataFrame initialisieren"""
-        init_dict = dict(zip(init_cond_string, init_cond))
-        unit_dict = dict(zip(init_cond_string, init_cond_unit))
-
+               
         ijj['units'] = unit_dict
 
         simulation_frame = pd.DataFrame([init_dict])
@@ -623,9 +657,16 @@ if __name__ == "__main__":
         cur.execute(sql.SQL("Select * FROM {}.pd;").format(sql.Identifier(model_name)))
         PD_column_names = [desc[0] for desc in cur.description]
 
+        """round the time points"""
+        RoundByUsedTimeSteps = abs(Decimal(str(time_steps)).as_tuple().exponent)
 
+        OldTimeIndex = list(ijj['results'].index)
+        NewTimeIndex = np.round(OldTimeIndex, decimals = RoundByUsedTimeSteps)
+
+        """assign new time index to the dataframe with the simulation results"""
+        ijj['results'].index = NewTimeIndex
+        
         """make the dict keys as new variables"""
-
         locals().update(ijj)
 
         pd_to_dict = ijj['results'].to_dict('index')

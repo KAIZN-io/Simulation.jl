@@ -112,11 +112,13 @@ class VisualisationDesign:
             save_fig = dict_system_switch.get('save_figures')
 
             if save_fig[0] == True:
-                plt.savefig('Pictures/{0}.{1}'.format(sql_USUBJID, save_fig[1]),
-                            dpi = 1200,
-                            format = save_fig[1],
-                            bbox_inches='tight'
-                            )
+                
+                plt.savefig('/Users/janpiotraschke/Bilder_Simulation/{0}.{1}'.format(
+                    sql_USUBJID, save_fig[1]),
+                    dpi=1200,
+                    format=save_fig[1],
+                    bbox_inches='tight'
+                )
 
         fig.tight_layout(pad=3)
 
@@ -177,16 +179,16 @@ dict_system_switch = {
                     'export_data_to_sql' : False,
                     'create_ADaM_csv' : False,
                     'df_to_latex' : False,
-                    'save_figures': [False, 'png'],
+                    'save_figures': [True, 'png'],
                      }
 
 dict_visualisation = {
                     # NOTE: heat_map not implemted yet
                     'heat_map' : False,
-                    'graph' : True,
+                    'graph' : False,
                     # 'subplots' : True,
                     'dose_response' : False,
-                    'get_terms' : ['r_os','pi_t'],
+                    'get_terms' : ['r_os'],
                     'dont_do' : True,
 
                     'not_to_visualize' : ['Yt','z1','z2','z3','z4','L_ArH','L_HH',
@@ -198,7 +200,7 @@ dict_visualisation = {
                     # if empty --> normal plots
                     'special_interest' : [],
 
-                    'each_single_model' : False,
+                    'each_single_model' : True,
                      }
 
 
@@ -207,10 +209,10 @@ sql_STUDYID = 'Yeast_BSc'
 sql_USUBJID = 'combined_models'
 
 # sql_SEQ_list = list(range(32, 36)) #+ list(range(3, 11)) 
-sql_SEQ_list = [46]
+sql_SEQ_list = [65]
 
 """tracking substance"""
-TESTCD = 'Hog1PPn'
+TESTCD = 'Deltaphi'
 
 """"get the wanted equation terms from SQL"""
 get_terms = dict_visualisation.get('get_terms')
@@ -316,7 +318,8 @@ for RUN_SEQ in ADaM_dict.values():
 
     """exclude some ODEs from the visualisation"""
     if dict_visualisation.get('dont_do') == True\
-    and dict_visualisation.get('graph') == True:
+    and dict_visualisation.get('graph') == True\
+    and sql_USUBJID == 'combined_models':
         for i in dict_visualisation.get('not_to_visualize'):
             RUN_SEQ['ODE_RESULTS'] = RUN_SEQ['ODE_RESULTS'].drop(columns=[i])
             RUN_SEQ['PDORRESU'].pop(i,None)
@@ -578,11 +581,12 @@ for RUN_SEQ in ADaM_dict.values():
             save_fig = dict_system_switch.get('save_figures')
 
             if save_fig[0] == True:
-                plt.savefig('Pictures/combined_{0}_SEQ{1}_{2}.png'.format(
-                                                model_name, sql_SEQ_list[0],current_date),
-                                                dpi = 1200,
-                                                format = save_fig[1],
-                                                bbox_inches = 'tight')
+                
+                plt.savefig('/Users/janpiotraschke/Bilder_Simulation/combined_{0}_SEQ{1}_{2}.png'.format(
+                    model_name, sql_SEQ_list[0], current_date),
+                    dpi=1200,
+                    format=save_fig[1],
+                    bbox_inches='tight')
 
 
 if dict_visualisation.get('dose_response') == True:

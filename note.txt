@@ -11,5 +11,5 @@ erster term in dHog1c ist ein Aktivierungsterm -->  Pbs2PP aktiviert Hog1c zu Ho
 
 was sind die z terme im hog model? sie sind in mM --> brauchen sie auch den V_ratio term? --> nein
 
-c_in mit V_ratio term?
+c_in mit V_ratio term? --> nein
 soll ich noch dc_i = (k_uptake * G - k_consumption * V * (10 ** 15)) aus dem Volumenmodell integrieren?

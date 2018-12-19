@@ -59,13 +59,13 @@
         },
         "V_ratio": {
             "component": {
-                "patV_ratio2": "-G*Lp*(pi_e+pi_t-pi_i)/(V_cell)"
+                "patV_ratio2": "-G*Lp*(pi_e+pi_t-pi_i)/V_cell"
             },
             "unit": "s^-1"
         },
         "A_Ar": {
             "component": {
-                "patA_Ar1": "(R*T/(c_strich_ATP))*(ATP-c_strich_ATP)*(1+K_eq)"
+                "patA_Ar1": "R*T/c_strich_ATP*(ATP-c_strich_ATP)*(1+K_eq)"
             },
             "unit": "J mol^-1"
         },
@@ -176,8 +176,8 @@
         },
         "r_osdt": {
             "component": {
-                "patr_osdt2": "-Lp*pi_t",
-                "patr_osdt3": "-Lp*pi_e",
+                "patr_osdt2": "-Lp*pi_e",
+                "patr_osdt3": "-Lp*pi_t",
                 "patr_osdt4": "+Lp*pi_i"
             },
             "unit": "um"
@@ -228,9 +228,10 @@
         "dATP": {
             "component": {
                 "patATP1": "k_ATPincr",
-                "patATP2": "-k_ATPdecr*ATP"
+                "patATP2": "-k_ATPdecr*ATP",
+                "patATP3": "-ATP*V_ratio"
             },
-            "condition": "if t >= t0_glucose and ATP < 2.5 and Glucose == True else 0",
+            "condition": "if t >= t0_glucose and ATP < 2.5 and Glucose == True else - ATP * V_ratio",
             "unit": "mM"
         },
         "dDeltaphi": {

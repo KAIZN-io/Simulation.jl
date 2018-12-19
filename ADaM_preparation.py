@@ -102,7 +102,7 @@ def getEquationTermsformSQL(sql_USUBJID='', SqlQueryTerms_list=[]):
     conn = psycopg2.connect(host='localhost', dbname='simulation_results')
 
     sql_USUBJID = sql_USUBJID+'_terms'
-    Query = 'SELECT index, ' + ','.join(SqlQueryTerms_list) +' FROM {}."44";'
+    Query = 'SELECT index, ' + ','.join(SqlQueryTerms_list) +' FROM {}."51";'
 
     cur = conn.cursor()
     cur.execute(sql.SQL(Query).format(sql.Identifier(sql_USUBJID)))

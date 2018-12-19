@@ -135,7 +135,9 @@ system
 
 conn = psycopg2.connect(host='localhost', dbname='simulation_results')
 cur = conn.cursor()
-allModels_list = ['ion', 'dummie', 'hog', 'volume', 'combined_models']
+# allModels_list = ['ion', 'dummie', 'hog', 'volume', 'combined_models']
+allModels_list = ['combined_models']
+
 
 """create init values sql table"""
 for model in allModels_list:
@@ -162,7 +164,7 @@ for model in allModels_list:
 
         for i in ODEVar_dict.values():
             InitValues2Sql_dict = {}
-            InitValues2Sql_dict['seq'] = str(1)
+            InitValues2Sql_dict['seq'] = str(2)
             InitValues2Sql_dict['testcd'] = i[1]
             InitValues2Sql_dict['orres'] = str(i[0])
             InitValues2Sql_dict['orresu'] = i[2]

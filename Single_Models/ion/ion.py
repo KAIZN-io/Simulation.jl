@@ -53,16 +53,16 @@ ion_init_values = {
                 'Na_in' : [29.98 , 'Na_in', 'mM','original/ion_model'],
 
                 # NOTE: Werte vom originalen Ion-Modell
-                # 'H_out' : [3.162e-3, 'H_out', 'mM'],
-                # 'K_out' : [0.1, 'K_out', 'mM'],
-                # 'Cl_out' : [0.1, 'Cl_out', 'mM'],
-                # 'Na_out' : [0.01, 'Na_out', 'mM'],
+                'H_out' : [3.162e-3, 'H_out', 'mM'],
+                'K_out' : [0.1, 'K_out', 'mM'],
+                'Cl_out' : [0.1, 'Cl_out', 'mM'],
+                'Na_out' : [0.01, 'Na_out', 'mM'],
 
                 # NOTE: Werte vom combined_models
-                'H_out' : [(3.162e-3)* 1126 , 'H_out', 'mM','original/ion_model'],
-                'K_out' : [0.1 * 1126, 'K_out', 'mM','original/ion_model'],
-                'Cl_out' : [0.1 * 1126, 'Cl_out', 'mM','original/ion_model'],
-                'Na_out' : [0.01 * 1126 , 'Na_out', 'mM','original/ion_model'],
+                # 'H_out' : [(3.162e-3)* 1126 , 'H_out', 'mM','original/ion_model'],
+                # 'K_out' : [0.1 * 1126, 'K_out', 'mM','original/ion_model'],
+                # 'Cl_out' : [0.1 * 1126, 'Cl_out', 'mM','original/ion_model'],
+                # 'Na_out' : [0.01 * 1126 , 'Na_out', 'mM','original/ion_model'],
 
                 ######
                 'ATP' : [2.477, 'ATP', 'mM'],

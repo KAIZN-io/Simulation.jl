@@ -137,7 +137,12 @@ conn = psycopg2.connect(host='localhost', dbname='simulation_results')
 cur = conn.cursor()
 # allModels_list = ['ion', 'dummie', 'hog', 'volume', 'combined_models']
 allModels_list = ['combined_models']
-
+for model in allModels_list:
+    cur.execute(sql.SQL("""
+        ALTER TABLE {}.ex
+        ADD initvaluesversion integer;
+        """).format(sql.Identifier(model)))
+    conn.commit()
 
 """create init values sql table"""
 for model in allModels_list:

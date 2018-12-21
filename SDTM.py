@@ -260,8 +260,8 @@ if __name__ == "__main__":
     dict_system_switch = {
                         'export_data_to_sql' : True,
                         'export_terms_data_to_sql' : False,
-                        'SpecificInitValuesVersionSEQ' : [3],
-                        'SpecificModelVersionSEQ' : [1]
+                        'SpecificInitValuesVersionSEQ' : [],
+                        'SpecificModelVersionSEQ' : []
                          }
 
     """activated stimuli
@@ -397,6 +397,8 @@ if __name__ == "__main__":
                     EXDOSU text,
                     EXSTDTC double precision,
                     CO text,
+                    MODELVERSION integer,
+                    INITVALUESVERSION integer, 
                     PRIMARY KEY (USUBJID, EXSEQ, EXTRT)
                 )
                 """).format(sql.Identifier(choosen_model),sql.Identifier('ex')))
@@ -535,6 +537,27 @@ if __name__ == "__main__":
             EXDOSE = ijj['EXDOSE']
             EXSTDTC = ijj['EXSTDTC']
 
+        conn = psycopg2.connect(host='localhost', dbname='simulation_results')
+
+        """open a cursor to perform database operations"""
+        cur = conn.cursor()
+        """gets the wanted InitValuesVersion"""
+        if len(dict_system_switch.get('SpecificInitValuesVersionSEQ')) > 0:
+            SpecificInitValuesVersionSEQ = dict_system_switch.get(
+                'SpecificInitValuesVersionSEQ')[0]
+
+        else:
+            """get the MAX(seq) value from the database"""
+            cur.execute(sql.SQL("""
+                SELECT MAX(seq)
+                FROM {}.init_values;
+                """).format(sql.Identifier(model_name)))
+
+            SpecificInitValuesVersionSEQ = cur.fetchone()[0]
+
+        cur.close()
+        conn.close()
+
         EX_dict = {
                     "studyid" : STUDYID,
                     "domain" : "ex",
@@ -546,6 +569,8 @@ if __name__ == "__main__":
                     "exdosu" : "mM",
                     "exstdtc" : EXSTDTC,
                     "co" : "exstdtc in Sekunden",
+                    "modelversion": SpecificModelVersionSEQ,
+                    "initvaluesversion": SpecificInitValuesVersionSEQ,
                     }
 
         """export the EX dict to the database"""
@@ -591,19 +616,19 @@ if __name__ == "__main__":
 
             cur = conn.cursor()
 
-            """gets the wanted InitValuesVersion"""
-            if len(dict_system_switch.get('SpecificInitValuesVersionSEQ')) > 0:
-                SpecificInitValuesVersionSEQ = dict_system_switch.get(
-                    'SpecificInitValuesVersionSEQ')[0]
+            # """gets the wanted InitValuesVersion"""
+            # if len(dict_system_switch.get('SpecificInitValuesVersionSEQ')) > 0:
+            #     SpecificInitValuesVersionSEQ = dict_system_switch.get(
+            #         'SpecificInitValuesVersionSEQ')[0]
 
-            else:
-                """get the MAX(seq) value from the database"""
-                cur.execute(sql.SQL("""
-                    SELECT MAX(seq)
-                    FROM {}.init_values;
-                    """).format(sql.Identifier(model_name)))
+            # else:
+            #     """get the MAX(seq) value from the database"""
+            #     cur.execute(sql.SQL("""
+            #         SELECT MAX(seq)
+            #         FROM {}.init_values;
+            #         """).format(sql.Identifier(model_name)))
 
-                SpecificInitValuesVersionSEQ = cur.fetchone()[0]
+            #     SpecificInitValuesVersionSEQ = cur.fetchone()[0]
 
             cur.execute(sql.SQL("""
                 SELECT testcd, orres, orresu
@@ -620,7 +645,7 @@ if __name__ == "__main__":
                 init_dict[i[0]] = i[1]
                 unit_dict[i[0]] = i[2]
 
-                        
+            cur.close()          
             conn.close()
 
         else:

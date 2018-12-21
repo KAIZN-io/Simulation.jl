@@ -113,9 +113,9 @@ class VisualisationDesign:
 
             if save_fig[0] == True:
                 
-                plt.savefig('/Users/janpiotraschke/Bilder_Simulation/{0}.{1}'.format(
-                    sql_USUBJID, save_fig[1]),
-                    dpi=1200,
+                plt.savefig('/Users/janpiotraschke/Bilder_Simulation/{0}_{1}.{2}'.format(
+                    sql_USUBJID, sql_SEQ_list[0], save_fig[1]),
+                    dpi=360,
                     format=save_fig[1],
                     bbox_inches='tight'
                 )
@@ -185,7 +185,7 @@ dict_system_switch = {
 dict_visualisation = {
                     # NOTE: heat_map not implemted yet
                     'heat_map' : False,
-                    'graph' : False,
+                    'graph' : True,
                     # 'subplots' : True,
                     'dose_response' : False,
                     'get_terms' : ['r_os'],
@@ -200,7 +200,7 @@ dict_visualisation = {
                     # if empty --> normal plots
                     'special_interest' : [],
 
-                    'each_single_model' : True,
+                    'each_single_model' : False,
                      }
 
 
@@ -209,7 +209,7 @@ sql_STUDYID = 'Yeast_BSc'
 sql_USUBJID = 'combined_models'
 
 # sql_SEQ_list = list(range(32, 36)) #+ list(range(3, 11)) 
-sql_SEQ_list = [75]
+sql_SEQ_list = [70]
 
 """tracking substance"""
 TESTCD = 'Deltaphi'
@@ -584,7 +584,7 @@ for RUN_SEQ in ADaM_dict.values():
                 
                 plt.savefig('/Users/janpiotraschke/Bilder_Simulation/combined_{0}_SEQ{1}_{2}.png'.format(
                     model_name, sql_SEQ_list[0], current_date),
-                    dpi=1200,
+                    dpi=360,
                     format=save_fig[1],
                     bbox_inches='tight')
 

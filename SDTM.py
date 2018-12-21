@@ -217,7 +217,7 @@ if __name__ == "__main__":
 
     dict_time = {
                 'start' : 0,
-                'stop' : 75,  
+                'stop' : 100,  
                 'time_steps' : 0.1,
                 'NaCl_impuls_start' : 10,
                 'Glucose_impuls_start' : 60,
@@ -247,7 +247,7 @@ if __name__ == "__main__":
         4: up-staircase change of NaCl
     """
     dict_stimulus = {
-                    'KCl' : [[0], 'mM', ['K_out','Cl_out'], True],
+                    'KCl' : [[200], 'mM', ['K_out','Cl_out'], True],
                     'NaCl' : [[0.3,3,30,300,600], 'mM', ['Na_out','Cl_out'], False],
                     'Sorbitol': [[300], 'mM', ['Sorbitol_out'], False],
 
@@ -260,13 +260,9 @@ if __name__ == "__main__":
     dict_system_switch = {
                         'export_data_to_sql' : True,
                         'export_terms_data_to_sql' : False,
-                        'SpecificInitValuesVersionSEQ' : [],
+                        'SpecificInitValuesVersionSEQ' : [3],
                         'SpecificModelVersionSEQ' : [1]
                          }
-
-
-
-    # locals().update(dict_system_switch)
 
     """activated stimuli
 
@@ -716,13 +712,25 @@ if __name__ == "__main__":
             return int(n * multiplier) / multiplier
 
         RoundAfterDigitsCound = 5
+        NumbersWithoutZero = list(range(1, 10))
+        NumbersWithoutZero = [str(x) for x in NumbersWithoutZero]
+
         for (x, y), UnroundedValue in np.ndenumerate(DfAsMatrix):
 
             GetDecimalPointPosition = str(UnroundedValue).find('.')
-            TruncateIndex = RoundAfterDigitsCound - GetDecimalPointPosition
+            for index, i in enumerate(str(UnroundedValue)):
+                if i in NumbersWithoutZero:
+                    FirstOccurenceNaturalNumber = index
+                    if index > GetDecimalPointPosition:
+                        FirstOccurenceNaturalNumber -= 1
+                    break
+
+            TruncateIndex = FirstOccurenceNaturalNumber + RoundAfterDigitsCound - GetDecimalPointPosition
+
             RoundedValue = truncate(UnroundedValue, decimals=TruncateIndex)
 
             DfAsMatrix[x, y] = RoundedValue
+
 
         ijj['results'] = pd.DataFrame(DfAsMatrix, 
             columns=ColumnsOfDataframe,

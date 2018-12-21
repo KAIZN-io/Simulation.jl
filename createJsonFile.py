@@ -178,7 +178,6 @@ if model == 'hog':
 
 
 """create json format"""
-
 s = json.dumps(dict_system, indent=4)
 with open('{0}/Single_Models/json_files/{1}_system.json'.format(cwd, model),"w") as f:
     f.write(s)

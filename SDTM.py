@@ -18,6 +18,7 @@ class netzwerk_daten_gewinnung:
             exec('{}={}'.format(simulation_frame.columns.tolist()[i],init[i]))
 
         """get the data for the system from the json file"""
+        
         with open('{0}/Single_Models/json_files/{1}_system.json'.format(cwd, model_name)) as json_data:
             data_from_json = json.load(json_data)
 
@@ -26,6 +27,7 @@ class netzwerk_daten_gewinnung:
         for key,value_system in data_from_json.items():
             if key == 'copa':
                 for key2, value2 in value_system.items():
+
                     exec('{}={}'.format(key2,value2))
 
             else:
@@ -152,8 +154,8 @@ class netzwerk_daten_gewinnung:
     #     return t_tuple
 
 
-    def simulation(simulation_frame=pd.DataFrame(), i=[]):
-        init_cond_from_frame = simulation_frame.tail(1).values.tolist()[0]
+    def simulation(DataForSimulation=pd.DataFrame(), i=[]):
+        init_cond_from_frame = DataForSimulation.tail(1).values.tolist()[0]
 
         """solves the ode and algebraic equations"""
         states = odeint(x.ODE_solver, init_cond_from_frame, i)
@@ -176,7 +178,7 @@ class netzwerk_daten_gewinnung:
         # NOTE: test bereich ende
 
         """ruft die entsprechenden Columns Namen auf"""
-        columns_order = simulation_frame.columns.values.tolist()
+        columns_order = DataForSimulation.columns.values.tolist()
 
         """uebergibt dem working_frame die Ergebnisse der Berechnung"""
         working_frame = pd.DataFrame(states, columns=columns_order, index=i)
@@ -185,7 +187,7 @@ class netzwerk_daten_gewinnung:
         #                             index=states.t)
 
         """haengt das working_frame dem simulation_frame an"""
-        simulation_frame = pd.concat([simulation_frame, working_frame])
+        simulation_frame = pd.concat([DataForSimulation, working_frame])
 
         return simulation_frame
 
@@ -204,6 +206,7 @@ if __name__ == "__main__":
     STUDYID = 'Yeast_BSc'
     EXCAT = 'Salz'
 
+    """only one model each time as True"""
     dict_model_switch = {
                         'combined_models': True,
                         'dummie': False,
@@ -214,7 +217,7 @@ if __name__ == "__main__":
 
     dict_time = {
                 'start' : 0,
-                'stop' : 100,  
+                'stop' : 75,  
                 'time_steps' : 0.1,
                 'NaCl_impuls_start' : 10,
                 'Glucose_impuls_start' : 60,
@@ -236,19 +239,18 @@ if __name__ == "__main__":
 
     Stimulus = [[value(s)], unit, [target(s)], boolean]
     """
+    """only for the hog model
+
+    signal_type :
+        2: single pulse of NaCl
+        3: square pulses of NaCl
+        4: up-staircase change of NaCl
+    """
     dict_stimulus = {
-                    # TODO: bisher funktioniert noch nicht die Funktion (no stimulus)
                     'KCl' : [[0], 'mM', ['K_out','Cl_out'], True],
                     'NaCl' : [[0.3,3,30,300,600], 'mM', ['Na_out','Cl_out'], False],
                     'Sorbitol': [[300], 'mM', ['Sorbitol_out'], False],
 
-                    """only for the hog model
-
-                    signal_type :
-                        2: single pulse of NaCl
-                        3: square pulses of NaCl
-                        4: up-staircase change of NaCl
-                    """
                     'NaCl_impuls' : [200, 'mM'],
                     'signal_type' : [3],
                     }
@@ -258,8 +260,13 @@ if __name__ == "__main__":
     dict_system_switch = {
                         'export_data_to_sql' : True,
                         'export_terms_data_to_sql' : False,
-                        'SpecificModelVersionSEQ' : [1],
+                        'SpecificInitValuesVersionSEQ' : [],
+                        'SpecificModelVersionSEQ' : [1]
                          }
+
+
+
+    # locals().update(dict_system_switch)
 
     """activated stimuli
 
@@ -332,6 +339,40 @@ if __name__ == "__main__":
 
     running_chit = []
     for choosen_model in model_test:
+        if choosen_model != 'hog':
+            """update the local safed ModelVersion"""
+            conn = psycopg2.connect(host='localhost', dbname='simulation_results')
+            cur = conn.cursor()
+
+            """gets the wanted ModelVersion"""
+            if len(dict_system_switch.get('SpecificModelVersionSEQ')) > 0:
+                SpecificModelVersionSEQ = dict_system_switch.get(
+                    'SpecificModelVersionSEQ')[0]
+            else:
+                """get the MAX(seq) value from the database"""
+                cur.execute(sql.SQL("""
+                    SELECT MAX(seq)
+                    FROM {}.json;
+                    """).format(sql.Identifier(choosen_model)))
+
+                SpecificModelVersionSEQ = cur.fetchone()[0]
+
+            cur.execute(sql.SQL("""
+                SELECT model_version
+                FROM {}.json
+                WHERE seq = %s;
+                """).format(sql.Identifier(choosen_model)), [SpecificModelVersionSEQ])
+
+            ModelVersionFromDatabase = cur.fetchone()[0]
+
+            cur.close()
+            conn.close()
+
+            """create json format"""
+
+            s = json.dumps(ModelVersionFromDatabase, indent=4)
+            with open('Single_Models/json_files/{0}_system.json'.format(choosen_model), "w") as f:
+                f.write(s)
 
         conn = psycopg2.connect(host='localhost', dbname='simulation_results')
         """open a cursor to perform database operations"""
@@ -428,7 +469,7 @@ if __name__ == "__main__":
 
                     dict_running_chit = {i : dict_running_chit[i] for i in liste_compress}
 
-                    """append to the rest of the todo simulation"""
+                    """append to the rest of the toodo simulation"""
                     running_chit.append(dict_running_chit)
 
                     if choosen_model not in models_ext_stimulus:
@@ -554,24 +595,25 @@ if __name__ == "__main__":
 
             cur = conn.cursor()
 
-            """get the MAX(seq) value from the database"""
-            cur.execute(sql.SQL("""
-                SELECT MAX(seq)
-                FROM {}.init_values;
-                """).format(sql.Identifier(model_name)))
+            """gets the wanted InitValuesVersion"""
+            if len(dict_system_switch.get('SpecificInitValuesVersionSEQ')) > 0:
+                SpecificInitValuesVersionSEQ = dict_system_switch.get(
+                    'SpecificInitValuesVersionSEQ')[0]
 
-            SpecificModelVersionSEQ = cur.fetchone()[0]
+            else:
+                """get the MAX(seq) value from the database"""
+                cur.execute(sql.SQL("""
+                    SELECT MAX(seq)
+                    FROM {}.init_values;
+                    """).format(sql.Identifier(model_name)))
 
-            """gets the wanted ModelVersion"""
-            if len(dict_system_switch.get('SpecificModelVersionSEQ')) > 0:
-                SpecificModelVersionSEQ = dict_system_switch.get(
-                    'SpecificModelVersionSEQ')[0]
+                SpecificInitValuesVersionSEQ = cur.fetchone()[0]
 
             cur.execute(sql.SQL("""
                 SELECT testcd, orres, orresu
                 FROM {}.init_values 
                 WHERE seq=%s;
-                """).format(sql.Identifier(model_name)), [SpecificModelVersionSEQ])
+                """).format(sql.Identifier(model_name)), [SpecificInitValuesVersionSEQ])
 
             TESTCD_ORRESU_tuple = cur.fetchall()
 
@@ -622,24 +664,24 @@ if __name__ == "__main__":
                 """switch for glucose adding"""
                 glucose_switch= [False]
 
-                simulation_frame = x.simulation(simulation_frame=simulation_frame,
+                simulation_frame = x.simulation(DataForSimulation=simulation_frame,
                                                 i=i
                                                 )
 
-            elif i[0] == dict_time.get('Glucose_impuls_start')\
+            elif i[0] == Glucose_impuls_start\
             and model_name in models_ext_stimulus:
 
                 # glucose_switch= [True]
                 # note: i exclueded the glucose stimulus 
                 glucose_switch= [False]
-                simulation_frame = x.simulation(simulation_frame=simulation_frame,
+                simulation_frame = x.simulation(DataForSimulation=simulation_frame,
                                                 i=i
                                                 )
 
             else:
 
                 glucose_switch= [False]
-                simulation_frame = x.simulation(simulation_frame=simulation_frame,
+                simulation_frame = x.simulation(DataForSimulation=simulation_frame,
                                                 i=i
                                                 )
 
@@ -663,9 +705,36 @@ if __name__ == "__main__":
         OldTimeIndex = list(ijj['results'].index)
         NewTimeIndex = np.round(OldTimeIndex, decimals = RoundByUsedTimeSteps)
 
-        """assign new time index to the dataframe with the simulation results"""
-        ijj['results'].index = NewTimeIndex
+        DfAsMatrix = ijj['results'].values
+        ColumnsOfDataframe = ijj['results'].columns.tolist()
         
+        """get the size of the matrix"""
+        # print(DfAsMatrix.shape)
+
+        def truncate(n, decimals=0):
+            multiplier = 10 ** decimals
+            return int(n * multiplier) / multiplier
+
+        RoundAfterDigitsCound = 5
+        for (x, y), UnroundedValue in np.ndenumerate(DfAsMatrix):
+
+            GetDecimalPointPosition = str(UnroundedValue).find('.')
+            TruncateIndex = RoundAfterDigitsCound - GetDecimalPointPosition
+            RoundedValue = truncate(UnroundedValue, decimals=TruncateIndex)
+
+            DfAsMatrix[x, y] = RoundedValue
+
+        ijj['results'] = pd.DataFrame(DfAsMatrix, 
+            columns=ColumnsOfDataframe,
+            index=NewTimeIndex)
+
+        """get less data 
+        
+        only get each (1/time_steps) simulation results
+        """
+        ijj['results'] = ijj['results'].loc[::int(1/time_steps)]
+  
+
         """make the dict keys as new variables"""
         locals().update(ijj)
 
@@ -685,7 +754,7 @@ if __name__ == "__main__":
                 dict_test['pdorresu'] = ijj['units']['{}'.format(substance)]
                 dict_test['pddtc'] = DTC
                 dict_test['co'] = "pddtc in Sekunden"
-                # print(dict_test)
+
                 keys_db = tuple(dict_test.keys())
                 values_db = tuple(dict_test.values())
 

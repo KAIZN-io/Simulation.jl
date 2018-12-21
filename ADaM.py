@@ -209,7 +209,7 @@ sql_STUDYID = 'Yeast_BSc'
 sql_USUBJID = 'combined_models'
 
 # sql_SEQ_list = list(range(32, 36)) #+ list(range(3, 11)) 
-sql_SEQ_list = [65]
+sql_SEQ_list = [75]
 
 """tracking substance"""
 TESTCD = 'Deltaphi'

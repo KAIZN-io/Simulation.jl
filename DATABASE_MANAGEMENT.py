@@ -164,7 +164,7 @@ for model in allModels_list:
 
         for i in ODEVar_dict.values():
             InitValues2Sql_dict = {}
-            InitValues2Sql_dict['seq'] = str(2)
+            InitValues2Sql_dict['seq'] = str(5)
             InitValues2Sql_dict['testcd'] = i[1]
             InitValues2Sql_dict['orres'] = str(i[0])
             InitValues2Sql_dict['orresu'] = i[2]

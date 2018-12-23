@@ -1,5 +1,12 @@
-\babel@toc {ngerman}{}
-\contentsline {section}{\numberline {1}Einleitung}{1}
-\contentsline {section}{\numberline {2}Theorie}{1}
-\contentsline {section}{\numberline {3}Auswertung}{1}
-\contentsline {section}{\numberline {4}Literaturverzeichnis}{1}
+\babel@toc {USenglish}{}
+\contentsline {section}{\numberline {1}Danksagung}{1}
+\contentsline {section}{\numberline {2}Introduction}{2}
+\contentsline {subsection}{\numberline {2.1}system biology}{2}
+\contentsline {subsection}{\numberline {2.2}Saccharomyces cerevisiae}{2}
+\contentsline {subsection}{\numberline {2.3}state of the art}{3}
+\contentsline {subsection}{\numberline {2.4}theory}{3}
+\contentsline {section}{\numberline {3}Results}{4}
+\contentsline {subsection}{\numberline {3.1}results of single models}{4}
+\contentsline {subsubsection}{\numberline {3.1.1}Ion model}{4}
+\contentsline {section}{\numberline {4}Discussion}{4}
+\contentsline {section}{\numberline {5}Literaturverzeichnis}{4}

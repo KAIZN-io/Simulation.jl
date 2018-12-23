@@ -179,7 +179,7 @@ dict_system_switch = {
                     'export_data_to_sql' : False,
                     'create_ADaM_csv' : False,
                     'df_to_latex' : False,
-                    'save_figures': [True, 'png'],
+                    'save_figures': [False, 'png'],
                      }
 
 dict_visualisation = {
@@ -206,10 +206,10 @@ dict_visualisation = {
 
 """choose the model"""
 sql_STUDYID = 'Yeast_BSc'
-sql_USUBJID = 'combined_models'
+sql_USUBJID = 'ion'
 
-# sql_SEQ_list = list(range(32, 36)) #+ list(range(3, 11)) 
-sql_SEQ_list = [70]
+# sql_SEQ_list = list(range(30, 34)) #+ list(range(3, 11)) 
+sql_SEQ_list = [34]
 
 """tracking substance"""
 TESTCD = 'Deltaphi'

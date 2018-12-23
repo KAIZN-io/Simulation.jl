@@ -217,7 +217,7 @@ if __name__ == "__main__":
 
     dict_time = {
                 'start' : 0,
-                'stop' : 100,  
+                'stop' : 600,  
                 'time_steps' : 0.1,
                 'NaCl_impuls_start' : 10,
                 'Glucose_impuls_start' : 60,
@@ -247,9 +247,9 @@ if __name__ == "__main__":
         4: up-staircase change of NaCl
     """
     dict_stimulus = {
-                    'KCl' : [[200], 'mM', ['K_out','Cl_out'], True],
-                    'NaCl' : [[0.3,3,30,300,600], 'mM', ['Na_out','Cl_out'], False],
-                    'Sorbitol': [[300], 'mM', ['Sorbitol_out'], False],
+                    'KCl' : [[100], 'mM', ['K_out','Cl_out'], True],
+                    'NaCl': [[100, 200], 'mM', ['Na_out', 'Cl_out'], False],
+                    'Sorbitol': [[100, 200, 400, 800, 1600], 'mM', ['Sorbitol_out'], False],
 
                     'NaCl_impuls' : [200, 'mM'],
                     'signal_type' : [3],
@@ -257,19 +257,27 @@ if __name__ == "__main__":
 
 
     """database management system"""
+    # NOTE : SpecificInitValuesVersionSEQ = 4 for combined_models
     dict_system_switch = {
-                        'export_data_to_sql' : True,
+                        'export_data_to_sql' : False,
                         'export_terms_data_to_sql' : False,
-                        'SpecificInitValuesVersionSEQ' : [],
+                        'SpecificInitValuesVersionSEQ' : [4],
                         'SpecificModelVersionSEQ' : []
                          }
+
+    """get the right pipelines for the choosen model simulation"""
+    conn = psycopg2.connect(host='localhost', dbname='simulation_results')
+    
+    """open a cursor to perform database operations"""
+    cur = conn.cursor()
+
 
     """activated stimuli
 
     find out which stimulus pipeline is opened for the experiment series
     """
-    activated_stimuli = [stimulus_name for stimulus_name, boolean
-                        in dict_stimulus.items() if boolean[-1] == True]
+    activated_stimuli = [stimulus_name for stimulus_name, items
+                        in dict_stimulus.items() if items[-1] == True]
 
 
     """ affected models
@@ -277,12 +285,72 @@ if __name__ == "__main__":
     find out the from stimuli affected models
     """
     models_ext_stimulus = []
-    for model_name, boolean in dict_model_switch.items():
-        if boolean == True:
-            exec(open('{0}/Single_Models/{1}/{1}.py'.format(cwd, model_name),encoding="utf-8").read())
+    list_of_model_names = []
 
-            """list of the names of the variables in the model"""
-            list_of_var_keys = eval('{}_init_values'.format(model_name)).keys()
+    for NameOfModel, boolean in dict_model_switch.items():
+        if boolean == True:
+            list_of_model_names.append(NameOfModel)
+
+            """gets the wanted ModelVersion"""
+            if len(dict_system_switch.get('SpecificModelVersionSEQ')) > 0:
+                SpecificModelVersionSEQ = dict_system_switch.get(
+                    'SpecificModelVersionSEQ')[0]
+            else:
+                """get the MAX(seq) value from the database"""
+                cur.execute(sql.SQL("""
+                    SELECT MAX(seq)
+                    FROM {}.json;
+                    """).format(sql.Identifier(NameOfModel)))
+
+                SpecificModelVersionSEQ = cur.fetchone()[0]
+
+            """gets the wanted InitValuesVersion"""
+            if len(dict_system_switch.get('SpecificInitValuesVersionSEQ')) > 0:
+                SpecificInitValuesVersionSEQ = dict_system_switch.get(
+                    'SpecificInitValuesVersionSEQ')[0]
+
+            else:
+                """get the MAX(seq) value from the database"""
+                cur.execute(sql.SQL("""
+                    SELECT MAX(seq)
+                    FROM {}.init_values;
+                    """).format(sql.Identifier(NameOfModel)))
+
+                SpecificInitValuesVersionSEQ = cur.fetchone()[0]
+            
+
+            if NameOfModel != 'hog':
+                """update the local safed json file for the model"""
+                cur.execute(sql.SQL("""
+                    SELECT model_version
+                    FROM {}.json
+                    WHERE seq = %s;
+                    """).format(sql.Identifier(NameOfModel)), [SpecificModelVersionSEQ])
+
+                ModelVersionFromDatabase = cur.fetchone()[0]
+
+                """create json format"""
+
+                s = json.dumps(ModelVersionFromDatabase, indent=4)
+                with open('Single_Models/json_files/{0}_system.json'.format(NameOfModel), "w") as f:
+                    f.write(s)
+
+                """query the available ODE components"""
+                cur.execute(sql.SQL("""
+                    SELECT testcd
+                    FROM {}.init_values
+                    WHERE seq = %s
+                    """).format(sql.Identifier(NameOfModel)), [SpecificInitValuesVersionSEQ])
+
+                ModelOdeVariable = cur.fetchall()
+                ModelOdeVariable = [x[0] for x in ModelOdeVariable]
+
+            else:
+                exec(open('Single_Models/{0}/{0}.py'.format(NameOfModel),encoding="utf-8").read())
+
+                """list of the names of the variables in the model"""
+                ModelOdeVariable = eval(
+                    '{}_init_values'.format(NameOfModel)).keys()
 
             """iterating over all activated stimuli"""
             for i in activated_stimuli:
@@ -291,10 +359,11 @@ if __name__ == "__main__":
                 target = dict_stimulus.get(i)[2]
 
                 """if the targets are in the specific model"""
-                if set(target).issubset(list_of_var_keys) == True:
-                    models_ext_stimulus.append('{}'.format(model_name))
+                if set(target).issubset(ModelOdeVariable) == True:
+                    models_ext_stimulus.append('{}'.format(NameOfModel))
 
     """deletes multiple listings"""
+
     models_ext_stimulus = list(set(models_ext_stimulus))
 
     """preparation for simulation"""
@@ -307,18 +376,16 @@ if __name__ == "__main__":
             list_of_stimuli_conc.append(values[0])
             list_of_stimuli_name.append(key)
 
-            """find the right stimuli-simulation-time-list for this impuls"""
+            """find the right stimuli-simulation-time-list for this impuls
+            
+            creates a sub dict of the possible stimilus
+            """
             if key in dict_unique_EXSTDTC.keys():
 
                 dict_of_EXSTDTC[key] = dict_unique_EXSTDTC[key]
 
     dict_stimuli = dict(zip(list_of_stimuli_name, list_of_stimuli_conc))
-
-    list_of_model_names = []
-    for key,value in dict_model_switch.items():
-        if value == True:
-            list_of_model_names.append(key)
-
+   
     """simulation
 
     the actual simulation begins
@@ -326,185 +393,65 @@ if __name__ == "__main__":
 
     """time points for not external stimulated models"""
     t = np.linspace(start, stop, (stop-start)/time_steps)
-    time_of_simulations = [start, t]
 
     """the 'universal' time list"""
     time_points = [start, stop, Glucose_impuls_start]
 
-    model_test = [k for k,l in dict_model_switch.items() if l == True]
+    list_of_model_names = [k for k,l in dict_model_switch.items() if l == True]
 
     running_chit = []
-    for choosen_model in model_test:
-        if choosen_model != 'hog':
-            """update the local safed ModelVersion"""
-            conn = psycopg2.connect(host='localhost', dbname='simulation_results')
-            cur = conn.cursor()
+    for NameOfModel in list_of_model_names:
 
-            """gets the wanted ModelVersion"""
-            if len(dict_system_switch.get('SpecificModelVersionSEQ')) > 0:
-                SpecificModelVersionSEQ = dict_system_switch.get(
-                    'SpecificModelVersionSEQ')[0]
-            else:
-                """get the MAX(seq) value from the database"""
-                cur.execute(sql.SQL("""
-                    SELECT MAX(seq)
-                    FROM {}.json;
-                    """).format(sql.Identifier(choosen_model)))
+        for TRT,DOSE_list in dict_stimuli.items():
+            for SingleDose in DOSE_list:
+                """for every dose volume a new Simulation"""
 
-                SpecificModelVersionSEQ = cur.fetchone()[0]
+                if NameOfModel in models_ext_stimulus:
 
-            cur.execute(sql.SQL("""
-                SELECT model_version
-                FROM {}.json
-                WHERE seq = %s;
-                """).format(sql.Identifier(choosen_model)), [SpecificModelVersionSEQ])
+                    """all the time points for the simulation"""
+                    time_points.extend(dict_of_EXSTDTC[TRT])
 
-            ModelVersionFromDatabase = cur.fetchone()[0]
+                    """if there are multiple stimuli events at one time point"""
+                    time_points = list(set(time_points))
+                    time_points.sort()
 
-            cur.close()
-            conn.close()
+                    switchboard = [1,1,1,1,1]
 
-            """create json format"""
+                    time_of_simulations_test = [np.linspace(i, j, (j-i)/time_steps)
+                                        for i,j in zip(time_points[0::],time_points[1::])
+                                        ]
 
-            s = json.dumps(ModelVersionFromDatabase, indent=4)
-            with open('Single_Models/json_files/{0}_system.json'.format(choosen_model), "w") as f:
-                f.write(s)
+                else:
+                    switchboard = [1,0,0,0,1]
+                    time_of_simulations_test = [t]
+                
+                dict_running_chit = {'name' : NameOfModel,
+                                    'EXTRT': TRT,
+                                    'EXDOSE': SingleDose,
+                                    'EXSTDTC_list': dict_of_EXSTDTC[TRT],
+                                    'results': time_of_simulations_test,
+                                    }
+                                    
+                liste_compress = list(itertools.compress(dict_running_chit,switchboard))
 
-        conn = psycopg2.connect(host='localhost', dbname='simulation_results')
-        """open a cursor to perform database operations"""
-        cur = conn.cursor()
+                dict_running_chit = {i : dict_running_chit[i] for i in liste_compress}
 
-        """create a new schema (=new model)"""
-        try:
-            cur.execute(sql.SQL("CREATE SCHEMA {};").format(\
-                            sql.Identifier(choosen_model)))
-        except:
-            pass
+                """append to the rest of the toodo simulation"""
+                running_chit.append(dict_running_chit)
 
-        conn.commit()
-
-        """intervention (EX) domain table creaton"""
-        try:
-            cur.execute(sql.SQL("""
-                CREATE TABLE {}.{}(
-                    STUDYID text,
-                    DOMAIN text,
-                    USUBJID text,
-                    EXSEQ integer,
-                    EXCAT text,
-                    EXTRT text,
-                    EXDOSE real,
-                    EXDOSU text,
-                    EXSTDTC double precision,
-                    CO text,
-                    MODELVERSION integer,
-                    INITVALUESVERSION integer, 
-                    PRIMARY KEY (USUBJID, EXSEQ, EXTRT)
-                )
-                """).format(sql.Identifier(choosen_model),sql.Identifier('ex')))
-
-        except:
-            pass
-        conn.commit()
-
-        """findings (PD) domain table creaton"""
-        try:
-            cur.execute(sql.SQL("""
-                CREATE TABLE {}.{}(
-                    STUDYID text,
-                    DOMAIN text,
-                    USUBJID text,
-                    PDSEQ integer,
-                    PDTESTCD text,
-                    PDTEST text,
-                    PDORRES double precision,
-                    PDORRESU text,
-                    PDDTC double precision,
-                    CO text,
-                    PRIMARY KEY (USUBJID, PDSEQ, PDTESTCD, PDDTC)
-                )
-                """).format(sql.Identifier(choosen_model),sql.Identifier('pd')))
-
-        except:
-            pass
-
-        conn.commit()
-        cur.close()
-        conn.close()
-
-        for yy,kl in dict_stimuli.items():
-            for xkl in kl:
-                for zy in dict_of_EXSTDTC[yy]:
-                    if choosen_model in models_ext_stimulus:
-                        switchboard = [1,1,1,1,1]
-
-                        time_of_simulations_test = []
-
-                        time_points.append(zy)
-                        time_points.sort()
-
-                        simulation_test = [np.linspace(i,j,(j-i)/time_steps)
-                                            for i,j in zip(time_points[0::],time_points[1::])
-                                            ]
-
-                        """remove that you can add for a new simulation"""
-                        time_points.remove(zy)
-
-                        for i in simulation_test:
-                            time_of_simulations_test.append(i)
-                    else:
-                        switchboard = [1,0,0,0,1]
-                        time_of_simulations_test = [np.linspace(start, stop, (stop-start)/time_steps)]
-
-                    dict_running_chit = {'name' : choosen_model,
-                                        'EXTRT' : yy,
-                                        'EXDOSE' : xkl,
-                                        'EXSTDTC' : zy,
-                                        'results' : time_of_simulations_test,
-                                        }
-
-                    liste_compress = list(itertools.compress(dict_running_chit,switchboard))
-
-                    dict_running_chit = {i : dict_running_chit[i] for i in liste_compress}
-
-                    """append to the rest of the toodo simulation"""
-                    running_chit.append(dict_running_chit)
-
-                    if choosen_model not in models_ext_stimulus:
-                        break
-                if choosen_model not in models_ext_stimulus:
+               
+                if NameOfModel not in models_ext_stimulus:
                     break
-            if choosen_model not in models_ext_stimulus:
+            if NameOfModel not in models_ext_stimulus:
                 break
 
 
-
-        # # TODO:
-        # """scenario if all stimuli are False"""
-        # if len(dict_stimuli.keys()) == 0:
-        #     time_of_simulations_test = [np.linspace(start, stop, (stop-start)/time_steps)]
-        #     for choosen_model in model_test:
-        #         dict_running_chit = {'name' : choosen_model,
-        #                             'EXTRT' : 0,
-        #                             'EXDOSE' : 0,
-        #                             'EXSTDTC' : 0,
-        #                             'results' : time_of_simulations,
-        #                             }
-        #         running_chit.append(dict_running_chit)
-
-
-
-    """create list for simulaiton results"""
-    simulation_results = []
     for ijj in running_chit:
 
         """initialize an empty DataFrame for each time value"""
         simulation_frame = pd.DataFrame()
         model_name = ijj['name']
 
-        conn = psycopg2.connect(host='localhost', dbname='simulation_results')
-
-        cur = conn.cursor()
 
         """check, how many SEQ number already exists"""
         cur.execute(sql.SQL("SELECT MAX(EXSEQ) FROM {}.ex;").format(\
@@ -517,46 +464,16 @@ if __name__ == "__main__":
         """SEQ for new simulation"""
         SEQ = SEQ_old + 1
 
-        """create the term schema"""
-        try:
-            cur.execute(("CREATE SCHEMA {}_terms;").format(model_name))
-        except:
-            pass
-
-        conn.commit()
-        cur.close()
-        conn.close()
 
         if model_name not in models_ext_stimulus:
             EXTRT = 0
             EXDOSE = 0
-            EXSTDTC = 0
+            EXSTDTC_list = [0]
 
         else:
             EXTRT = ijj['EXTRT']
             EXDOSE = ijj['EXDOSE']
-            EXSTDTC = ijj['EXSTDTC']
-
-        conn = psycopg2.connect(host='localhost', dbname='simulation_results')
-
-        """open a cursor to perform database operations"""
-        cur = conn.cursor()
-        """gets the wanted InitValuesVersion"""
-        if len(dict_system_switch.get('SpecificInitValuesVersionSEQ')) > 0:
-            SpecificInitValuesVersionSEQ = dict_system_switch.get(
-                'SpecificInitValuesVersionSEQ')[0]
-
-        else:
-            """get the MAX(seq) value from the database"""
-            cur.execute(sql.SQL("""
-                SELECT MAX(seq)
-                FROM {}.init_values;
-                """).format(sql.Identifier(model_name)))
-
-            SpecificInitValuesVersionSEQ = cur.fetchone()[0]
-
-        cur.close()
-        conn.close()
+            EXSTDTC_list = ijj['EXSTDTC_list']
 
         EX_dict = {
                     "studyid" : STUDYID,
@@ -567,36 +484,15 @@ if __name__ == "__main__":
                     "extrt" : EXTRT,
                     "exdose" : EXDOSE,
                     "exdosu" : "mM",
-                    "exstdtc" : EXSTDTC,
+                    "exstdtc_array" : EXSTDTC_list,
+                    "simulation_start": start,
+                    "simulation_stop": stop,
                     "co" : "exstdtc in Sekunden",
                     "modelversion": SpecificModelVersionSEQ,
                     "initvaluesversion": SpecificInitValuesVersionSEQ,
                     }
 
-        """export the EX dict to the database"""
-        if dict_system_switch.get('export_data_to_sql') == True:
-            conn = psycopg2.connect(host='localhost', dbname='simulation_results')
 
-            """open a cursor to perform database operations"""
-            cur = conn.cursor()
-
-            """update database"""
-            keys_db = tuple(EX_dict.keys())
-            values_db = tuple(EX_dict.values())
-
-            """dict to sql database"""
-            try:
-                insert_statement = 'insert into {}.ex (%s) values %s'.format(model_name)
-                cur.execute(cur.mogrify(insert_statement, (AsIs(','.join(keys_db)), tuple(values_db))))
-            except:
-                pass
-
-            conn.commit()
-
-            cur.close()
-            conn.close()
-
-      
         csv_fingerprint = str(SEQ)
 
         init_cond = []
@@ -608,27 +504,6 @@ if __name__ == "__main__":
                     ,encoding="utf-8").read())
 
         if model_name != 'dummie':
-
-            # NOTE: test area
-
-            conn = psycopg2.connect(
-                host='localhost', dbname='simulation_results')
-
-            cur = conn.cursor()
-
-            # """gets the wanted InitValuesVersion"""
-            # if len(dict_system_switch.get('SpecificInitValuesVersionSEQ')) > 0:
-            #     SpecificInitValuesVersionSEQ = dict_system_switch.get(
-            #         'SpecificInitValuesVersionSEQ')[0]
-
-            # else:
-            #     """get the MAX(seq) value from the database"""
-            #     cur.execute(sql.SQL("""
-            #         SELECT MAX(seq)
-            #         FROM {}.init_values;
-            #         """).format(sql.Identifier(model_name)))
-
-            #     SpecificInitValuesVersionSEQ = cur.fetchone()[0]
 
             cur.execute(sql.SQL("""
                 SELECT testcd, orres, orresu
@@ -644,9 +519,6 @@ if __name__ == "__main__":
             for i in TESTCD_ORRESU_tuple:
                 init_dict[i[0]] = i[1]
                 unit_dict[i[0]] = i[2]
-
-            cur.close()          
-            conn.close()
 
         else:
             dict_of_init_values = eval('{}_init_values'.format(model_name))
@@ -665,8 +537,9 @@ if __name__ == "__main__":
 
         simulation_frame = pd.DataFrame([init_dict])
 
-        for i in ijj['results']:
 
+        for i in ijj['results']:
+            
             working_frame = []
 
             """ logic behind the simulation
@@ -674,13 +547,15 @@ if __name__ == "__main__":
             if the time has come ... and a stimulus is activated ...
             and a compartible model is choosen ...
             """
-            if i[0] == EXSTDTC\
+          
+            if i[0] in EXSTDTC_list\
             and model_name in models_ext_stimulus:
 
-                for stimulus_name_adding in dict_stimulus.get(EXTRT)[2]:
+                for TESTCDAffectedByStimulus in dict_stimulus.get(EXTRT)[2]:
 
                     """adds the right value to the right ODE"""
-                    simulation_frame.loc[EXSTDTC,stimulus_name_adding] += EXDOSE
+                    simulation_frame.loc[i[0],
+                                         TESTCDAffectedByStimulus] += EXDOSE
 
                 """switch for glucose adding"""
                 glucose_switch= [False]
@@ -706,19 +581,16 @@ if __name__ == "__main__":
                                                 i=i
                                                 )
 
-            simulation_results.append(simulation_frame)
-
-        ijj['results'] = simulation_results[-1]
+            
+        """replace the time array with the simulation results"""
+        ijj['results'] = simulation_frame
 
         print(SEQ, "model_name", model_name)
 
-        conn = psycopg2.connect(host='localhost', dbname='simulation_results')
-
-        """open a cursor to perform database operations"""
-
-        cur = conn.cursor()
-        cur.execute(sql.SQL("Select * FROM {}.pd;").format(sql.Identifier(model_name)))
-        PD_column_names = [desc[0] for desc in cur.description]
+        """last step before pushing results to database
+        
+        beautify the results
+        """
 
         """round the time points"""
         RoundByUsedTimeSteps = abs(Decimal(str(time_steps)).as_tuple().exponent)
@@ -729,8 +601,6 @@ if __name__ == "__main__":
         DfAsMatrix = ijj['results'].values
         ColumnsOfDataframe = ijj['results'].columns.tolist()
         
-        """get the size of the matrix"""
-        # print(DfAsMatrix.shape)
 
         def truncate(n, decimals=0):
             multiplier = 10 ** decimals
@@ -766,34 +636,50 @@ if __name__ == "__main__":
         only get each (1/time_steps) simulation results
         """
         ijj['results'] = ijj['results'].loc[::int(1/time_steps)]
-  
 
-        """make the dict keys as new variables"""
-        locals().update(ijj)
 
-        pd_to_dict = ijj['results'].to_dict('index')
+        """export the EX dict to the database"""
+        if dict_system_switch.get('export_data_to_sql') == True:
+            keys_db = tuple(EX_dict.keys())
+            values_db = tuple(EX_dict.values())
 
-        for DTC,inner_dict in pd_to_dict.items():
-            for substance,value in inner_dict.items():
+            """dict to sql database"""
+            insert_statement = 'insert into {}.ex (%s) values %s'.format(
+                model_name)
+            cur.execute(cur.mogrify(insert_statement,
+                                    (AsIs(','.join(keys_db)), tuple(values_db))))
 
-                dict_test = {}
-                dict_test['studyid'] = STUDYID
-                dict_test['domain'] = 'pd'
-                dict_test['usubjid'] = model_name
-                dict_test['pdseq'] = SEQ
-                dict_test['pdtestcd'] = substance
-                dict_test['pdtest'] = None
-                dict_test['pdorres'] = value
-                dict_test['pdorresu'] = ijj['units']['{}'.format(substance)]
-                dict_test['pddtc'] = DTC
-                dict_test['co'] = "pddtc in Sekunden"
+            conn.commit()
 
-                keys_db = tuple(dict_test.keys())
-                values_db = tuple(dict_test.values())
+            """make the dict keys as new variables"""
+            locals().update(ijj)
 
-                """dict to sql database"""
+            pd_to_dict = ijj['results'].to_dict('index')
 
-                insert_statement = 'insert into {}.pd (%s) values %s'.format(model_name)
-                cur.execute(cur.mogrify(insert_statement, (AsIs(','.join(keys_db)), tuple(values_db))))
+            for DTC,inner_dict in pd_to_dict.items():
+                for substance,value in inner_dict.items():
 
-                conn.commit()
+                    dict_test = {}
+                    dict_test['studyid'] = STUDYID
+                    dict_test['domain'] = 'pd'
+                    dict_test['usubjid'] = model_name
+                    dict_test['pdseq'] = SEQ
+                    dict_test['pdtestcd'] = substance
+                    dict_test['pdtest'] = None
+                    dict_test['pdorres'] = value
+                    dict_test['pdorresu'] = ijj['units']['{}'.format(substance)]
+                    dict_test['pddtc'] = DTC
+                    dict_test['co'] = "pddtc in Sekunden"
+
+                    keys_db = tuple(dict_test.keys())
+                    values_db = tuple(dict_test.values())
+
+                    """dict to sql database"""
+
+                    insert_statement = 'insert into {}.pd (%s) values %s'.format(model_name)
+                    cur.execute(cur.mogrify(insert_statement, (AsIs(','.join(keys_db)), tuple(values_db))))
+
+                    conn.commit()
+
+    cur.close()
+    conn.close()

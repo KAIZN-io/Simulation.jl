@@ -1,0 +1,14 @@
+\section{Results}
+\subsection{results of single models}
+Before merging the three models together it must be controlled whether each model is implemented correctly for itself. The pictures of the models simulation results are the guide for this. Sometimes there are discrepanies between the puplished model and the picture which should represent the model.  Hereafter, the implementation process for each of the models is described.
+
+\subsubsection{Ion model}
+The challanges with the implementation of the ion model where, that the presented equation, initial values and parameters did not result in the intended system behaviour. \\
+After an in-depth analysis of the equation there where two anomalies:
+
+\begin{enumerate}
+	\item the calculation of the change of the inner hydrogen ion concentration has \emph{Bf} as an undefined parameter
+	\item the fluxes have the wrong units
+\end{enumerate}
+ 
+The published ion model has discrepancies in the parameter values of the phenomenological and stoichiometric coefficients and the calculation of the ion fluxes have the wrong units 

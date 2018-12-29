@@ -7,8 +7,30 @@ The challanges with the implementation of the ion model where, that the presente
 After an in-depth analysis of the equation there where two anomalies:
 
 \begin{enumerate}
-	\item the calculation of the change of the inner hydrogen ion concentration has \emph{Bf} as an undefined parameter
+	\item the calculation of the change of the inner proton ion concentration has \emph{Bf} as an undefined parameter
 	\item the fluxes have the wrong units
 \end{enumerate}
- 
+For solving the problem with the undefined parameter in (1) the ODE was constructed by deriving the formula for the calculation of the pH value for diluted solution 
+
+\begin{equation*}
+pH = - log_{10}([H^+])
+\frac{d}{dt} pH = - \frac{d}{dt} log_{10}([H^+])
+= - \frac{1}{ln(10)} \frac{d}{dt}ln([H^+])
+\end{equation*}
+
 The published ion model has discrepancies in the parameter values of the phenomenological and stoichiometric coefficients and the calculation of the ion fluxes have the wrong units 
+
+
+
+
+\subsection{merging of the models}
+The process of merging models is a tricky task. There exists some good guideline (zitieren : Liebermeister) for this.
+Hereafter, the used essential steps are sketched:\\
+One of the first steps in the process of model merging is the control whether there is a conflict between assumptions of the description of the biological systems. 
+
+\subsection{combined model}
+For the analysis and validation of the merged model we choosed the nuclear phophorylated Hog1 (Hog1PPn) as the control substance. Hog1PPn is also used in the hog model as the output because it regulates the expression of hundred of genes (zitieren : Hog Model!!!)
+\subsubsection{changing initial values}
+After implement the initial values from the combined model back to the single models, no difference for the hog model was simulated. The reason for this lays in the simple reason, that we only changed the initial values from the ion and the volume model in the combined model.\\
+The problem for compering the simulation results for the volume model is the fact, that the original data from the Github-Account of the ...
+

@@ -185,7 +185,7 @@ dict_system_switch = {
 dict_visualisation = {
                     # NOTE: heat_map not implemted yet
                     'heat_map' : False,
-                    'graph' : True,
+                    'graph' : False,
                     # 'subplots' : True,
                     'dose_response' : False,
                     'get_terms' : ['r_os'],
@@ -206,13 +206,14 @@ dict_visualisation = {
 
 """choose the model"""
 sql_STUDYID = 'Yeast_BSc'
-sql_USUBJID = 'ion'
+sql_USUBJID = 'hog'
 
 # sql_SEQ_list = list(range(30, 34)) #+ list(range(3, 11)) 
-sql_SEQ_list = [34]
+sql_SEQ_list = [6]
 
 """tracking substance"""
-TESTCD = 'Deltaphi'
+# NOTE: use Hog1PPn as the output of the dose-response curve
+TESTCD = 'Hog1PPn'
 
 """"get the wanted equation terms from SQL"""
 get_terms = dict_visualisation.get('get_terms')
@@ -237,7 +238,7 @@ if len(get_terms) > 0:
     multiple ODEs in the same ODE solver step
     """    
 
-    # note : get the terms units!
+    # NOTE : get the terms units!
     RenameTerms_dict = {}
     for i,j in data_from_json['equation'].items():
        
@@ -300,13 +301,37 @@ if len(get_terms) > 0:
                                         SubplotLogic=TermsPlotLogic,
                                         Terms=True)
 
+"""compare models"""
+TestSubstance_dict = {
+    'ion': 'Deltaphi',
+    'hog': 'Hog1PPn',
+    'volume': 'r'
+    }
+CompareSeq_dict = {
+    'combined_models': 105,
+    'ion': 3,
+    'hog': 3,
+    'volume': 9
+}
 
+SingleModels = ['volume']
+
+for i in SingleModels:
+    CompareSeq = {}
+    CompareSeq['combined_models'] = CompareSeq_dict['combined_models']
+    CompareSeq[i] = CompareSeq_dict[i]
+    x = ADaM_preparation.compareModels(ModelsToCompare_list=['combined_models', i],
+                                       TestSubstance=TestSubstance_dict[i],
+                                       ModelSeq=CompareSeq
+                                       )
+    
+    plt.plot(x)
+    plt.show()
 
 """try to get the data from the database"""
 ADaM_dict = ADaM_preparation.getDatafromSQL(sql_STUDYID = sql_STUDYID,
                                             sql_USUBJID = sql_USUBJID,
                                             sql_SEQ_list = sql_SEQ_list)
-
 
 EXDOSE_TESTCD_list = []
 used_EXTRT_list = []

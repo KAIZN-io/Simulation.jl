@@ -8,6 +8,37 @@ exec(open("SYSTEM/py_packages.py").read())
 
 from argparse import Namespace
 
+def compareModels(ModelsToCompare_list = [], TestSubstance = '', ModelSeq={}):
+    """get the data"""
+    conn = psycopg2.connect(host='localhost', dbname='simulation_results')
+
+    """open a cursor to perform database operations"""
+    cur = conn.cursor()
+    
+    PD_df_dict = {}
+    for i in ModelsToCompare_list:
+
+        cur.execute(sql.SQL("""
+            SELECT pdorres, pddtc 
+            FROM {}.pd 
+            WHERE pdseq=%s AND pdtestcd=%s
+            ORDER BY pddtc;
+            """).format(sql.Identifier(i)), [ModelSeq[i], TestSubstance])
+    
+        values_list = []
+        PD_df_index = []
+        for j in cur.fetchall():
+            values_list.append(j[0])
+            PD_df_index.append(j[1])
+        PD_df_dict[i] = values_list
+
+    """create the ODE_RESULTS DataFrame"""
+    ODE_RESULTS = pd.DataFrame(PD_df_dict, index=PD_df_index)
+
+    return ODE_RESULTS
+
+    
+    
 
 def getDatafromSQL(sql_STUDYID = '', sql_USUBJID = '', sql_SEQ_list = []):
     conn = psycopg2.connect(host='localhost', dbname='simulation_results')

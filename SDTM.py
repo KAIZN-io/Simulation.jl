@@ -217,7 +217,7 @@ if __name__ == "__main__":
 
     dict_time = {
                 'start' : 0,
-                'stop' : 600,  
+                'stop' : 100,  
                 'time_steps' : 0.1,
                 'NaCl_impuls_start' : 10,
                 'Glucose_impuls_start' : 60,
@@ -247,7 +247,7 @@ if __name__ == "__main__":
         4: up-staircase change of NaCl
     """
     dict_stimulus = {
-                    'KCl' : [[100], 'mM', ['K_out','Cl_out'], True],
+                    'KCl' : [[0], 'mM', ['K_out','Cl_out'], True],
                     'NaCl': [[100, 200], 'mM', ['Na_out', 'Cl_out'], False],
                     'Sorbitol': [[100, 200, 400, 800, 1600], 'mM', ['Sorbitol_out'], False],
 
@@ -259,9 +259,9 @@ if __name__ == "__main__":
     """database management system"""
     # NOTE : SpecificInitValuesVersionSEQ = 4 for combined_models
     dict_system_switch = {
-                        'export_data_to_sql' : False,
+                        'export_data_to_sql' : True,
                         'export_terms_data_to_sql' : False,
-                        'SpecificInitValuesVersionSEQ' : [4],
+                        'SpecificInitValuesVersionSEQ' : [],
                         'SpecificModelVersionSEQ' : []
                          }
 

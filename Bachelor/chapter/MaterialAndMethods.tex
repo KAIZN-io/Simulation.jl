@@ -1,0 +1,9 @@
+\section{material and methods}
+\subsection{software development}
+Cause a simulation for the combined models could take several minutes and the thereafter calculation and handling of this results are not garanted to work in the process of a program development, I came up with the idea that the results must be safed after each simulation and the analysis of them should be run in another program, as \\
+\begin{center}
+	first program : simulation --> save data\\
+	second program : data --> analysis
+\end{center}
+For the construction of this workflow I implemented a database and connected. For the storing logic of the data I used a concept from CDISC for clinical trials which allowed me to construct the useful column names, data types and table in the database. Because a simulation of ODEs and algebraic equations can have pending sets of initial values, parameter values or equations terms, I expanded the concept of CDISC to the area of system biology and designed new data storage procedures. In picture (!!! Bild zeichnen lassen und hier einfügen) you can see  the proposed workflow. \\ The intention for the  implementation of CDISC to system biology was the fact, that the FDA is moving towards CDISC standards for regulatory submissions (!!!cite : forging new SDTM standards ... !!!!).\\\\
+With this approach, you can analysis and try new codes snippets with the results of a long simulation in seconds. \\

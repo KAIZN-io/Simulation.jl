@@ -1,12 +1,18 @@
 \babel@toc {USenglish}{}
-\contentsline {section}{\numberline {1}Danksagung}{1}
-\contentsline {section}{\numberline {2}Introduction}{2}
-\contentsline {subsection}{\numberline {2.1}system biology}{2}
-\contentsline {subsection}{\numberline {2.2}Saccharomyces cerevisiae}{2}
-\contentsline {subsection}{\numberline {2.3}state of the art}{3}
-\contentsline {subsection}{\numberline {2.4}theory}{3}
-\contentsline {section}{\numberline {3}Results}{4}
-\contentsline {subsection}{\numberline {3.1}results of single models}{4}
-\contentsline {subsubsection}{\numberline {3.1.1}Ion model}{4}
-\contentsline {section}{\numberline {4}Discussion}{4}
-\contentsline {section}{\numberline {5}Literaturverzeichnis}{4}
+\contentsline {section}{\numberline {1}Abstract}{I}
+\contentsline {section}{\numberline {2}Zusammenfassung}{II}
+\contentsline {section}{\numberline {3}Introduction}{1}
+\contentsline {subsection}{\numberline {3.1}system biology}{1}
+\contentsline {subsection}{\numberline {3.2}Saccharomyces cerevisiae}{1}
+\contentsline {subsection}{\numberline {3.3}state of the art}{2}
+\contentsline {subsection}{\numberline {3.4}theory}{2}
+\contentsline {section}{\numberline {4}material and methods}{3}
+\contentsline {subsection}{\numberline {4.1}software development}{3}
+\contentsline {section}{\numberline {5}Results}{3}
+\contentsline {subsection}{\numberline {5.1}results of single models}{3}
+\contentsline {subsubsection}{\numberline {5.1.1}Ion model}{4}
+\contentsline {subsection}{\numberline {5.2}merging of the models}{4}
+\contentsline {subsection}{\numberline {5.3}combined model}{4}
+\contentsline {section}{\numberline {6}Discussion}{4}
+\contentsline {section}{\numberline {7}Literaturverzeichnis}{5}
+\contentsline {section}{\numberline {8}Danksagung}{6}

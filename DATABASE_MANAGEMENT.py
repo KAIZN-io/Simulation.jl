@@ -13,6 +13,83 @@ cur = conn.cursor()
 
 ModelList = ['ion', 'dummie', 'hog', 'volume', 'combined_models']
 
+SourceModel = 'combined_models'
+cur.execute(sql.SQL("""
+    SELECT testcd, orres, orresu
+    FROM {}.init_values
+    WHERE seq = 4;
+    """).format(sql.Identifier(SourceModel)))
+
+"""create the corresponding dict for this query"""
+SourceModel_dict = {}
+for i in cur.fetchall():
+    SourceModel_dict[i[0]] = [i[1], i[2]]
+
+
+TargetModel_list = ['ion', 'hog', 'volume']
+for TargetModel in TargetModel_list:
+
+    """get the original initial values"""
+    cur.execute(sql.SQL("""
+        SELECT testcd, orres, orresu
+        FROM {}.init_values
+        WHERE seq = 1;
+        """).format(sql.Identifier(TargetModel)))
+
+    """create the corresponding dict for this query"""
+    TargetModel_dict = {}
+    for i in cur.fetchall():
+        TargetModel_dict[i[0]] = [i[1], i[2]]
+
+    """update the new init values to the Database"""
+    cur.execute(sql.SQL("""
+        SELECT MAX(seq)
+        FROM {}.init_values;
+        """).format(sql.Identifier(TargetModel)))
+
+    SeqToWorkWith = cur.fetchone()[0]
+
+
+    convert_r_to_V = ['r', 'r_os', 'r_b', 'R_ref']
+    if TargetModel == 'volume':
+
+        WorkingSourceModel_dict = {}
+        for i in SourceModel_dict:
+            if i in convert_r_to_V:
+                """
+                rename the string
+                """
+                NewString = 'V' + i[1:]
+                WorkingSourceModel_dict[NewString] = [
+                    4/3 * np.pi * SourceModel_dict[i][0]**3, 'fL']
+ 
+
+        """merge the two dicts"""
+        SourceModel_dict = {**SourceModel_dict, **WorkingSourceModel_dict}
+        
+    """some unit changes for c_i volume model"""
+    if TargetModel == 'volume':
+        SourceModel_dict['c_i'] = [SourceModel_dict['c_i'][0] * SourceModel_dict['V'][0] * 1e-18, 'mmol']
+
+    """merge only the substance which have the same unit"""
+    for key, values in TargetModel_dict.items():
+
+        if key in SourceModel_dict\
+        and values[-1] == SourceModel_dict[key][-1]:
+            Comment = 'init_values from ' + SourceModel
+
+            cur.execute(sql.SQL("""
+                UPDATE {}.init_values
+                SET orres = %s, co = %s
+                WHERE testcd = %s AND seq = %s;
+                """).format(sql.Identifier(TargetModel)), [SourceModel_dict[key][0], Comment, key, SeqToWorkWith])
+            conn.commit()
+
+        else:
+            print("nicht gleiche Einheiten: ", TargetModel, " ", key)
+
+
+
 for NameOfModel in ModelList:
     # TODO Cast is the right way, but does not work yet
     # cur.execute(sql.SQL("""

@@ -1,7 +1,7 @@
 exec(open("SYSTEM/py_packages.py").read())
 
 TargetModel = 'combined_models'
-InvestigateModel = 'hog'
+InvestigateModel = 'ion'
 
 conn = psycopg2.connect(host='localhost', dbname='simulation_results')
 cur = conn.cursor()
@@ -62,7 +62,7 @@ if InvestigateModel == 'hog':
 Comment = 'changed from orginal' 
 for TESTCD,ORRES in OdeSolutionAtTimepoint_dict.items():
     if TESTCD in ReferenceModelSubstances:
-
+        print(ORRES)
         cur.execute(sql.SQL("""
             UPDATE {}.init_values
             SET orres = %s, co = %s

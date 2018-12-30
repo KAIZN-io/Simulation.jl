@@ -52,8 +52,8 @@ combined_models_parameter = {
                 'pi_c' : [2e5, 'Pa', 'critical turgor pressure'],
                 'Lp' : [1.19e-6, 'um s^{-1} Pa^{-1}', 'hydraulic conductivity'],
                 'nu' : [0.5, 'dimensionless', 'Poissons ratio'],
-                # 'k_uptake' : [2e-16, 'mmol s^{-1} um^{-2}'],
-                # 'k_consumption' : [2.5e-16, 'mmol s^{-1} um^{-3}'],
+                'k_uptake' : [2e-16, 'mmol s^{-1} um^{-2}'],
+                'k_consumption' : [2.5e-16, 'mmol s^{-1} um^{-3}'],
                 'E_3D' : [2.58e6, 'Pa', 'measured Youngs modulus', 'Goldenbogen & Giese et al. 2016'],
 
                 # from ion model
@@ -62,9 +62,9 @@ combined_models_parameter = {
                 #'V_out' : [2.85e-6,'m^3'],
 
                 # umgerechnetes Volumen für kombiniertes Hog Model
-                #'V_out' : [2.85 * 1e12,'fL'],
+                'V_out' : [2.85 * 1e12,'fL'],
                 # neu definierte externe Umgebung--> Experiment naeher
-                'V_out' : [28.95 * 1e3, 'fL'],
+                # 'V_out' : [28.95 * 1e3, 'fL'],
 
                 'pbc' : [200,'mM pH^-1'],
                 'C_m' : [1e-2, 'xxxxxxx'],

@@ -29,7 +29,7 @@ def pushJsonToPostgresql(json_file = {}):
     cur.close()
     conn.close()
 
-model_name = 'ion'
+model_name = 'combined_models'
 
 """get the data for the system from the json file"""
 with open('Single_Models/json_files/{0}_system.json'.format(model_name)) as json_data:

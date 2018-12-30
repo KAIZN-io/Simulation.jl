@@ -11,6 +11,11 @@ system
 conn = psycopg2.connect(host='localhost', dbname='simulation_results')
 cur = conn.cursor()
 
+
+# cur.execute("""ALTER TABLE combined_models.json
+#             DROP COLUMN model_change;""")
+# conn.commit()
+
 ModelList = ['ion', 'dummie', 'hog', 'volume', 'combined_models']
 
 SourceModel = 'combined_models'
@@ -303,14 +308,16 @@ for NameOfModel in ModelList:
 
 
 # allModels_list = ['ion', 'dummie', 'hog', 'volume', 'combined_models']
-# allModels_list = ['combined_models']
-# for model in allModels_list:
-#     cur.execute(sql.SQL("""
-#         ALTER TABLE {}.ex
-#         ADD initvaluesversion integer;
-#         """).format(sql.Identifier(model)))
-#     conn.commit()
-
+allModels_list = ['combined_models']
+for model in allModels_list:
+    try:
+        cur.execute(sql.SQL("""
+            ALTER TABLE {}.json
+            ADD column adding_changes json, ADD column deleting_changes json;
+            """).format(sql.Identifier(model)))
+        conn.commit()
+    except:
+        pass
 # """create init values sql table"""
 # for model in allModels_list:
 #     try:

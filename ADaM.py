@@ -185,7 +185,7 @@ dict_system_switch = {
 dict_visualisation = {
                     # NOTE: heat_map not implemted yet
                     'heat_map' : False,
-                    'graph' : False,
+                    'graph' : True,
                     # 'subplots' : True,
                     'dose_response' : False,
                     'get_terms' : ['r_os'],
@@ -206,10 +206,10 @@ dict_visualisation = {
 
 """choose the model"""
 sql_STUDYID = 'Yeast_BSc'
-sql_USUBJID = 'hog'
+sql_USUBJID = 'combined_models'
 
 # sql_SEQ_list = list(range(30, 34)) #+ list(range(3, 11)) 
-sql_SEQ_list = [6]
+sql_SEQ_list = [112]
 
 """tracking substance"""
 # NOTE: use Hog1PPn as the output of the dose-response curve
@@ -307,14 +307,20 @@ TestSubstance_dict = {
     'hog': 'Hog1PPn',
     'volume': 'r'
     }
+
+TestSubstanceUnit_dict = {
+    'ion': 'V',
+    'hog':'mM',
+    'volume':'um'
+} 
 CompareSeq_dict = {
-    'combined_models': 105,
-    'ion': 3,
-    'hog': 3,
-    'volume': 9
+    'combined_models': 106,
+    'ion': 35,
+    'hog': 7,
+    'volume': 10
 }
 
-SingleModels = ['volume']
+SingleModels = ['ion']
 
 for i in SingleModels:
     CompareSeq = {}
@@ -324,9 +330,12 @@ for i in SingleModels:
                                        TestSubstance=TestSubstance_dict[i],
                                        ModelSeq=CompareSeq
                                        )
-    
-    plt.plot(x)
-    plt.show()
+
+    # sql_USUBJID = TestSubstance_dict[i]
+
+    # VisualisationDesign.plotTimeSeries(TimeSeriesData_df=x,
+    #                                    SubplotLogic={TestSubstanceUnit_dict[i]: [i, 'combined_models']})
+
 
 """try to get the data from the database"""
 ADaM_dict = ADaM_preparation.getDatafromSQL(sql_STUDYID = sql_STUDYID,

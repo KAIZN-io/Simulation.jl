@@ -217,7 +217,7 @@ if __name__ == "__main__":
 
     dict_time = {
                 'start' : 0,
-                'stop' : 100,  
+                'stop' : 1000,  
                 'time_steps' : 0.1,
                 'NaCl_impuls_start' : 10,
                 'Glucose_impuls_start' : 60,
@@ -247,8 +247,8 @@ if __name__ == "__main__":
         4: up-staircase change of NaCl
     """
     dict_stimulus = {
-                    'KCl' : [[0], 'mM', ['K_out','Cl_out'], True],
-                    'NaCl': [[100, 200], 'mM', ['Na_out', 'Cl_out'], False],
+                    'KCl' : [[150], 'mM', ['K_out','Cl_out'], False],
+                    'NaCl': [[200], 'mM', ['Na_out', 'Cl_out'], True],
                     'Sorbitol': [[100, 200, 400, 800, 1600], 'mM', ['Sorbitol_out'], False],
 
                     'NaCl_impuls' : [200, 'mM'],
@@ -258,11 +258,12 @@ if __name__ == "__main__":
 
     """database management system"""
     # NOTE : SpecificInitValuesVersionSEQ = 4 for combined_models
+    # NOTE : SpecificModelVersionSEQ = 1 for combined_models
     dict_system_switch = {
-                        'export_data_to_sql' : True,
+                        'export_data_to_sql' : False,
                         'export_terms_data_to_sql' : False,
-                        'SpecificInitValuesVersionSEQ' : [],
-                        'SpecificModelVersionSEQ' : []
+                        'SpecificInitValuesVersionSEQ' : [4],
+                        'SpecificModelVersionSEQ' : [1]
                          }
 
     """get the right pipelines for the choosen model simulation"""

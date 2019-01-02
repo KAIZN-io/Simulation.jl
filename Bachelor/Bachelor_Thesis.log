@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.12.12)  1 JAN 2019 17:47
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.12.12)  2 JAN 2019 10:26
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1987,20 +1987,7 @@ Package: chemformula 2017/03/23 v4.15e typeset chemical compounds and reactions
 . Defining command \setchemformula with sig. 'm' on line 3339.
 .................................................
 )
-(./Bachelor_Thesis.aux
-
-LaTeX Warning: Label `IonPaper' multiply defined.
-
-
-LaTeX Warning: Label `IonImplemented' multiply defined.
-
-
-LaTeX Warning: Label `IonPaper' multiply defined.
-
-
-LaTeX Warning: Label `IonImplemented' multiply defined.
-
-)
+(./Bachelor_Thesis.aux)
 \openout1 = `Bachelor_Thesis.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 24.
@@ -2017,7 +2004,8 @@ LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 24.
 LaTeX Font Info:    ... okay on input line 24.
 LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 24.
 LaTeX Font Info:    Try loading font information for TS1+cmr on input line 24.
- (/usr/local/texlive/2018/texmf-dist/tex/latex/base/ts1cmr.fd
+
+(/usr/local/texlive/2018/texmf-dist/tex/latex/base/ts1cmr.fd
 File: ts1cmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    ... okay on input line 24.
@@ -2187,21 +2175,36 @@ Package pdftex.def Info: picture/model_intersections.png  used on input line 28
 .
 (pdftex.def)             Requested size: 358.50612pt x 235.8362pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 38--43
+Underfull \hbox (badness 10000) in paragraph at lines 39--41
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 39--41
 
  []
 
 [2 <./picture/model_intersections.png>]
-Underfull \hbox (badness 10000) in paragraph at lines 55--57
+Underfull \hbox (badness 10000) in paragraph at lines 42--45
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 55--57
+Underfull \hbox (badness 10000) in paragraph at lines 42--45
 
  []
 
-[3] [4]) (./chapter/MaterialAndMethods.tex
+[3]
+Underfull \hbox (badness 10000) in paragraph at lines 60--62
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 60--62
+
+ []
+
+[4] [5]) (./chapter/MaterialAndMethods.tex
 Underfull \hbox (badness 10000) in paragraph at lines 8--12
 
  []
@@ -2216,13 +2219,13 @@ Underfull \hbox (badness 10000) in paragraph at lines 14--16
 
  []
 
-[5]) (./chapter/Results.tex
-<picture/Ion_Paper.png, id=56, 363.3575pt x 255.95625pt>
+[6]) (./chapter/Results.tex
+<picture/Ion_Paper.png, id=59, 363.3575pt x 255.95625pt>
 File: picture/Ion_Paper.png Graphic file (type png)
 <use picture/Ion_Paper.png>
 Package pdftex.def Info: picture/Ion_Paper.png  used on input line 27.
 (pdftex.def)             Requested size: 224.06548pt x 157.83981pt.
-<picture/ion_examine.png, id=57, 705.1143pt x 540.21825pt>
+<picture/ion_examine.png, id=60, 705.1143pt x 540.21825pt>
 File: picture/ion_examine.png Graphic file (type png)
 <use picture/ion_examine.png>
 Package pdftex.def Info: picture/ion_examine.png  used on input line 33.
@@ -2247,12 +2250,12 @@ Underfull \hbox (badness 10000) in paragraph at lines 46--47
 
  []
 
-<picture/Hog_Paper.png, id=58, 356.33125pt x 392.46625pt>
+<picture/Hog_Paper.png, id=61, 356.33125pt x 392.46625pt>
 File: picture/Hog_Paper.png Graphic file (type png)
 <use picture/Hog_Paper.png>
 Package pdftex.def Info: picture/Hog_Paper.png  used on input line 52.
 (pdftex.def)             Requested size: 224.06548pt x 246.78792pt.
-<picture/hog_examine.png, id=59, 699.21225pt x 540.21825pt>
+<picture/hog_examine.png, id=62, 699.21225pt x 540.21825pt>
 File: picture/hog_examine.png Graphic file (type png)
 <use picture/hog_examine.png>
 Package pdftex.def Info: picture/hog_examine.png  used on input line 58.
@@ -2262,12 +2265,12 @@ Overfull \hbox (2.61049pt too wide) in paragraph at lines 50--62
 []$[]$ $[]$ 
  []
 
-<picture/Volume_Paper.png, id=60, 263.98625pt x 196.735pt>
+<picture/Volume_Paper.png, id=63, 263.98625pt x 196.735pt>
 File: picture/Volume_Paper.png Graphic file (type png)
 <use picture/Volume_Paper.png>
 Package pdftex.def Info: picture/Volume_Paper.png  used on input line 70.
 (pdftex.def)             Requested size: 224.06548pt x 166.98236pt.
-<picture/volume_examine.png, id=61, 690.96143pt x 540.21825pt>
+<picture/volume_examine.png, id=64, 690.96143pt x 540.21825pt>
 File: picture/volume_examine.png Graphic file (type png)
 <use picture/volume_examine.png>
 Package pdftex.def Info: picture/volume_examine.png  used on input line 76.
@@ -2277,7 +2280,7 @@ Overfull \hbox (2.61049pt too wide) in paragraph at lines 68--80
 []$[]$ $[]$ 
  []
 
-[6] [7 <./picture/Ion_Paper.png> <./picture/ion_examine.png> <./picture/Hog_Pap
+[7] [8 <./picture/Ion_Paper.png> <./picture/ion_examine.png> <./picture/Hog_Pap
 er.png> <./picture/hog_examine.png>]
 Overfull \hbox (875.03357pt too wide) in paragraph at lines 97--107
  [] 
@@ -2306,7 +2309,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 112--113
 
  []
 
-[8 <./picture/Volume_Paper.png> <./picture/volume_examine.png>]
+[9 <./picture/Volume_Paper.png> <./picture/volume_examine.png>]
 File: picture/model_intersections.png Graphic file (type png)
 <use picture/model_intersections.png>
 Package pdftex.def Info: picture/model_intersections.png  used on input line 12
@@ -2316,13 +2319,7 @@ Package pdftex.def Info: picture/model_intersections.png  used on input line 12
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-[9]) (./chapter/Discussion.tex
-Overfull \hbox (20.96713pt too wide) in paragraph at lines 2--8
-\T1/cmr/m/n/12 schauen, ob es nicht eher mem-brane ca-pac-ity ist und dann in d
-er ganzen Ar-beit entsprechende
- []
-
-
+[10]) (./chapter/Discussion.tex
 Underfull \hbox (badness 10000) in paragraph at lines 2--8
 
  []
@@ -2347,7 +2344,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 2--8
 
  []
 
-[10])
+[11])
 Underfull \hbox (badness 10000) in paragraph at lines 10--34
 
  []
@@ -2357,49 +2354,45 @@ Underfull \hbox (badness 10000) in paragraph at lines 10--34
 
  []
 
-(./Bachelor_Thesis.bbl [11]) [12] (./chapter/Danksagung.tex [13])
-(./Bachelor_Thesis.aux)
-
-LaTeX Warning: There were multiply-defined labels.
-
- ) 
+(./Bachelor_Thesis.bbl [12]) [13] (./chapter/Danksagung.tex [14])
+(./Bachelor_Thesis.aux) ) 
 Here is how much of TeX's memory you used:
  31628 strings out of 492649
  659393 string characters out of 6129621
- 795901 words of memory out of 5000000
+ 795907 words of memory out of 5000000
  34944 multiletter control sequences out of 15000+600000
  553137 words of font info for 87 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 103i,11n,107p,10363b,402s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/local/texlive/2018/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc}
-</usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb><
-/usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></
-usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></u
-sr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr
-/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/l
-ocal/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/loc
-al/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/local
-/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/t
-exlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/local/tex
-live/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/local/texliv
-e/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/2
-018/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/20
-18/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/local/texlive/2018
-/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2018/t
-exmf-dist/fonts/type1/public/cm-super/sfbx1200.pfb></usr/local/texlive/2018/tex
-mf-dist/fonts/type1/public/cm-super/sfrm1000.pfb></usr/local/texlive/2018/texmf
--dist/fonts/type1/public/cm-super/sfrm1200.pfb></usr/local/texlive/2018/texmf-d
-ist/fonts/type1/public/cm-super/sfrm1440.pfb></usr/local/texlive/2018/texmf-dis
-t/fonts/type1/public/cm-super/sfrm2074.pfb></usr/local/texlive/2018/texmf-dist/
-fonts/type1/public/cm-super/sfsl1200.pfb></usr/local/texlive/2018/texmf-dist/fo
-nts/type1/public/cm-super/sfsx1200.pfb></usr/local/texlive/2018/texmf-dist/font
-s/type1/public/cm-super/sfsx1440.pfb></usr/local/texlive/2018/texmf-dist/fonts/
-type1/public/cm-super/sfsx1728.pfb></usr/local/texlive/2018/texmf-dist/fonts/ty
-pe1/public/cm-super/sfti1200.pfb>
-Output written on Bachelor_Thesis.pdf (17 pages, 4013901 bytes).
+ 103i,11n,107p,10363b,398s stack positions out of 5000i,500n,10000p,200000b,80000s
+{/usr/local/texlive/2018/texmf-dist/fonts/enc/dvips/cm
+-super/cm-super-t1.enc}</usr/local/texlive/2018/texmf-dist/fonts/type1/public/a
+msfonts/cm/cmex10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/am
+sfonts/cm/cmmi10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/ams
+fonts/cm/cmmi12.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsf
+onts/cm/cmmi5.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfon
+ts/cm/cmmi6.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts
+/cm/cmmi7.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/c
+m/cmmi8.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/
+cmr10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cm
+r12.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7
+.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pf
+b></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb
+></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb><
+/usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></u
+sr/local/texlive/2018/texmf-dist/fonts/type1/public/cm-super/sfbx1200.pfb></usr
+/local/texlive/2018/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb></usr/l
+ocal/texlive/2018/texmf-dist/fonts/type1/public/cm-super/sfrm1200.pfb></usr/loc
+al/texlive/2018/texmf-dist/fonts/type1/public/cm-super/sfrm1440.pfb></usr/local
+/texlive/2018/texmf-dist/fonts/type1/public/cm-super/sfrm2074.pfb></usr/local/t
+exlive/2018/texmf-dist/fonts/type1/public/cm-super/sfsl1200.pfb></usr/local/tex
+live/2018/texmf-dist/fonts/type1/public/cm-super/sfsx1200.pfb></usr/local/texli
+ve/2018/texmf-dist/fonts/type1/public/cm-super/sfsx1440.pfb></usr/local/texlive
+/2018/texmf-dist/fonts/type1/public/cm-super/sfsx1728.pfb></usr/local/texlive/2
+018/texmf-dist/fonts/type1/public/cm-super/sfti1200.pfb>
+Output written on Bachelor_Thesis.pdf (18 pages, 4019572 bytes).
 PDF statistics:
- 177 PDF objects out of 1000 (max. 8388607)
- 116 compressed objects within 2 object streams
+ 180 PDF objects out of 1000 (max. 8388607)
+ 118 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
  53 words of extra memory for PDF output out of 10000 (max. 10000000)
 

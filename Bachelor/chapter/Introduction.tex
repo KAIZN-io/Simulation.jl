@@ -36,10 +36,13 @@ In our momentan state of knowledge, there is not yet a model which integrate thi
 
 \subsection{theory of the used models}
 \subsubsection{ion model}
+This model was designed to reproduces the experimentally observed potassium and proton fluxes indcues by the external stimuli $KCl$ and glucose in S. cerevisiae. . It implemented eight well characterized transport proteins relevant to the regulation and maintenance of intracellular alkali-metal cation content. \cite{Gerber_2016}\\\\
+The ion model consists out of a non-equivilibrium thermodynamic (NET) approach to model the transport of the ion over the plasma membrane. NET is the analysis of spartial inhomogeneous systems and of time dependent processes. It is not valid if there are very fast processes or big inhomogeneity. The ion model assumes that both compartimens are well mixed. This way the NET approach hold true. \\
+
 Per diffiniton, osmolarity means the amount of substance $n$ of osmotic activ particles per volume $V$ of the solution. Osmotic pressure accurs if two solutions with different osmolarity are seperated by a semipermeable membrane, where not all substances can pass the membrane for creating an equilibrium.\\
 S. cerevisiae has a plasma membrane which functions as a semipermeable membrane. Water can diffuse freely through it, to adapt to the osmotic changes. At a hyperosmotic shock in the extracellular environment, water will flow out of the cell and let the cell shrink in volume. Cause of the shock event the high osmolarity glycerol (HOG) pathway in S. cerevisiae gets activ and synthesis the osmolyte glycerol. With that the cell increases the internal osmolarity and restores it’s volume cause of the influx of water.\\\\
 The immediate effect on yeast to an osmotic shock involves water outflow and decreasing volume \cite{ASimpleMathematicalModel}.\\
-The ion model consists out of a non-equivilibrium thermodynamic (NET) approach to model the transport of the ion over the plasma membrane. NET is the analysis of spartial inhomogeneous systems and of time dependent processes. It is not valid if there are very fast processes or big inhomogeneity. The ion model assumes that both compartimens are well mixed. This way the NET approach hold true. \\
+
 Fluxes over membranes are irreversible processes. This will lead to a production of entropy in the system, which is calculated by the entropy production density $\sigma$ which is respresented with the equation \ref{EntropyProductionDensity}
 
 \begin{equation}\label{EntropyProductionDensity}
@@ -48,27 +51,44 @@ Fluxes over membranes are irreversible processes. This will lead to a production
 Equation \ref{EntropyProductionDensity} summeries the production of entropy under the conditions of temperatur difference, concentration difference and chemical reactions.
 Fundamentally, $\sigma$ can only be created by fluxes $J$ with it’s forces $X$. In the area around equilibrium we can further assume that a flux $J$ is linearly coupled over a phenomenological coefficient $L$ with it’s forces $X$, because at equilibrium all forces and fluxes vanish. Under this condition the following statement holds true.
 \begin{equation}\label{stoeachimetricCoeff}
-	\sigma = \sum_{i}J_i X_i =\sum_{i}\sum_{j}L_{ij}X_j X_i
+	\sigma = \sum_{i}J_i X_i = \sum_{i}\sum_{j} \frac{\delta J_i}{\delta X_j}X_j X_i= \sum_{i}\sum_{j}L_{ij}X_j X_i
 \end{equation}
+$L_{ij}$ were estimated from the experimental data of starved cells and are independent of the flows and forces \cite{Gerber_2016}. They represents active transporters or channels in the plasma membrane. A high value of $L_{ij}$ indicates that the transport of $j$ is directly coupled to $i$.\\
 After some other assumption made from the ion model (for deeper insight see \cite{Gerber_2016}), the equation for the flux of ion k is:
 \begin{equation*}
 J_k = \sum_{j=1}^n L_{kj}(RT\cdot ln\left(\frac{c_k^{in}}{c_k^{out}}\right) + z_kF\Delta \phi ) + L_{kAr}A_{Ar}
 \end{equation*}
 In the ion model a glycerol stimulus is further simulated. Ion regulation determines many physiological parameters, such as cell volume \cite{Ke_2013}.\\\\
+
+
 \subsubsection{volume model}
-Turgor pressure prevents exaggerated swelling and maintains cell shape \cite{volumeModel}. The volume model \cite{volumeModel} describes the water flux $J_w$ between the cell and the environment with 
+The volume model only holds true for a individual yeast cell in G1 phase. It can describes the small and steady volume variations during normal growth and the growth caused by hyper- or hypoosmotic shocks \cite{volumeModel}.\\
+Turgor pressure $\pi_t$ prevents exaggerated swelling and maintains cell shape \cite{volumeModel}. $\pi_t$ equals the hydrostatic pressure acting on the cell wall. For this the volume model desribes the elastically and plastically expansion of the membrane by involving the strain on the wall\\
+The volume model \cite{volumeModel} describes further the water flux $J_w$ between the cell and the environment with 
 \begin{equation}\label{waterFlux}
-	J_{w} = - \frac{d}{dt} V_{os} = G * Lp * (\pi_e + \pi_t - \pi_i)
+	J_{w} = - \frac{d}{dt} V_{os} = G \cdot Lp \cdot (\pi_e + \pi_t - \pi_i)
 \end{equation}
-with $Lp$ as the hydraulic conductivity, $G$ the cell surface and the internal, external and turgor pressure  ($\pi_i$, $\pi_e$ , $\pi_t$). The volume model only holds true for a individual yeast cell in G1 phase \cite{volumeModel}.
-The cell volume depends essential on the relation of the internal, external and turgor pressure. The internal and external pressure $\pi$ depends on the concentration $c$ of the osmotic active substance in the corresponding areas correlated over the equation \ref{osmotic_pressure}
+with $Lp$ as the hydraulic conductivity, $G$ the cell surface and the internal, external and turgor pressure  ($\pi_i$, $\pi_e$ , $\pi_t$). 
+The cell volume $V$ depends essential on the relation of the internal, external and turgor pressure due to changes in the osmotic volume $V_os$ (water volume) because the model defined the total cell volume $V = V_{os} + V_b$ as the sum of $V_{os}$ and a solid volume $V_b$ which is not affected by water dynamics \cite{volumeModel}. The internal and external pressure $\pi$ depends on the concentration $c$ of the osmotic active substance in the corresponding areas correlated over the equation \ref{osmotic_pressure}
+
 \begin{equation} \label{osmotic_pressure}
 	\pi = c \cdot R \cdot T	
 \end{equation} 
 
+Furthermore, the model simulates the changes in the inner osmolyte concentration $\dot c_{in}$ with an uptake $k_{uptake}$ and a consumption $k_{consumption}$ term:
+\begin{equation*}
+	\dot c_{in} = \frac{1}{V}(k_{uptake}G - k_{consumption}V-\dot c_{in}/{V})
+\end{equation*}
+
+Summarising, it is highlighted that the cell expansion is mainly influeced by the interaction of
+\begin{enumerate}
+	\item the control of the internal osmolarity $c_{in}$, which together with $\pi_t$ drives $J_w$ and therefore $V_os$
+	\item the elasto-plastic deformation of the cell wall due to $\pi_t$. $J_w < 0$ expands the cell wall and increase therefore $\pi_t$
+\end{enumerate}
+
 \subsubsection{hog model}
 The hog model is composed out of the Hog1 Mitogen Activated Protein Kinase (MAPK) cascade. This cascade is conserved even in higher eukaryotes including humans (\cite{ASimpleMathematicalModel}). The Hog1 MAPK is activated in the response to an increase in extracellular osmolarity \cite{Saito2012}. All other non-osmotic stresses (e.g. temperature stres \cite{Saito2012}) which are known to also activate the HOG pathway are not represented in this model. The MAPK pathways are important for transmitting and processing signals from the cell membran into the cell \cite{ASimpleMathematicalModel}. \\
-Hog1n MAPK is activated by the upstream Pbs2 MAP kinase kinase (MAPKK) by phosphorylation. 
+Hog1 MAPK is activated by the upstream Pbs2 MAP kinase kinase (MAPKK) by phosphorylation. The phoshorylated Hog1c (Hog1PPc) translocates into the nucleus where it activates different transcription factors by phosphorylation \cite{JannisUhlendorf}.
 
 
 \newpage

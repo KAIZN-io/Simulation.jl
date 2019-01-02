@@ -6,17 +6,20 @@
 \contentsline {subsection}{\numberline {3.2}Saccharomyces cerevisiae}{1}
 \contentsline {subsection}{\numberline {3.3}state of the art}{2}
 \contentsline {subsection}{\numberline {3.4}theory of the used models}{3}
-\contentsline {section}{\numberline {4}material and methods}{5}
-\contentsline {subsection}{\numberline {4.1}software development}{5}
-\contentsline {section}{\numberline {5}Results}{6}
-\contentsline {subsection}{\numberline {5.1}results of single models}{6}
-\contentsline {subsubsection}{\numberline {5.1.1}Ion model}{6}
-\contentsline {subsection}{\numberline {5.2}hog model}{6}
-\contentsline {subsection}{\numberline {5.3}volume model}{8}
-\contentsline {subsection}{\numberline {5.4}merging of the models}{8}
-\contentsline {subsection}{\numberline {5.5}combined model}{9}
-\contentsline {subsubsection}{\numberline {5.5.1}single models with the initial values from the combined model}{9}
-\contentsline {section}{\numberline {6}Discussion}{10}
-\contentsline {subsection}{\numberline {6.1}further work}{11}
-\contentsline {section}{\numberline {7}reference}{11}
-\contentsline {section}{\numberline {8}Danksagung}{13}
+\contentsline {subsubsection}{\numberline {3.4.1}ion model}{3}
+\contentsline {subsubsection}{\numberline {3.4.2}volume model}{4}
+\contentsline {subsubsection}{\numberline {3.4.3}hog model}{5}
+\contentsline {section}{\numberline {4}material and methods}{6}
+\contentsline {subsection}{\numberline {4.1}software development}{6}
+\contentsline {section}{\numberline {5}Results}{7}
+\contentsline {subsection}{\numberline {5.1}results of single models}{7}
+\contentsline {subsubsection}{\numberline {5.1.1}Ion model}{7}
+\contentsline {subsection}{\numberline {5.2}hog model}{7}
+\contentsline {subsection}{\numberline {5.3}volume model}{9}
+\contentsline {subsection}{\numberline {5.4}merging of the models}{9}
+\contentsline {subsection}{\numberline {5.5}combined model}{10}
+\contentsline {subsubsection}{\numberline {5.5.1}single models with the initial values from the combined model}{10}
+\contentsline {section}{\numberline {6}Discussion}{11}
+\contentsline {subsection}{\numberline {6.1}further work}{12}
+\contentsline {section}{\numberline {7}reference}{12}
+\contentsline {section}{\numberline {8}Danksagung}{14}

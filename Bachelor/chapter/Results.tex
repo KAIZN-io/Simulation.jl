@@ -10,14 +10,24 @@ After an in-depth analysis of the equation there where two anomalies:
 	\item the calculation of the change of the inner proton ion concentration has \emph{Bf} as an undefined parameter
 	\item the fluxes have the wrong units
 \end{enumerate}
-For solving the problem with the undefined parameter in (1) the ODE was constructed by deriving the formula for the calculation of the pH value for diluted solution 
-
+For solving the problem with the undefined parameter in (1) the ODE was constructed by deriving the formula for the calculation of the pH value for diluted solution \ref{pHforDilution}
 \begin{equation*}
-pH = - log_{10}([H^+])
-\frac{d}{dt} pH = - \frac{d}{dt} log_{10}([H^+])
-= - \frac{1}{ln(10)} \frac{d}{dt}ln([H^+])
+	pH = - log_{10}([H^+])\\
 \end{equation*}
-
+\begin{equation}\label{pHforDilution}
+	\frac{d}{dt}pH = \frac{d}{dt}(-log_{10}([H^+])) = - \frac{1}{ln(10)} \frac{d}{dt}ln([H^+]) = - \frac{1}{ln(10)}\frac{1}{H^+} \frac{dH^+}{dt}
+\end{equation}
+and combine it with the equation \ref{pHchange} for the change of the pH Value as a result of proton flux (\cite{martinafroehlich})
+\begin{equation}\label{pHchange}
+	\frac{d}{dt}pH_{in} = \frac{J_H \cdot Surface}{V_{in} \cdot pbc}
+\end{equation}
+	
+The equation \ref{usedProtonFlux} 
+\begin{equation}\label{usedProtonFlux}
+- \frac{1}{ln(10)} \frac{1}{H^+}\frac{dH^+}{dt} = \frac{J_H \cdot Surface}{V_{in} \cdot pbc}\\
+\Rightarrow \frac{dH^+}{dt}=-\frac{J_H \cdot Surface \cdot ln(10) \cdot H^+}{V_{in} \cdot pbc}
+\end{equation}
+was used in modelling.\\
 The published ion model has discrepancies in the parameter values of the phenomenological and stoichiometric coefficients and the calculation of the ion fluxes have the wrong units \\\\
 The ion model assumes that the celllular compartment and the environment are well mixed. Their does not exists concentrations gradients. \\\\
 \begin{figure}[htbp]
@@ -38,12 +48,8 @@ The ion model assumes that the celllular compartment and the environment are wel
 \end{figure}
 
 \subsection{hog model}
-The hog model consists of ODEs of the following form:
-\begin{equation}\label{VratioChange}
-	\frac{d[P]}{dt} = f(\vec{P})-V_{ratio}\cdot [P]
-\end{equation}
 
-Equation \ref{VratioChange} describes in general  with the first term at the right hand side the changes of a concentration due to a chemical process and with the second term the changes in the concentration due to changes in volume \cite{Ke_2013}.\\
+
 
 \begin{figure}[htbp]
 	
@@ -112,6 +118,7 @@ In the whole process of merging we must consider their biochemical interpretatio
 Initial values were changed because as we can see in \ref{IntersectionsOfTheModels} multiple components are used in several models. The components have different quantities in the initial assumptions. One of the main difference was the assumption of the cell volume $V_cell$ in the hog model ($V_{cell}=58fL $) and the volume model ($V_{cell} \approx 0.27fL$). To solve this problem we simulated the volume model until $V_cell$ also have the value of $58fL$. We assumed the ODE values at this time point as the initial values for the corresponding substance in the merged model. \\\\
 
 \subsection{combined model}
+The combined model simulates the interaction between extra- and intracellular ionconcentration, changes in cell volume and the activity of the MAP cascade (???). The model senses the differences in the osmolarity between the cell and its environment and adapt with the important high osmolarity glycerol (HOG) signaling pathway with the MAP cascade the cell volume and the intracellular osmolyt concentrations. \\\\
 For the analysis and validation of the merged model we choosed the nuclear phophorylated Hog1 (Hog1PPn) as the control substance. Hog1PPn is also used in the hog model as the output because it regulates the expression of hundred of genes \cite{Zi_2010}. We borrowed the idea of a drug response curve from the theme field pharmocokinetic (zitieren: hier das Buch!!!) as a visualized output showed below.  \\
 (hier noch das falsche Bild, da Simulation noch nicht ganz fertig)
 \begin{figure}[h!]

@@ -1,11 +1,12 @@
 \section{Discussion}
 Distinctions between the \ref{IonPaper} and \ref{IonImplemented} in the peak of the membrane voltage (???? nachschauen, ob es nicht eher membrane capacity ist und dann in der ganzen Arbeit entsprechende updaten) seems to have its root in the different time grid setting of the ODE-Solver in Copasi, which was used for the ion model simulation in the paper \cite{Gerber_2016}.\\
-It is assumed that there are not any temperature gradient which would results in a heat flux.\\\\
+Martina Fröhlich (one of the author of the ion model) noted in her dissertation, that the ion model should only be used for analyses with starved cells \cite{martinafroehlich}.\\
+It is assumed that there are not any temperature gradient ($grad(T)=0$) which would results in a heat flux.\\\\
 Currently, only the proton and the potassium transport are ATP driven. It is known that $Na^+$ is also excluded by the Ena1p pump, which extrudes potassium. A general extension of the implemented membran transport processes could benifits the insight of then model in response of a external stimulus.\\\\
 An implementation of the CWI pathways could further improve the information value of the combined model.\\\\
 One of the problems in merging kinetic models from different sources and experimental conditions is the parameterization process of the merged model \cite{Wang2017}. With no data available it was a try and error process to find a good parameter value for a substance, which is in a interplay with many variables. Available data sets could help in this process but even with this the parameterizations task remains a challenge. \cite{Ke_2013}. \\\\
 I propose that the idea to seperate an equation into their terms and storage them seperatly in a JSON file and that into a database, could lead to a machine learning based term knockout. This allows to reduces the computing time without limiting the equation result.\\
 
-\subsection{further work}
+\subsection{Outlook}
 I would like to expand the work with the model to the point where I am able to control plasma membrane transport mechanismen in eukaryotic single cells. I propose, that a precise anaylse of the extracellular environment could allow me then to get an idea what happend inside the cell to get this meassured secretion. For this secretory pathways (SEC) must be implemented to expand the stress-response network for the desired approach.\\
 Another further work aspect is the improvement of the model vision control with the help of a database.\\\\

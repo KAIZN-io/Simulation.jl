@@ -48,21 +48,27 @@ Tom Altenburg, Björn Goldenbogen, Jannis Uhlendorf, and Edda Klipp.
   cell size of saccharomyces cerevisiae.
 \newblock unpublished, April 2018.
 
-\bibitem{SDTMStandard}
-Carey Smoak, Smitha Krishnamurthy, Mansi Singh, and Sy~Truong.
-\newblock Forging new sdtm standards for in-vitro diagnostic (ivd) devices: A
-  use-case, 2014.
-
-\bibitem{Liebermeister2008ValidityAC}
-Wolfram Liebermeister.
-\newblock Validity and combination of biochemical models.
-\newblock 2008.
-
 \bibitem{Zi_2010}
 Zhike Zi, Wolfram Liebermeister, and Edda Klipp.
 \newblock A quantitative study of the hog1 {MAPK} response to fluctuating
   osmotic stress in saccharomyces cerevisiae.
 \newblock {\em {PLoS} {ONE}}, 5(3):e9522, mar 2010.
+
+\bibitem{SDTMStandard}
+Carey Smoak, Smitha Krishnamurthy, Mansi Singh, and Sy~Truong.
+\newblock Forging new sdtm standards for in-vitro diagnostic (ivd) devices: A
+  use-case, 2014.
+
+\bibitem{martinafroehlich}
+Martina Fröhlich.
+\newblock {\em Computational and experimental investigation of the mechanisms
+  involved in cellular water transport and (cat)ion homeostasis}.
+\newblock PhD thesis, Freie Universität Berlin, 2012.
+
+\bibitem{Liebermeister2008ValidityAC}
+Wolfram Liebermeister.
+\newblock Validity and combination of biochemical models.
+\newblock 2008.
 
 \bibitem{Wang2017}
 Zhuo Wang, Samuel~A. Danziger, Benjamin~D. Heavner, Shuyi Ma, Jennifer~J.

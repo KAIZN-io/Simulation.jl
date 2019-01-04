@@ -43,11 +43,11 @@ Fundamentally, $\sigma$ can only be created by fluxes $J$ with it’s forces $X$
 \begin{equation}\label{stoeachimetricCoeff}
 	\sigma = \sum_{i}J_i X_i = \sum_{i}\sum_{j} \frac{\delta J_i}{\delta X_j}X_j X_i= \sum_{i}\sum_{j}L_{ij}X_j X_i
 \end{equation}
-$L_{ij}$ were estimated from the experimental data of starved cells and are independent of the flows and forces \cite{Gerber_2016}. They represents active transporters or channels in the plasma membrane. A high value of $L_{ij}$ indicates that the transport of $j$ is directly coupled to $i$.\\
+$L_{ij}$ were estimated from the experimental data of starved cells and are independent of the flows and forces \cite{Gerber_2016}. They represents active transporters or channels in the plasma membrane. A high value of $L_{ij}$ indicates that the transport of $j$ is directly coupled to $i$. \\
 After some other assumption made from the ion model (for deeper insight see \cite{Gerber_2016}), the equation for the flux of ion k is:
-\begin{equation*}
+\begin{equation}\label{IonFlux}
 J_k = \sum_{j=1}^n L_{kj}(RT\cdot ln\left(\frac{c_k^{in}}{c_k^{out}}\right) + z_kF\Delta \phi ) + L_{kAr}A_{Ar}
-\end{equation*}
+\end{equation}
 In the ion model a glycerol stimulus is further simulated. Ion regulation determines many physiological parameters, such as cell volume \cite{Ke_2013}.\\
 The hydrolysis of ATP is the only considered chemical reaction in the model.
 

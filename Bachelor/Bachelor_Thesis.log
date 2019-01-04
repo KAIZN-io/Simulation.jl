@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.12.12)  3 JAN 2019 17:26
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.12.12)  3 JAN 2019 18:14
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -2177,6 +2177,11 @@ Underfull \hbox (badness 10000) in paragraph at lines 82--88
 
  []
 
+
+Underfull \hbox (badness 10000) in paragraph at lines 93--96
+
+ []
+
 [4]) (./chapter/MaterialAndMethods.tex
 Underfull \hbox (badness 10000) in paragraph at lines 8--12
 
@@ -2196,61 +2201,56 @@ Underfull \hbox (badness 10000) in paragraph at lines 14--16
 <picture/Ion_Paper.png, id=51, 363.3575pt x 255.95625pt>
 File: picture/Ion_Paper.png Graphic file (type png)
 <use picture/Ion_Paper.png>
-Package pdftex.def Info: picture/Ion_Paper.png  used on input line 37.
+Package pdftex.def Info: picture/Ion_Paper.png  used on input line 39.
 (pdftex.def)             Requested size: 224.06548pt x 157.83981pt.
 <picture/ion_examine.png, id=52, 705.1143pt x 540.21825pt>
 File: picture/ion_examine.png Graphic file (type png)
 <use picture/ion_examine.png>
-Package pdftex.def Info: picture/ion_examine.png  used on input line 43.
+Package pdftex.def Info: picture/ion_examine.png  used on input line 45.
 (pdftex.def)             Requested size: 224.06548pt x 171.66164pt.
 
-Overfull \hbox (2.61049pt too wide) in paragraph at lines 35--47
+Overfull \hbox (2.61049pt too wide) in paragraph at lines 37--49
 []$[]$ $[]$ 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 29--49
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 29--49
+Underfull \hbox (badness 10000) in paragraph at lines 33--51
 
  []
 
 <picture/Hog_Paper.png, id=53, 356.33125pt x 392.46625pt>
 File: picture/Hog_Paper.png Graphic file (type png)
 <use picture/Hog_Paper.png>
-Package pdftex.def Info: picture/Hog_Paper.png  used on input line 58.
+Package pdftex.def Info: picture/Hog_Paper.png  used on input line 62.
 (pdftex.def)             Requested size: 224.06548pt x 246.78792pt.
 <picture/hog_examine.png, id=54, 699.21225pt x 540.21825pt>
 File: picture/hog_examine.png Graphic file (type png)
 <use picture/hog_examine.png>
-Package pdftex.def Info: picture/hog_examine.png  used on input line 64.
+Package pdftex.def Info: picture/hog_examine.png  used on input line 68.
 (pdftex.def)             Requested size: 224.06548pt x 173.11241pt.
 
-Overfull \hbox (2.61049pt too wide) in paragraph at lines 56--68
+Overfull \hbox (2.61049pt too wide) in paragraph at lines 60--72
 []$[]$ $[]$ 
  []
 
 <picture/Volume_Paper.png, id=55, 263.98625pt x 196.735pt>
 File: picture/Volume_Paper.png Graphic file (type png)
 <use picture/Volume_Paper.png>
-Package pdftex.def Info: picture/Volume_Paper.png  used on input line 76.
+Package pdftex.def Info: picture/Volume_Paper.png  used on input line 81.
 (pdftex.def)             Requested size: 224.06548pt x 166.98236pt.
 <picture/volume_examine.png, id=56, 690.96143pt x 540.21825pt>
 File: picture/volume_examine.png Graphic file (type png)
 <use picture/volume_examine.png>
-Package pdftex.def Info: picture/volume_examine.png  used on input line 82.
+Package pdftex.def Info: picture/volume_examine.png  used on input line 87.
 (pdftex.def)             Requested size: 224.06548pt x 175.18141pt.
 
-Overfull \hbox (2.61049pt too wide) in paragraph at lines 74--86
+Overfull \hbox (2.61049pt too wide) in paragraph at lines 79--91
 []$[]$ $[]$ 
  []
 
 [6] [7 <./picture/Ion_Paper.png> <./picture/ion_examine.png> <./picture/Hog_Pap
 er.png> <./picture/hog_examine.png>]
-Overfull \hbox (875.03357pt too wide) in paragraph at lines 103--113
+Overfull \hbox (875.03357pt too wide) in paragraph at lines 108--118
  [] 
  []
 
@@ -2258,26 +2258,26 @@ Overfull \hbox (875.03357pt too wide) in paragraph at lines 103--113
 LaTeX Warning: `h' float specifier changed to `ht'.
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 116--117
+Underfull \hbox (badness 10000) in paragraph at lines 121--122
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 116--117
+Underfull \hbox (badness 10000) in paragraph at lines 121--122
 
  []
 
 
 LaTeX Warning: Reference `IntersectionsOfTheModels' on page 8 undefined on inpu
-t line 118.
+t line 123.
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 118--119
+Underfull \hbox (badness 10000) in paragraph at lines 123--124
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 118--119
+Underfull \hbox (badness 10000) in paragraph at lines 123--124
 
  []
 
@@ -2285,11 +2285,11 @@ Underfull \hbox (badness 10000) in paragraph at lines 118--119
 <picture/model_intersections.png, id=72, 788.546pt x 518.738pt>
 File: picture/model_intersections.png Graphic file (type png)
 <use picture/model_intersections.png>
-Package pdftex.def Info: picture/model_intersections.png  used on input line 12
-8.
+Package pdftex.def Info: picture/model_intersections.png  used on input line 13
+3.
 (pdftex.def)             Requested size: 358.50612pt x 235.8362pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 121--134
+Underfull \hbox (badness 10000) in paragraph at lines 126--139
 
  []
 
@@ -2341,10 +2341,10 @@ LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 31634 strings out of 492649
- 659506 string characters out of 6129621
- 796938 words of memory out of 5000000
- 34950 multiletter control sequences out of 15000+600000
+ 31635 strings out of 492649
+ 659515 string characters out of 6129621
+ 796946 words of memory out of 5000000
+ 34951 multiletter control sequences out of 15000+600000
  553137 words of font info for 87 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  103i,11n,107p,10363b,402s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -2373,7 +2373,7 @@ nts/type1/public/cm-super/sfsx1200.pfb></usr/local/texlive/2018/texmf-dist/font
 s/type1/public/cm-super/sfsx1440.pfb></usr/local/texlive/2018/texmf-dist/fonts/
 type1/public/cm-super/sfsx1728.pfb></usr/local/texlive/2018/texmf-dist/fonts/ty
 pe1/public/cm-super/sfti1200.pfb>
-Output written on Bachelor_Thesis.pdf (16 pages, 4022869 bytes).
+Output written on Bachelor_Thesis.pdf (16 pages, 4022287 bytes).
 PDF statistics:
  174 PDF objects out of 1000 (max. 8388607)
  114 compressed objects within 2 object streams

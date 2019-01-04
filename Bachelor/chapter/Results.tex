@@ -1,15 +1,17 @@
 \section{Results}
 \subsection{results of single models}
-Before merging the three models together it must be controlled whether each model is implemented correctly for itself. The pictures of the models simulation results are the guide for this. Sometimes there are discrepanies between the puplished model and the picture which should represent the model.  Hereafter, the implementation process for each of the models is described.
+Before merging the three models together it must be controlled whether each model is implemented correctly for itself. The pictures of the models simulation results are the guide for this. Sometimes there are discrepanies between the puplished model and the picture which should represent the model.  Hereafter, the implementation process for each of the models is described.\\
+To better retrace the implementation steps it is recommended to read the paper for the hog \cite{Zi_2010}, ion \cite{Gerber_2016} and volume model  \cite{volumeModel}.
 
 \subsubsection{Ion model}
-The challanges with the implementation of the ion model where, that the presented equation, initial values and parameters did not result in the intended system behaviour. \\
-After an in-depth analysis of the equation there where two anomalies:
+The challanges with the implementation of the ion model were, that the presented equations, initial values and parameters did not result in the intended system behaviour. \\
+After an in-depth analysis of the equation there were two anomalies:
 
 \begin{enumerate}
 	\item the calculation of the change of the inner proton ion concentration has \emph{Bf} as an undefined parameter
 	\item the fluxes have the wrong units
 \end{enumerate}
+
 For solving the problem with the undefined parameter in (1) the ODE was constructed by deriving the formula for the calculation of the pH value for diluted solution \ref{pHforDilution}
 \begin{equation*}
 	pH = - log_{10}([H^+])\\
@@ -27,9 +29,9 @@ The equation \ref{usedProtonFlux}
 - \frac{1}{ln(10)} \frac{1}{H^+}\frac{dH^+}{dt} = \frac{J_H \cdot Surface}{V_{in} \cdot pbc}\\
 \Rightarrow \frac{dH^+}{dt}=-\frac{J_H \cdot Surface \cdot ln(10) \cdot H^+}{V_{in} \cdot pbc}
 \end{equation}
-was used in modelling.\\
-The published ion model has discrepancies in the parameter values of the phenomenological and stoichiometric coefficients and the calculation of the ion fluxes have the wrong units \\\\
-The ion model assumes that the celllular compartment and the environment are well mixed. Their does not exists concentrations gradients. \\\\
+
+was used for modelling the change of the inner proton concentration.\\\\
+To solve the problem with the wrong units it was identified, that the equation for the reported fluxes only missed the unit Kelvin $K$ in its numerator. Multiplying the equation with the temperature $T$ solved this problem and resulted in the equation \ref{IonFlux}.
 \begin{figure}[htbp]
 	
 	\begin{minipage}{0,5\textwidth}
@@ -47,8 +49,10 @@ The ion model assumes that the celllular compartment and the environment are wel
 	\caption{left: membrane voltage in the ion paper for different NaCl stimulus (0.01 mM - 10 mM); right: the simulated implemented ion model for the same stimulus range }
 \end{figure}
 
-\subsection{hog model}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% bis hier hin durchgelesen. Text  sieht schon mal ganz gut aus. Vlt. noch lückenhaft
 
+\subsection{hog model}
+% schritte der hog model implementierung
 
 
 \begin{figure}[htbp]
@@ -65,10 +69,13 @@ The ion model assumes that the celllular compartment and the environment are wel
 		
 		\label{IonImpdlemented} 
 	\end{minipage}
-	\caption{left below: membrane voltage in the ion paper for different NaCl stimulus (0.01 mM - 10 mM); right: the simulated implemented ion model for the same stimulus range }
+	\caption{}
 \end{figure}
 
 \subsection{volume model}
+The volume model could not be implemented with only the corresponding paper because the model wants to describes the change in the non-osmolytic volume $V_b$ but missed to note down an equation for this.\\
+After consultation with my supervisior and one of the author of the model about this information gap, it was recommended that I use the already implemented volume model in their local network "YCM" as a template. After translating this template in my own software structure, no problems were encountered. In the appendix I documented the used ODE, algebraic equation, parameter and initial values for this model. 
+% schritte der volume model implementierung
 \begin{figure}[htbp]
 	
 	\begin{minipage}{0,5\textwidth}
@@ -83,7 +90,7 @@ The ion model assumes that the celllular compartment and the environment are wel
 		
 		\label{IonImpledmented} 
 	\end{minipage}
-	\caption{left: membrane voltage in the ion paper for different NaCl stimulus (0.01 mM - 10 mM); right: the simulated implemented ion model for the same stimulus range }
+	\caption{}
 \end{figure}
 
 

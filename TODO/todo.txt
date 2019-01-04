@@ -1,0 +1,15 @@
+implement Docker:
+Docker engine runs on Linux systems. Docker is an open-source project based on 
+Linux containers. It uses the features based on the Linux Kernel. 
+
+The slogan is, “build once, run anywhere”!
+
+Docker allows you build an environment/infrastructure push up an image of it to 
+a docker repository and have someone, a world away, pull down your docker image,
+and have it run exactly the same way it ran on your computer.
+The reason this is possible is because of the concept of containers. You can put 
+say mysql in one container, apache in another, and php in yet another one all
+wrapped up in a host container running a variation of linux you like. Have the 
+php container pull in php code from a git repository, and set it up so that 
+docker spins up a working environment with your app once you run the command to 
+initialize everything.

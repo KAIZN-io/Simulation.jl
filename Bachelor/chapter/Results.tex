@@ -49,11 +49,9 @@ To solve the problem with the wrong units it was identified, that the equation f
 	\caption{left: membrane voltage in the ion paper for different NaCl stimulus (0.01 mM - 10 mM); right: the simulated implemented ion model for the same stimulus range }
 \end{figure}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% bis hier hin durchgelesen. Text  sieht schon mal ganz gut aus. Vlt. noch lückenhaft
 
 \subsection{hog model}
-% schritte der hog model implementierung
-
+For the implemtation of the hog model, the \textit{Table S1-S3} and the Matlab code for the used $NaCl$ impulse in \textit{Code S1 } in the supporting informations of the paper were implemented in the python3 environment. No difficulties were encountered. 
 
 \begin{figure}[htbp]
 	
@@ -61,13 +59,13 @@ To solve the problem with the wrong units it was identified, that the equation f
 		
 		\includegraphics[width=\textwidth]{picture/Hog_Paper.png}
 		
-		\label{IonPaddper} 
+		\label{hogPaper} 
 	\end{minipage}
 	\begin{minipage}{0,5\textwidth}
 		
 		\includegraphics[width=\textwidth]{picture/hog_examine.png}
 		
-		\label{IonImpdlemented} 
+		\label{hogImplemented} 
 	\end{minipage}
 	\caption{}
 \end{figure}
@@ -82,13 +80,13 @@ After consultation with my supervisior and one of the author of the model about 
 		
 		\includegraphics[width=\textwidth]{picture/Volume_Paper.png}
 		
-		\label{IonPadper} 
+		\label{volumePaper} 
 	\end{minipage}
 	\begin{minipage}{0,5\textwidth}
 		
 		\includegraphics[width=\textwidth]{picture/volume_examine.png}
 		
-		\label{IonImpledmented} 
+		\label{volumeImplemented} 
 	\end{minipage}
 	\caption{}
 \end{figure}
@@ -98,11 +96,11 @@ After consultation with my supervisior and one of the author of the model about 
 The process of merging models is a tricky task. There exists some good guideline \cite{Liebermeister2008ValidityAC} for this.
 Hereafter, the used essential steps are sketched:
 \begin{enumerate}
-	\item equations: One of the first steps in the process of model merging is the control whether there is a conflict between assumptions of the description of the biological systems. Conflicts must be resolved by combining equation terms or discard some informations
+	\item equations: One of the first steps in the process of model merging is to control whether there is a conflict between assumptions of the description of the biological systems. Conflicts must be resolved by combining equation terms or discard some informations
 	\item names: Find all the overlaps in the variable and parameter naming and convert them to a common sets of names
 	\item units: Standardize all used units for the parameter and initial values to a common set. In this process new factors where give to individual values if the unit changes requires that.
 \end{enumerate}
-Changes in the equation design (ODE and algebraic equation) in the process of merging the model were done and are presented below:
+Changes in the equation design (ODE and algebraic equation) were done in the process of merging the models and are presented below:
 \begin{table} [h]
 	\footnotesize
 \begin{center} 
@@ -120,12 +118,26 @@ uptake / dilution of osmotically active compounds & removed & replaced with the 
 \end{center}
 \end{table}
 
-In the whole process of merging we must consider their biochemical interpretation to maintain the plausblity of the model \cite{Liebermeister2008ValidityAC}. No parameter value was changed in his biological interpretation.\\\\
+In the whole process of merging we must consider their biochemical interpretation to maintain the plausblity of the model \cite{Liebermeister2008ValidityAC}. No parameter value was changed in its biological interpretation.\\\\
+Initial values were changed because, as we can see in figure \ref{IntersectionsOfTheModels}
 
-Initial values were changed because as we can see in \ref{IntersectionsOfTheModels} multiple components are used in several models. The components have different quantities in the initial assumptions. One of the main difference was the assumption of the cell volume $V_cell$ in the hog model ($V_{cell}=58fL $) and the volume model ($V_{cell} \approx 0.27fL$). To solve this problem we simulated the volume model until $V_cell$ also have the value of $58fL$. We assumed the ODE values at this time point as the initial values for the corresponding substance in the merged model. \\\\
+\begin{figure}[h!]
+	\begin{center}
+		\begin{minipage}{0,8\textwidth}
+			
+			\includegraphics[width=\textwidth]{picture/model_intersections.png}
+			\caption{Response of Hog1PPn} 
+			\label{IntersectionsOfTheModels} 
+		\end{minipage}
+	\end{center}
+\end{figure}
 
+ multiple components are used in several models. These components have different quantities in the initial assumptions. One of the main difference was the assumption of the cell volume $V_{cell}$ in the hog model ($V_{cell}=58fL $) and the volume model ($V_{cell} \approx 0.27fL$). To solve this problem we simulated the volume model until $V_{cell}$ also has the value of $58fL$. We assumed the ODE values at this time point as the initial values for the corresponding substance in the merged model. \\\\
+We removed the volume related variables and $\pi_t$ from the hog model because the calculation of $\pi_t$ in the volume model was based on updated insights.
+
+
+%%% bis hier hin eigentlich ganz ok
 \subsection{combined model}
-The combined model simulates the interaction between extra- and intracellular ionconcentration, changes in cell volume and the activity of the MAP cascade (???). The model senses the differences in the osmolarity between the cell and its environment and adapt with the important high osmolarity glycerol (HOG) signaling pathway with the MAP cascade the cell volume and the intracellular osmolyt concentrations. \\\\
 For the analysis and validation of the merged model we choosed the nuclear phophorylated Hog1 (Hog1PPn) as the control substance. Hog1PPn is also used in the hog model as the output because it regulates the expression of hundred of genes \cite{Zi_2010}. We borrowed the idea of a drug response curve from the theme field pharmocokinetic (zitieren: hier das Buch!!!) as a visualized output showed below.  \\
 (hier noch das falsche Bild, da Simulation noch nicht ganz fertig)
 \begin{figure}[h!]

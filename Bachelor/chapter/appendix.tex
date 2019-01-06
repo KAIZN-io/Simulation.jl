@@ -1,2 +1,77 @@
 \section{appendix}
+\begin{table} [h]
+	\footnotesize
+	\begin{center} 
+		\caption{initial conditions of the volume model}
+		\begin{tabular} {l l l l l l l l}
+		\hline
+	 	\textbf{state variable} & \textbf{initial condition} & \textbf{annotation}  \\
+	 	\hline
+	 	$r_{os}$ & $1.188$ $\mu m$ & osmotic radius\\
+	 	$r_{b}$ & $0.496$ $\mu m$ &solid components radius\\
+	 	$r$ & $1.684$ $\mu m$ & cell radius\\
+	 	$\pi_t$ & $2 \cdot 10^5$ $Pa$ & turgor pressure\\
+	 	$R_{ref}$ & $1.361$ $\mu m$ & relaxed cell radius \\
+	 	$c_{i}$ & $6.389 \cdot 10^{-12}$ $mmol$ & internal amount of osmolytes\\
+	 	\hline
+		\end{tabular}
+		\label{initCondVolume}
+	\end{center}
+\end{table}
+
+\begin{table} [h]
+	\footnotesize
+	\begin{center} 
+		\caption{complete list of model parameter values}
+		\begin{tabular} {l l l l l l l l}
+			\hline
+			\textbf{parameter} & \textbf{value} & \textbf{annotation}  \\
+			\hline
+			$d$ & $0.115$ $\mu m$ & cell wall thickness\\
+			$phi$ & $10^{-4}$ $Pa^{-1} \cdot s^{-1}$ & cell wall extensibility\\
+			$\pi_c$ & $0.115$ $Pa$ & critical turgor pressure\\
+			$\pi_e$ & $0.115$ $Pa$ & external pressure\\
+			$E$ & $0.115$ $Pa$ & Youngs modulus (elastic modulus)\\
+			$Lp$ & $0.115$ $\mu m \cdot Pa^{-1} \cdot s^{-1}$ & hydraulic conductivity\\
+			$nu$ & $0.115$ $dimensionless$ & Poissons ratio\\
+			$k_{uptake}$ & $0.115$ $mmol \cdot s^{-1} \cdot \mu m ^{-2} $ & osmolyte uptake rate\\
+			$k_{consumption}$ & $mmol \cdot s^{-1} \cdot \mu m ^{-3} $ & osmolyte dilution rate\\
+			$T$ & $303.15$ $K$ & temperature\\
+			$R$ & $8.314$ $J \cdot K^{-1} \cdot mol^{-1}$ & gas constant \\
+			\hline
+		\end{tabular}
+		\label{parameterVolume}
+	\end{center}
+\end{table}
+The values for the initial conditions and the parameters are rounded.
+
+\begin{table} [h]
+	
+	\begin{center} 
+		\caption{complete list of ordinary differential equations and algebraic equations}
+		\begin{tabular} {l l l l l l l l}
+			\hline
+			$V = \frac{4}{3}\cdot \pi  \cdot 10^{-15} \cdot r^3$ \\
+			$\pi_i = \frac{c_i}{V} \cdot R\cdot T$\\
+			$V_{ref} =  \frac{4}{3} \cdot \pi \cdot 10^{-15} \cdot R_{ref}^3$\\
+			$G = 4 \cdot  \pi \cdot r^2$\\
+			$R_{ref} = \frac{r}{(1 + (1 - nu)\cdot (\pi_t \cdot r) / (E\cdot 2\cdot d))} $\\
+			$R_{refdt}= \frac{phi\cdot R_{ref}\cdot r }{2\cdot d} \cdot max(\pi_t- \pi_c, 0)$\\
+			$r_{osdt }= - Lp\cdot (\pi_t + \pi_e - \pi_i)$\\
+			$r_{bdt} = 0.2\cdot R_{refdt}$\\
+			$r_{dt} = r_{osdt} + r_{bdt}$  \\
+			$\frac{d}{dt} R_{ref} = R_{refdt}$\\
+			$\frac{d}{dt}  c_i = k_{uptake}\cdot G - k_{consumption}\cdot V\cdot 10^{15}$\\
+			$\frac{d}{dt} \pi_t = \frac{E\cdot 2\cdot d }{1 - nu} \cdot (\frac{r_{dt}}{r^2 } - \frac{R_{refdt}}{R_{ref} \cdot r}) - \frac{r_{dt}}{ r} \cdot \pi_t$\\
+			$\frac{d}{dt}  r = r_{dt}$\\
+			$\frac{d}{dt} r_{os} = r_{osdt}$\\
+			$\frac{d}{dt}  r_b = r_{bdt}$\\
+			
+			\hline
+		\end{tabular}
+		\label{equationsVolume}
+	\end{center}
+\end{table}
+
 % In the appendix I documented the used ODE, algebraic equation, parameter and initial values for the volume model.
+

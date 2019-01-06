@@ -30,8 +30,12 @@ class VisualisationDesign:
             GeneralizePlot = False
 
         sns.set_style(style = 'whitegrid')
-        sns.set_context(context = 'notebook')
+        # context : dict, None, or one of {paper, notebook, talk, poster}
+        sns.set_context(context = 'talk')
         fig = plt.figure(figsize = (10,7.5))
+
+        """fontSize 16 is a good size for the thesis"""
+        fontSize = 16
 
         """create the subplots"""
         iter_num = 1
@@ -43,14 +47,15 @@ class VisualisationDesign:
             exec('ax{}.spines["top"].set_visible(False)'.format(iter_num))
             exec('ax{}.spines["right"].set_visible(False)'.format(iter_num))
             exec('ax{}.set_xlabel("time [s]",fontsize=12)'.format(iter_num))
+
             
             """fix the y-axis lim for pictures for latex / publication"""
             # exec('ax{}.set_ylim(bottom=-20000, top=50000)'.format(iter_num))
 
             if GeneralizePlot == True:
-                exec("ax{}.set_ylabel('no unit',fontsize=12)".format(iter_num))
+                exec("ax{}.set_ylabel('no unit',fontsize=fontSize)".format(iter_num))
             else:
-                exec('ax{}.set_ylabel(ORRESU,fontsize=12)'.format(iter_num))
+                exec('ax{}.set_ylabel(ORRESU,fontsize=fontSize)'.format(iter_num))
 
             iter_num +=1
 
@@ -58,7 +63,7 @@ class VisualisationDesign:
         fig.autofmt_xdate(bottom = 0.2,
                         rotation = 30)
         fig.suptitle(t='{}_Model'.format(sql_USUBJID.title()),
-                    fontsize = 12)
+                     fontsize=fontSize)
 
         with sns.color_palette('cubehelix',len(TimeSeriesData_df.columns.tolist())):
 
@@ -99,14 +104,14 @@ class VisualisationDesign:
                                     axis_index))
 
                         exec('ax{0}.legend(ncol=1,borderaxespad = 0,bbox_to_anchor=(1.01, 0.5), \
-                            frameon = True,loc={1!r},fontsize=12)'.format(axis_index,'center left'))
+                            frameon = True,loc={1!r},fontsize=fontSize)'.format(axis_index, 'center left'))
 
             else: 
                 PlotLabels = TimeSeriesData_df.columns.tolist()
                 for i in PlotLabels:
                     exec('ax1.plot(TimeSeriesData_df[i],label=i)')
                     exec("ax1.legend(ncol=1,borderaxespad = 0,bbox_to_anchor=(1.01, 0.5), \
-                                frameon = True,loc='center left',fontsize=12)")
+                                frameon = True,loc='center left',fontsize=fontSize)")
 
             """"save the plot"""
             save_fig = dict_system_switch.get('save_figures')
@@ -206,14 +211,14 @@ dict_visualisation = {
 
 """choose the model"""
 sql_STUDYID = 'Yeast_BSc'
-sql_USUBJID = 'combined_models'
+sql_USUBJID = 'volume'
 
 # sql_SEQ_list = list(range(30, 34)) #+ list(range(3, 11)) 
-sql_SEQ_list = [112]
+sql_SEQ_list = [11]
 
 """tracking substance"""
 # NOTE: use Hog1PPn as the output of the dose-response curve
-TESTCD = 'Hog1PPn'
+TESTCD = 'r'
 
 """"get the wanted equation terms from SQL"""
 get_terms = dict_visualisation.get('get_terms')
@@ -533,6 +538,11 @@ for RUN_SEQ in ADaM_dict.values():
         for key, value in sorted(PDORRESU.items()):
             PDORRESU_grouped.setdefault(value, []).append(key)
 
+        """some design condition for the bachelor plots"""
+        if sql_USUBJID == 'volume':
+            ODE_RESULTS = pd.DataFrame(ODE_RESULTS['V']) 
+            PDORRESU_grouped = {'total volume [fL]':['V']}
+    
         """plot the time series"""
         VisualisationDesign.plotTimeSeries(TimeSeriesData_df=ODE_RESULTS,
                                             SubplotLogic=PDORRESU_grouped)

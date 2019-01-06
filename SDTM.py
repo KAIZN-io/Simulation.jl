@@ -208,16 +208,16 @@ if __name__ == "__main__":
 
     """only one model each time as True"""
     dict_model_switch = {
-                        'combined_models': True,
+                        'combined_models': False,
                         'dummie': False,
                         'hog': False,
-                        'ion': False,
+                        'ion': True,
                         'volume': False,
                          }
 
     dict_time = {
                 'start' : 0,
-                'stop' : 1000,  
+                'stop' : 130,  
                 'time_steps' : 0.1,
                 'NaCl_impuls_start' : 10,
                 'Glucose_impuls_start' : 60,
@@ -231,7 +231,7 @@ if __name__ == "__main__":
     """Stimulus = [time] in s"""
     dict_unique_EXSTDTC = {                                
                                 'KCl' : [30],
-                                'NaCl' : [30],
+                                'NaCl' : [300],
                                 'Sorbitol' : [30],
                             }
 
@@ -248,11 +248,11 @@ if __name__ == "__main__":
     """
     dict_stimulus = {
                     'KCl' : [[150], 'mM', ['K_out','Cl_out'], False],
-                    'NaCl': [[200], 'mM', ['Na_out', 'Cl_out'], True],
+                    'NaCl': [[200], 'mM', ['Na_out', 'Cl_out'], False],
                     'Sorbitol': [[100, 200, 400, 800, 1600], 'mM', ['Sorbitol_out'], False],
 
                     'NaCl_impuls' : [200, 'mM'],
-                    'signal_type' : [3],
+                    'signal_type' : [2],
                     }
 
 
@@ -260,9 +260,9 @@ if __name__ == "__main__":
     # NOTE : SpecificInitValuesVersionSEQ = 4 for combined_models
     # NOTE : SpecificModelVersionSEQ = 1 for combined_models
     dict_system_switch = {
-                        'export_data_to_sql' : False,
+                        'export_data_to_sql' : True,
                         'export_terms_data_to_sql' : False,
-                        'SpecificInitValuesVersionSEQ' : [4],
+                        'SpecificInitValuesVersionSEQ' : [1],
                         'SpecificModelVersionSEQ' : [1]
                          }
 

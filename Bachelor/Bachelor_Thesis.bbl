@@ -5,6 +5,12 @@ Ruian Ke, Piers~J. Ingram, and Ken Haynes.
 \newblock An integrative model of ion regulation in yeast.
 \newblock {\em {PLoS} Computational Biology}, 9(1):e1002879, jan 2013.
 
+\bibitem{Ghosh2013}
+Samik Ghosh, Yukiko Matsuoka, Yoshiyuki Asai, Kun-Yi Hsin, and Hiroaki Kitano.
+\newblock Toward an integrated software platform for systems pharmacology.
+\newblock {\em Biopharmaceutics {\&} Drug Disposition}, 34(9):508--526, dec
+  2013.
+
 \bibitem{Feyder2015}
 Serge Feyder, Johan-Owen~De Craene, S{\'{e}}verine Bär, Dimitri Bertazzi, and
   Sylvie Friant.
@@ -24,17 +30,6 @@ Jannis Uhlendorf.
 \newblock {\em Real-time feedback control of gene expression}.
 \newblock PhD thesis, Université Paris-Diberot, 2013.
 
-\bibitem{Saito2012}
-H.~Saito and F.~Posas.
-\newblock Response to hyperosmotic stress.
-\newblock {\em Genetics}, 192(2):289--318, oct 2012.
-
-\bibitem{ASimpleMathematicalModel}
-Peter Gennemark, Bodil Nordlander, Stefan Hohmann, and Dag Wedelin.
-\newblock A simple mathematical model of adaptation to high osmolarity in
-  yeast.
-\newblock {\em In Silio Biology}, 2006.
-
 \bibitem{Gerber_2016}
 Susanne Gerber, Martina Fröhlich, Hella Lichtenberg-Frat{\'{e}}, Sergey
   Shabala, Lana Shabala, and Edda Klipp.
@@ -47,6 +42,17 @@ Tom Altenburg, Björn Goldenbogen, Jannis Uhlendorf, and Edda Klipp.
 \newblock Osmolyte homeostasis controls single cell growth rate and maximum
   cell size of saccharomyces cerevisiae.
 \newblock unpublished, April 2018.
+
+\bibitem{ASimpleMathematicalModel}
+Peter Gennemark, Bodil Nordlander, Stefan Hohmann, and Dag Wedelin.
+\newblock A simple mathematical model of adaptation to high osmolarity in
+  yeast.
+\newblock {\em In Silio Biology}, 2006.
+
+\bibitem{Saito2012}
+H.~Saito and F.~Posas.
+\newblock Response to hyperosmotic stress.
+\newblock {\em Genetics}, 192(2):289--318, oct 2012.
 
 \bibitem{Zi_2010}
 Zhike Zi, Wolfram Liebermeister, and Edda Klipp.
@@ -77,5 +83,11 @@ Zhuo Wang, Samuel~A. Danziger, Benjamin~D. Heavner, Shuyi Ma, Jennifer~J.
 \newblock Combining inferred regulatory and reconstructed metabolic networks
   enhances phenotype prediction in yeast.
 \newblock {\em {PLOS} Computational Biology}, 13(5):e1005489, may 2017.
+
+\bibitem{Noell2018}
+Guillaume Noell, Rosa Faner, and Alvar Agust{\'{\i}}.
+\newblock From systems biology to p4 medicine: applications in respiratory
+  medicine.
+\newblock {\em European Respiratory Review}, 27(147):170110, feb 2018.
 
 \end{thebibliography}

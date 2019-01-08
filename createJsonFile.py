@@ -6,7 +6,7 @@ exec(open("SYSTEM/py_packages.py").read())
 
 cwd = os.getcwd()
 
-model = 'combined_models'
+model = 'ion'
 
 system_comp = ['copa','equation','ODE']
 dict_system = {}
@@ -45,6 +45,7 @@ cur.close()
 conn.close()
 
 for system in system_comp:
+    """opens the .txt file"""
     f = open('{0}/Single_Models/{1}/{1}_{2}.txt'.format(cwd, model,system))
 
     string_list = [line for line in f]
@@ -52,29 +53,21 @@ for system in system_comp:
     dict_spec = {}
 
     if system == 'copa':
-        try:
-            # .strip() removes leading and ending whitespaces
-            for string_line in range(len(string_list)):
-                key = string_list[string_line][string_list[string_line].find(""):string_list[string_line].find("=")].strip()
-                value = string_list[string_line][string_list[string_line].find("=")+1:string_list[string_line].find("\n")]
-                dict_spec[key] = value
+        for string_line in range(len(string_list)):
+            key = string_list[string_line][string_list[string_line].find(""):string_list[string_line].find("=")].strip()
+            value = string_list[string_line][string_list[string_line].find("=")+1:string_list[string_line].find("\n")]
+            dict_spec[key] = value
 
-            dict_system[system] = dict_spec
-        except FileNotFoundError:
-            pass
+        dict_system[system] = dict_spec
+
     else:
         dict_system[system] = dict_spec
         for string_line in range(len(string_list)):
 
-            """
-            remove whitespaces and split the string
-            QUESTION: is the replacing realy nessesary?
-            """
-            split_equation = string_list[string_line].replace("", " ").replace('=',' ').replace('-',' ').split()
-
             """.strip() removes leading and ending whitespaces"""
             key = string_list[string_line][string_list[string_line].find(""):string_list[string_line].find("=")].strip()
             value = string_list[string_line][string_list[string_line].find("=")+1:string_list[string_line].find("\n")]
+
 
             """split the value string"""
             dict_spec[key] = {}
@@ -110,9 +103,12 @@ for system in system_comp:
                         parenthese_close = 0
 
                 if ('if' in i) and len(i)==2:
+                    """get the string position of the if condition beginning"""
                     join_if.append(j)
 
             for k in join_if:
+                # print(splitted[k::])
+
                 dict_spec[key]['condition'] = ' '.join(splitted[k::])
                 del splitted[k::]
 

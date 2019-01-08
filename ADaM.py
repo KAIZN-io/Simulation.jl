@@ -190,7 +190,7 @@ dict_system_switch = {
 dict_visualisation = {
                     # NOTE: heat_map not implemted yet
                     'heat_map' : False,
-                    'graph' : True,
+                    'graph' : False,
                     # 'subplots' : True,
                     'dose_response' : False,
                     'get_terms' : ['r_os'],
@@ -211,10 +211,10 @@ dict_visualisation = {
 
 """choose the model"""
 sql_STUDYID = 'Yeast_BSc'
-sql_USUBJID = 'volume'
+sql_USUBJID = 'combined_models'
 
 # sql_SEQ_list = list(range(30, 34)) #+ list(range(3, 11)) 
-sql_SEQ_list = [11]
+sql_SEQ_list = [2]
 
 """tracking substance"""
 # NOTE: use Hog1PPn as the output of the dose-response curve
@@ -318,15 +318,16 @@ TestSubstanceUnit_dict = {
     'hog':'mM',
     'volume':'um'
 } 
+# NOTE: models must have the same simulation lenght
+
 CompareSeq_dict = {
-    'combined_models': 106,
-    'ion': 35,
+    'combined_models': 6,
+    'ion': 40,
     'hog': 7,
     'volume': 10
 }
 
 SingleModels = ['ion']
-
 for i in SingleModels:
     CompareSeq = {}
     CompareSeq['combined_models'] = CompareSeq_dict['combined_models']

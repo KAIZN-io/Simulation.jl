@@ -101,18 +101,26 @@ Hereafter, the used essential steps are sketched:
 	\item units: Standardize all used units for the parameter and initial values to a common set. In this process new factors where give to individual values if the unit changes requires that.
 \end{enumerate}
 Changes in the equation design (ODE and algebraic equation) were done in the process of merging the models and are presented below:
+
 \begin{table} [h]
 	\footnotesize
 \begin{center} 
 	\caption{changes in the equation design}
-\begin{tabular} {l l l l l l l l}
+\begin{tabular} {p{3.5cm} l p{6cm} }
 %&  \multicolumn{2}{c}{changing equation}  \\ \hline
+\toprule
 & changes & reason\\
-internal / external osmolyt concentration & $c = \sum ([Ionen]+[other osmolyte])$ & simplification\\ 
+\midrule
+internal / external osmolyt concentration & $c = \sum ([Ionen]+[$other osmolyte$])$ & simplification\\ 
+\addlinespace[9pt]
 internal / external presure & $\pi = c \cdot R \cdot T	$ & simplification\\
-ion x changes & $\frac{J_x \cdot CellSurface}{CellVolume} \cdot 10^{6}$ & unit harmonization\\
-sorbitol stimulus & $\frac{d}{dt}[Sorbitol]=0$ & implementation of sorbitol stimulus with the assumation that sorbitol can not diffuse over the plasma membrane; in ODE format because due to the simulation design this approach results in less memory data\\
-uptake / dilution of osmotically active compounds & removed & replaced with the equation for the ion and glycerol
+\addlinespace[9pt]
+ion x changes & $\frac{J_x \cdot CellSurface}{CellVolume} \cdot 10^{6}$ & unit harmonization without changing flux $J_x$ calculation\\
+\addlinespace[9pt]
+sorbitol stimulus & $\frac{d}{dt}[Sorbitol]=0$ & implementation of sorbitol stimulus with the assumation that sorbitol can not diffuse over the plasma membrane; in ODE format because this generates less memory data\\
+\addlinespace[9pt]
+uptake / dilution of osmotic active compounds & removed & replaced with the equations for ion and glycerol\\
+\bottomrule
 \end{tabular}
 \label{changesOnTheModels}
 \end{center}

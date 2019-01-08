@@ -118,7 +118,7 @@ def getDatafromSQL(sql_STUDYID = '', sql_USUBJID = '', sql_SEQ_list = []):
         dict_running_chit[SEQ]['EXTRT'] = EX_dict['extrt']
         dict_running_chit[SEQ]['EXDOSE'] = EX_dict['exdose']
         dict_running_chit[SEQ]['EXDOSU'] = EX_dict['exdosu']
-        dict_running_chit[SEQ]['EXSTDTC'] = EX_dict['exstdtc']
+        dict_running_chit[SEQ]['EXSTDTC'] = EX_dict['exstdtc_array']
         dict_running_chit[SEQ]['ODE_RESULTS'] = ODE_RESULTS
         dict_running_chit[SEQ]['PDORRESU'] = PDORRESU_dict
 

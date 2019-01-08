@@ -11,64 +11,88 @@ class netzwerk_daten_gewinnung:
     def __init__(self):
         pass
 
-    def ODE_solver(init, t):
+    def ODE_solver(InitialValues, t):
 
-        """get the starting values for the ODEs"""
-        for i in range(len(init)):
-            exec('{}={}'.format(simulation_frame.columns.tolist()[i],init[i]))
-
-        """get the data for the system from the json file"""
+        ResultsDict = {}
+        TermResultsDict = {}
+        OdeResultsForSolver = []
+        t_ODE_comp = ()
         
-        with open('{0}/Single_Models/json_files/{1}_system.json'.format(cwd, model_name)) as json_data:
+
+        """get the Names of the ODEs"""
+        ColumnNames = simulation_frame.columns.tolist()
+
+        """assing the initial values to their ODEs"""
+        for i in range(len(InitialValues)):
+            try:                
+                
+                # if ColumnNames[i] == 'ATP'\
+                #     and InitialValues[i] > 2.5:
+                #     InitialValues[i] = 2.5
+                
+                exec('{}={}'.format(ColumnNames[i], InitialValues[i]))
+
+            except:
+                print(ColumnNames[i], InitialValues[i], 'time:', t)
+
+        """get the model system from the json file"""
+        with open('Single_Models/json_files/{0}_system.json'.format(
+            model_name)) as json_data:
             data_from_json = json.load(json_data)
 
-        t_ODE = ()
-        t_ODE_comp = ()
-        for key,value_system in data_from_json.items():
-            if key == 'copa':
-                for key2, value2 in value_system.items():
+        """activate the model system"""
+        for EquationType, ModelSpecies in data_from_json.items():
+            if EquationType == 'copa':
+                for CopaName, CopaTerm in ModelSpecies.items():
 
-                    exec('{}={}'.format(key2,value2))
+                    exec('{}={}'.format(CopaName,CopaTerm))
 
             else:
-                for keys,value in value_system.items():
-                    if 'condition' in value:
-                        for key2,value2 in value['component'].items():
-                            exec('{}={} {}'.format(key2,value2,value['condition']))
-                            t_ODE_comp = t_ODE_comp + (key2,)
+                """iterate over the content for the species"""
+                for SpeciesName,SpeciesContent in ModelSpecies.items():
+                    if 'condition' in SpeciesContent:
+                        for TermPat,Term in SpeciesContent['component'].items():
+
+                            """activate the term under its condition"""
+                            exec('{}={} {}'.format(TermPat, Term,
+                                                   SpeciesContent['condition']))
+
+                            """add TermPat to a set / list for database"""
+                            t_ODE_comp = t_ODE_comp + (TermPat,)
+
                     else:
-                        for key2,value2 in value['component'].items():
-                            exec('{}={}'.format(key2,value2))
-                            t_ODE_comp = t_ODE_comp + (key2,)
+                        for TermPat,Term in SpeciesContent['component'].items():
 
-                    list_values = list(value['component'].keys())
-                    a = '+'.join(list_values)
+                            exec('{}={}'.format(TermPat,Term))
+                            t_ODE_comp = t_ODE_comp + (TermPat,)
 
-                    if key == 'ODE':
-                        t_ODE = t_ODE + (keys,)
+                    """rejoin the terms to their equation"""
+                    list_values = list(SpeciesContent['component'].keys())
 
-                    exec('{}={}'.format(keys,a))
+                    """
+                    prepare to calculate the sum of the terms of a substance
+                    """
+                    EquationTerms = '+'.join(list_values)
 
-        """sort the t_ODE
+                    KeysPlaceholder = SpeciesName
+                    exec('{}={}'.format(KeysPlaceholder,EquationTerms))
+
+                    if EquationType == 'ODE':
+                        ResultsDict[SpeciesName] = eval(SpeciesName)
+
+                    # if KeysPlaceholder == 'dATP':
+                    #     print(dATP)
+
+        """sort the OdeResultsForSolverPlaceholder
 
         this must be done because the json file is not sorted!
         """
-        t_ODE = sorted(t_ODE)
+        ResultsDict = OrderedDict(sorted(ResultsDict.items()))
 
-        """eval the results"""
-        t_tuple = ()
-        t_tuple_comp = ()
+        """ODE results for the next simulation step of the ODE solver"""
+        OdeResultsForSolver = [j for i, j in ResultsDict.items()]
 
-        for i in t_ODE:
-            t_tuple = t_tuple + (eval(i),)
-
-        """has the data from the components"""
-        for i in t_ODE_comp:
-            t_tuple_comp = t_tuple_comp + (eval(i),)
-
-
-        """export the individuel terms to the database
-        """
+        """export the individuel terms to the database"""
         if dict_system_switch.get('export_data_to_sql') == True\
         and dict_system_switch.get('export_terms_data_to_sql') == True:
 
@@ -83,7 +107,7 @@ class netzwerk_daten_gewinnung:
 
             df.to_sql(csv_fingerprint, con=engine, schema='{}_terms'.format(model_name), if_exists='append')
 
-        return t_tuple
+        return OdeResultsForSolver
 
     # # TEMP: new ode solver version
     # def new_ODE_solver(t, init):
@@ -98,13 +122,13 @@ class netzwerk_daten_gewinnung:
     #
     #     t_ODE = ()
     #     t_ODE_comp = ()
-    #     for key,value_system in data_from_json.items():
+    #     for key,ModelSpecies in data_from_json.items():
     #         if key == 'copa':
-    #             for key2, value2 in value_system.items():
+    #             for key2, value2 in ModelSpecies.items():
     #                 exec('{}={}'.format(key2,value2))
     #
     #         else:
-    #             for keys,value in value_system.items():
+    #             for keys,value in ModelSpecies.items():
     #                 if 'condition' in value:
     #                     for key2,value2 in value['component'].items():
     #                         exec('{}={} {}'.format(key2,value2,value['condition']))
@@ -157,6 +181,7 @@ class netzwerk_daten_gewinnung:
     def simulation(DataForSimulation=pd.DataFrame(), i=[]):
         init_cond_from_frame = DataForSimulation.tail(1).values.tolist()[0]
 
+        # print(DataForSimulation.tail(1))
         """solves the ode and algebraic equations"""
         states = odeint(x.ODE_solver, init_cond_from_frame, i)
 
@@ -208,16 +233,16 @@ if __name__ == "__main__":
 
     """only one model each time as True"""
     dict_model_switch = {
-                        'combined_models': False,
+                        'combined_models': True,
                         'dummie': False,
                         'hog': False,
-                        'ion': True,
+                        'ion': False,
                         'volume': False,
                          }
 
     dict_time = {
                 'start' : 0,
-                'stop' : 130,  
+                'stop' : 80,  
                 'time_steps' : 0.1,
                 'NaCl_impuls_start' : 10,
                 'Glucose_impuls_start' : 60,
@@ -231,7 +256,7 @@ if __name__ == "__main__":
     """Stimulus = [time] in s"""
     dict_unique_EXSTDTC = {                                
                                 'KCl' : [30],
-                                'NaCl' : [300],
+                                'NaCl' : [30],
                                 'Sorbitol' : [30],
                             }
 
@@ -247,7 +272,7 @@ if __name__ == "__main__":
         4: up-staircase change of NaCl
     """
     dict_stimulus = {
-                    'KCl' : [[150], 'mM', ['K_out','Cl_out'], False],
+                    'KCl' : [[200], 'mM', ['K_out','Cl_out'], True],
                     'NaCl': [[200], 'mM', ['Na_out', 'Cl_out'], False],
                     'Sorbitol': [[100, 200, 400, 800, 1600], 'mM', ['Sorbitol_out'], False],
 
@@ -262,7 +287,7 @@ if __name__ == "__main__":
     dict_system_switch = {
                         'export_data_to_sql' : True,
                         'export_terms_data_to_sql' : False,
-                        'SpecificInitValuesVersionSEQ' : [1],
+                        'SpecificInitValuesVersionSEQ' : [4],
                         'SpecificModelVersionSEQ' : [1]
                          }
 
@@ -572,7 +597,7 @@ if __name__ == "__main__":
                 # note: i exclueded the glucose stimulus 
                 glucose_switch= [False]
                 simulation_frame = x.simulation(DataForSimulation=simulation_frame,
-                                                i=i
+                                                i=i 
                                                 )
 
             else:

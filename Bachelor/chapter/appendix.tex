@@ -4,16 +4,16 @@
 	\begin{center} 
 		\caption{initial conditions of the volume model}
 		\begin{tabular} {l l l l l l l l}
-		\hline
+		\toprule
 	 	\textbf{state variable} & \textbf{initial condition} & \textbf{annotation}  \\
-	 	\hline
+	 	\midrule
 	 	$r_{os}$ & $1.188$ $\mu m$ & osmotic radius\\
 	 	$r_{b}$ & $0.496$ $\mu m$ &solid components radius\\
 	 	$r$ & $1.684$ $\mu m$ & cell radius\\
 	 	$\pi_t$ & $2 \cdot 10^5$ $Pa$ & turgor pressure\\
 	 	$R_{ref}$ & $1.361$ $\mu m$ & relaxed cell radius \\
 	 	$c_{i}$ & $6.389 \cdot 10^{-12}$ $mmol$ & internal amount of osmolytes\\
-	 	\hline
+	 	\bottomrule
 		\end{tabular}
 		\label{initCondVolume}
 	\end{center}
@@ -24,9 +24,9 @@
 	\begin{center} 
 		\caption{complete list of model parameter values}
 		\begin{tabular} {l l l l l l l l}
-			\hline
+			\toprule
 			\textbf{parameter} & \textbf{value} & \textbf{annotation}  \\
-			\hline
+			\midrule
 			$d$ & $0.115$ $\mu m$ & cell wall thickness\\
 			$phi$ & $10^{-4}$ $Pa^{-1} \cdot s^{-1}$ & cell wall extensibility\\
 			$\pi_c$ & $0.115$ $Pa$ & critical turgor pressure\\
@@ -38,7 +38,7 @@
 			$k_{consumption}$ & $mmol \cdot s^{-1} \cdot \mu m ^{-3} $ & osmolyte dilution rate\\
 			$T$ & $303.15$ $K$ & temperature\\
 			$R$ & $8.314$ $J \cdot K^{-1} \cdot mol^{-1}$ & gas constant \\
-			\hline
+			\bottomrule
 		\end{tabular}
 		\label{parameterVolume}
 	\end{center}
@@ -50,7 +50,7 @@ The values for the initial conditions and the parameters are rounded.
 	\begin{center} 
 		\caption{complete list of ordinary differential equations and algebraic equations}
 		\begin{tabular} {l l l l l l l l}
-			\hline
+			\toprule
 			$V = \frac{4}{3}\cdot \pi  \cdot 10^{-15} \cdot r^3$ \\
 			$\pi_i = \frac{c_i}{V} \cdot R\cdot T$\\
 			$V_{ref} =  \frac{4}{3} \cdot \pi \cdot 10^{-15} \cdot R_{ref}^3$\\
@@ -67,7 +67,7 @@ The values for the initial conditions and the parameters are rounded.
 			$\frac{d}{dt} r_{os} = r_{osdt}$\\
 			$\frac{d}{dt}  r_b = r_{bdt}$\\
 			
-			\hline
+			\bottomrule
 		\end{tabular}
 		\label{equationsVolume}
 	\end{center}

@@ -4,9 +4,39 @@ import os
 exec(open("SYSTEM/py_packages.py").read())
 
 
+def pushJsonToPostgresql(json_file={}):
+    conn = psycopg2.connect(host='localhost', dbname='simulation_results')
+    cur = conn.cursor()
+
+    """create the table for the model versions"""
+    try:
+        cur.execute(sql.SQL("""
+            CREATE TABLE {}.json(
+                seq serial PRIMARY KEY,
+                model_version json 
+            );
+            """).format(sql.Identifier(model)))
+    except:
+        pass
+    conn.commit()
+
+    """prepare the json file for the upload"""
+    test = str(json_file)
+    test = test.replace("'", '"')
+
+    """upload the json file"""
+    insert_statement = 'insert into '+model + \
+        '.json(model_version) values (%s)'
+    cur.execute(insert_statement, [test])
+
+    conn.commit()
+
+    cur.close()
+    conn.close()
+
 cwd = os.getcwd()
 
-model = 'ion'
+model = 'combined_models'
 
 system_comp = ['copa','equation','ODE']
 dict_system = {}
@@ -173,10 +203,9 @@ if model == 'hog':
 
 
 
-"""create json format"""
+"""create json format.."""
 s = json.dumps(dict_system, indent=4)
-with open('{0}/Single_Models/json_files/{1}_system.json'.format(cwd, model),"w") as f:
-    f.write(s)
 
+""".. and push it to the database"""
+pushJsonToPostgresql(json_file=s)
 
-# exec(open('{0}/Single_Models/{1}/{1}.py'.format(cwd, model),encoding="utf-8").read())

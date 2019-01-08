@@ -106,29 +106,25 @@
         },
         "Na_indt": {
             "component": {
-                "patNa_indt2": "-(J_Na*G)/V_os*1e6",
-                "patNa_indt3": "-Na_in*V_ratio"
+                "patNa_indt2": "-(J_Na*G)/V_os*1e6"
             },
             "unit": "mM"
         },
         "Cl_indt": {
             "component": {
-                "patCl_indt2": "-(J_Cl*G)/V_os*1e6",
-                "patCl_indt3": "-Cl_in*V_ratio"
+                "patCl_indt2": "-(J_Cl*G)/V_os*1e6"
             },
             "unit": "mM"
         },
         "K_indt": {
             "component": {
-                "patK_indt2": "-(J_K*G)/V_os*1e6",
-                "patK_indt3": "-K_in*V_ratio"
+                "patK_indt2": "-(J_K*G)/V_os*1e6"
             },
             "unit": "mM"
         },
         "H_indt": {
             "component": {
-                "patH_indt2": "-(J_H*G*np.log(10)*H_in)/(V_os*pbc)*1e6",
-                "patH_indt3": "-H_in*V_ratio"
+                "patH_indt2": "-(J_H*G*np.log(10)*H_in)/(V_os*pbc)*1e6"
             },
             "unit": "mM"
         },
@@ -231,7 +227,7 @@
                 "patATP2": "-k_ATPdecr*ATP",
                 "patATP3": "-ATP*V_ratio"
             },
-            "condition": "if t >= t0_glucose and ATP < 2.5 and Glucose == True else - ATP * V_ratio",
+            "condition": "if t >= t0_glucose and ATP < 2.5 and Glucose == True else 0",
             "unit": "mM"
         },
         "dDeltaphi": {
@@ -375,19 +371,23 @@
                 "patc_i2": "+K_indt",
                 "patc_i3": "+Cl_indt",
                 "patc_i4": "+H_indt",
-                "patc_i5": "+dGlyc_in"
+                "patc_i5": "+dGlyc_in",
+                "patc_i6": "+(k_uptake*G-k_consumption*V_cell)/V_cell*1e18",
+                "patc_i7": "-c_i*V_ratio"
             },
             "unit": "mM"
         },
         "dH_in": {
             "component": {
-                "patH_in1": "H_indt"
+                "patH_in1": "H_indt",
+                "patH_in2": "-H_in*V_ratio"
             },
             "unit": "mM"
         },
         "dCl_in": {
             "component": {
-                "patCl_in1": "Cl_indt"
+                "patCl_in1": "Cl_indt",
+                "patCl_in2": "-Cl_in*V_ratio"
             },
             "unit": "mM"
         },
@@ -405,7 +405,8 @@
         },
         "dK_in": {
             "component": {
-                "patK_in1": "K_indt"
+                "patK_in1": "K_indt",
+                "patK_in2": "-K_in*V_ratio"
             },
             "unit": "mM"
         },
@@ -417,7 +418,8 @@
         },
         "dNa_in": {
             "component": {
-                "patNa_in1": "Na_indt"
+                "patNa_in1": "Na_indt",
+                "patNa_in2": "-Na_in*V_ratio"
             },
             "unit": "mM"
         },

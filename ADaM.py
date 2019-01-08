@@ -190,7 +190,7 @@ dict_system_switch = {
 dict_visualisation = {
                     # NOTE: heat_map not implemted yet
                     'heat_map' : False,
-                    'graph' : False,
+                    'graph' : True,
                     # 'subplots' : True,
                     'dose_response' : False,
                     'get_terms' : ['r_os'],
@@ -214,7 +214,7 @@ sql_STUDYID = 'Yeast_BSc'
 sql_USUBJID = 'combined_models'
 
 # sql_SEQ_list = list(range(30, 34)) #+ list(range(3, 11)) 
-sql_SEQ_list = [2]
+sql_SEQ_list = [15]
 
 """tracking substance"""
 # NOTE: use Hog1PPn as the output of the dose-response curve

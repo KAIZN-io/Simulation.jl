@@ -51,8 +51,9 @@ class netzwerk_daten_gewinnung:
                 """iterate over the content for the species"""
                 for SpeciesName,SpeciesContent in ModelSpecies.items():
                     if 'condition' in SpeciesContent:
+                    
                         for TermPat,Term in SpeciesContent['component'].items():
-
+                  
                             """activate the term under its condition"""
                             exec('{}={} {}'.format(TermPat, Term,
                                                    SpeciesContent['condition']))
@@ -242,7 +243,7 @@ if __name__ == "__main__":
 
     dict_time = {
                 'start' : 0,
-                'stop' : 80,  
+                'stop' : 100,  
                 'time_steps' : 0.1,
                 'NaCl_impuls_start' : 10,
                 'Glucose_impuls_start' : 60,
@@ -283,12 +284,12 @@ if __name__ == "__main__":
 
     """database management system"""
     # NOTE : SpecificInitValuesVersionSEQ = 4 for combined_models
-    # NOTE : SpecificModelVersionSEQ = 1 for combined_models
+    # NOTE : SpecificModelVersionSEQ = 6 for combined_models
     dict_system_switch = {
                         'export_data_to_sql' : True,
                         'export_terms_data_to_sql' : False,
                         'SpecificInitValuesVersionSEQ' : [4],
-                        'SpecificModelVersionSEQ' : [1]
+                        'SpecificModelVersionSEQ' : []
                          }
 
     """get the right pipelines for the choosen model simulation"""

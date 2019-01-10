@@ -1,0 +1,10 @@
+version: '2.1'
+
+services:
+  cpp_docker:
+    image: cpp_docker
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000

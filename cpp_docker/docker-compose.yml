@@ -1,0 +1,8 @@
+version: '2.1'
+
+services:
+  cpp_docker:
+    image: cpp_docker
+    build: .
+    ports:
+      - 3000:3000

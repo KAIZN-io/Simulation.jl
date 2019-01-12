@@ -50,7 +50,7 @@ To solve the problem with the wrong units it was identified, that the equation f
 \end{figure}
 
 
-\subsection{hog model}
+\subsubsection{hog model}
 For the implemtation of the hog model, the \textit{Table S1-S3} and the Matlab code for the used $NaCl$ impulse in \textit{Code S1 } in the supporting informations of the paper were implemented in the python3 environment. No difficulties were encountered. 
 
 \begin{figure}[htbp]
@@ -70,7 +70,7 @@ For the implemtation of the hog model, the \textit{Table S1-S3} and the Matlab c
 	\caption{}
 \end{figure}
 
-\subsection{volume model}
+\subsubsection{volume model}
 The volume model could not be implemented with only the corresponding paper because the model wants to describes the change in the non-osmolytic volume $V_b$ but missed to note down an equation for this.\\
 After consultation with my supervisior and one of the author of the model about this information gap, it was recommended that I use the already implemented volume model in their local network "YCM" as a template. After translating this template in my own software structure, no problems were encountered. In the appendix I documented the used ODE, algebraic equation, parameter and initial values for this model. 
 % schritte der volume model implementierung
@@ -146,21 +146,65 @@ We removed the volume related variables and $\pi_t$ from the hog model because t
 
 %%% bis hier hin eigentlich ganz ok
 \subsection{combined model}
-For the analysis and validation of the merged model we choosed the nuclear phophorylated Hog1 (Hog1PPn) as the control substance. Hog1PPn is also used in the hog model as the output because it regulates the expression of hundred of genes \cite{Zi_2010}. We borrowed the idea of a drug response curve from the theme field pharmocokinetic (zitieren: hier das Buch!!!) as a visualized output showed below.  \\
-(hier noch das falsche Bild, da Simulation noch nicht ganz fertig)
+For the analysis and validation of the merged model we choosed the nuclear phophorylated Hog1 (Hog1PPn) as the control substance. Hog1PPn is also used in the hog model as the output because it regulates the expression of hundred of genes \cite{Zi_2010}. We borrowed the idea of a drug response curve from the theme field pharmocokinetic as a visualized output, showed below.  \\
 \begin{figure}[h!]
 	\begin{center}
 		\begin{minipage}{0,8\textwidth}
 			
-			\includegraphics[width=\textwidth]{picture/model_intersections.png}
-			\caption{Response of Hog1PPn} 
+			\includegraphics[width=\textwidth]{picture/Drug_response.png}
+			\caption{Response of Hog1PPn; initial Glucose at $t=1s$; hyperosmotic shock at $t=30s$} 
 			\label{DrugResponseCurve} 
+		\end{minipage}
+	\end{center}
+\end{figure}
+Under the used settings of the combined model, no difference in the respone of Hog1PPn between different sets of hyperosmotic shocks occured. The simulation time was set to 200s, with an inital glucose stimulus at $t=1s$ and the unique hyperosmotic shock at $t=30s$. \\\\
+As we can see in \ref{SingleDose}, multiple stimulus at predefined times are possible with the model environment. A second stimulus does not results in the same volume and turgor pressure drop as the first one. Cause of clarity, only a set of ODE are visualized. They represent the other ODEs, because they are the output of multiple interacting components. 
+\begin{figure}[h!]
+	\begin{center}
+		\begin{minipage}{0,8\textwidth}
+			
+			\includegraphics[width=\textwidth]{picture/combined_models_66.png}
+			\caption{Response of Hog1PPn} 
+			\label{SingleDose} 
 		\end{minipage}
 	\end{center}
 \end{figure}
 
 \subsubsection{single models with the initial values from the combined model}
-After implement the initial values from the combined model back to the single models, no difference for the hog model was simulated. The reason for this lays in the simple reason, that we only changed the initial values from the ion and the volume model in the combined model.\\
-The problem for compering the simulation results for the volume model is the fact, that the original data from the Github-Account of the ...
-
+We furhter asked us, how each of the original paper model would behave, if they have the parametrisation and the initial values of the combined model inherited.\\\\
+Every simulation was executed under the condition of a 200 mM NaCl Impuls at $t=30s$.\\
+\begin{figure}[h!]
+	\begin{center}
+		\begin{minipage}{0,8\textwidth}
+			
+			\includegraphics[width=\textwidth]{picture/Hog1PPn_11.png}
+			\caption{Response of $Hog1PPn$} 
+			\label{CombiInitHog} 
+		\end{minipage}
+	\end{center}
+\end{figure}
+\begin{figure}[h!]
+	\begin{center}
+		\begin{minipage}{0,8\textwidth}
+			
+			\includegraphics[width=\textwidth]{picture/r_11.png}
+			\caption{Responses of radius $r$} 
+			\label{CombiInitVolume} 
+		\end{minipage}
+	\end{center}
+\end{figure}
+\begin{figure}[h!]
+	\begin{center}
+		\begin{minipage}{0,8\textwidth}
+			
+			\includegraphics[width=\textwidth]{picture/Deltaphi_11.png}
+			\caption{Response of membrane potential Deltaphi} 
+			\label{CombiInitIon} 
+		\end{minipage}
+	\end{center}
+\end{figure}
+As we can see in figure \ref{CombiInitHog} and in figure \ref{CombiInitVolume} the behaviours of the model representing substances show a signifikant difference. For a unknown reason, Hog1PPn (figure \ref{CombiInitHog}) shows a rise in expression a time point $t=20s$ in the abscence of any stimulus. As a side note, the further difference after $t=30s$ are the result of different approaches to simulate the affect of a hyperosmotic shock. \\\\
+Figure \ref{CombiInitVolume} illustrates that the inital values from the combined model for the volume model ODE components does not fit at all. The model 
+ODEs quickly reach a steady state far below from the combined model. It does not exists a drop in volume when faced with a stimulus. The volume model assumes the external osmolyt concentration $c_e$ and corresponding external pressure $\pi_e$ as a constant. It simply does not has an interface for noticing a rise in $c_e$ in a running simulation under the used software development conditions.\\\\
+The ion model (figure \ref{CombiInitIon}) stays in a steady state until the stimulus event. It is shown that in the combined model the ion fluxes representing membrane potential Deltaphi shows a dynamically behaviour in the interplay with volume and hog pathway regulation. The difference between the both models were modeled with an additional glucose stimulus at $t=60s-72s$. After that, the ion components behave approximately the same.
 \newpage

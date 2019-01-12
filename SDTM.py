@@ -243,11 +243,11 @@ if __name__ == "__main__":
 
     dict_time = {
                 'start' : 0,
-                'stop' : 100,  
+                'stop' : 80,  
                 'time_steps' : 0.1,
                 'NaCl_impuls_start' : 10,
-                'Glucose_impuls_start' : 60,
-                'Glucose_impuls_end' : 72,
+                'Glucose_impuls_start' : 1,
+                'Glucose_impuls_end' : 13,
                 'KCL_unique_impuls_start' : 30,
                 }
 
@@ -273,9 +273,9 @@ if __name__ == "__main__":
         4: up-staircase change of NaCl
     """
     dict_stimulus = {
-                    'KCl' : [[200], 'mM', ['K_out','Cl_out'], True],
-                    'NaCl': [[200], 'mM', ['Na_out', 'Cl_out'], False],
-                    'Sorbitol': [[100, 200, 400, 800, 1600], 'mM', ['Sorbitol_out'], False],
+                    'KCl' : [[100], 'mM', ['K_out','Cl_out'], True],
+                    'NaCl': [[800], 'mM', ['Na_out', 'Cl_out'], False],
+                    'Sorbitol': [[1600], 'mM', ['Sorbitol_out'], False],
 
                     'NaCl_impuls' : [200, 'mM'],
                     'signal_type' : [2],
@@ -283,13 +283,14 @@ if __name__ == "__main__":
 
 
     """database management system"""
-    # NOTE : SpecificInitValuesVersionSEQ = 4 for combined_models
-    # NOTE : SpecificModelVersionSEQ = 6 for combined_models
+    # NOTE : SpecificInitValuesVersionSEQ = 2 for combined_models (4 ist alte Version)
+    # NOTE : SpecificModelVersionSEQ = 6 for combined_models (oder 14 (mit Glucose * - V_ratio))
+    # NOTE : Ion Model --> Model Version 3 hat eine vebesserte ATP Berechnung --> macht aber keine Auswirkung
     dict_system_switch = {
-                        'export_data_to_sql' : True,
+                        'export_data_to_sql' : False,
                         'export_terms_data_to_sql' : False,
-                        'SpecificInitValuesVersionSEQ' : [4],
-                        'SpecificModelVersionSEQ' : []
+                        'SpecificInitValuesVersionSEQ' : [2],
+                        'SpecificModelVersionSEQ' : [14]
                          }
 
     """get the right pipelines for the choosen model simulation"""
@@ -596,7 +597,7 @@ if __name__ == "__main__":
 
                 # glucose_switch= [True]
                 # note: i exclueded the glucose stimulus 
-                glucose_switch= [False]
+                glucose_switch= [True]
                 simulation_frame = x.simulation(DataForSimulation=simulation_frame,
                                                 i=i 
                                                 )
@@ -628,7 +629,6 @@ if __name__ == "__main__":
         DfAsMatrix = ijj['results'].values
         ColumnsOfDataframe = ijj['results'].columns.tolist()
         
-
         def truncate(n, decimals=0):
             multiplier = 10 ** decimals
             return int(n * multiplier) / multiplier

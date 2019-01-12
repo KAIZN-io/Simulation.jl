@@ -92,7 +92,7 @@ class VisualisationDesign:
                     for i in substance:
 
                         if sql_USUBJID == 'combined_models' and i == 'Hog1PPn':
-                            exec("ax{}.plot(TimeSeriesData_df[i],label='Hog1PPn (*1E5)')".format(axis_index))
+                            exec("ax{}.plot(TimeSeriesData_df[i],label='Hog1PPn (*1E7)')".format(axis_index))
 
                         else:
                             if Terms==True:
@@ -133,8 +133,10 @@ class VisualisationDesign:
 
     def plotSingleDoseResponse(colour_plot_dict = {}):
 
+
         for values in colour_plot_dict.values():
             plt.plot(values["results"], color = values["colour"])
+
 
         """add the threshold line = ORRES_min"""
         plt.axhline(ORRES_min, color='k', linestyle='--', alpha = 0.5)
@@ -150,19 +152,44 @@ class VisualisationDesign:
         plt.show()
 
     def plotDoseResponse(EXDOSE_TESTCD_df = pd.DataFrame(),
-                        xscale = 'linear'):
+                        xscale = 'log'):
 
-        plt.plot(EXDOSE_TESTCD_df,
-                marker = 'x')
+        fontSize = 16
+
+        # sns.set_style(style = 'whitegrid')
+        # context : dict, None, or one of {paper, notebook, talk, poster}
+        # sns.set_context(context = 'talk')
+
+        EXDOSE_TESTCD_df.plot(marker='x')
         
+        plt.title(s='Dose-Response-Curve',
+                  fontsize=fontSize)
+
         plt.xscale(value = xscale)
         ax = plt.axes()
+
         ax.set_xlim()
 
         ax.set_xlabel("stimulus concentration [mM]")
-        ax.set_ylabel("response (AUC) [s*mM]")
+        ax.set_ylabel("Hog1PPn response (AUC) [s*mM]")
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
 
-        plt.show()
+
+        """"save the plot"""
+        save_fig = dict_system_switch.get('save_figures')
+        if save_fig[0] == True:
+
+                plt.savefig('/Users/janpiotraschke/Bilder_Simulation/{0}_{1}.{2}'.format(
+                    sql_USUBJID, sql_SEQ_list[0], save_fig[1]),
+                    dpi=360,
+                    format=save_fig[1],
+                    bbox_inches='tight'
+                )
+
+        # plt.tight_layout(pad=3)
+
+        # plt.show()
 
     def plotHeatMap():
         pass
@@ -184,23 +211,21 @@ dict_system_switch = {
                     'export_data_to_sql' : False,
                     'create_ADaM_csv' : False,
                     'df_to_latex' : False,
-                    'save_figures': [False, 'png'],
+                    'save_figures': [True, 'png'],
                      }
 
 dict_visualisation = {
-                    # NOTE: heat_map not implemted yet
-                    'heat_map' : False,
-                    'graph' : True,
+                    'graph' : False,
                     # 'subplots' : True,
-                    'dose_response' : False,
+                    'dose_response' : True,
                     'get_terms' : ['r_os'],
                     'dont_do' : True,
 
                     'not_to_visualize' : ['Yt','z1','z2','z3','z4','L_ArH','L_HH',
-                                            'Na_in','Na_out','K_out','K_in','Cl_in',
+                                            'Na_in','Na_out','K_out','K_in',
                                             'Cl_out','H_in','H_out','ATP','Hog1PPc',
-                                            'Hog1c','Hog1n','Pbs2','Pbs2PP','R_ref','r_os','r_b'],
-                    'exp_rel_var' : ['Hog1PPn','r','Glyc_in','pi_t','Deltaphi','c_i'],
+                                            'Hog1c','Hog1n', 'Pbs2' ,'Pbs2PP','R_ref','r_os','r_b', 'c_i','Sorbitol_out'],
+                    'exp_rel_var' : ['Hog1PPn','r','Glyc_in','pi_t','Deltaphi','Cl_in'],
                     # type the name of the ODE substance you are interested in
                     # if empty --> normal plots
                     'special_interest' : [],
@@ -213,17 +238,22 @@ dict_visualisation = {
 sql_STUDYID = 'Yeast_BSc'
 sql_USUBJID = 'combined_models'
 
-# sql_SEQ_list = list(range(30, 34)) #+ list(range(3, 11)) 
-sql_SEQ_list = [15]
+# sql_SEQ_list = list(range(31, 44)) #+ list(range(3, 11)) 
+sql_SEQ_list = list(range(73,86))
+# sql_SEQ_list = list(range(73, 75))
+
+# NOTE : 71 for overview --> combined model
+# sql_SEQ_list = [71]
 
 """tracking substance"""
 # NOTE: use Hog1PPn as the output of the dose-response curve
-TESTCD = 'r'
+TESTCD = 'Hog1PPn'
 
 """"get the wanted equation terms from SQL"""
 get_terms = dict_visualisation.get('get_terms')
 EquationTerms_list = []
 WantedDataJson_dict = {}
+
 if len(get_terms) > 0:
 
     TermsOrresuGrouped = {}
@@ -319,15 +349,15 @@ TestSubstanceUnit_dict = {
     'volume':'um'
 } 
 # NOTE: models must have the same simulation lenght
-
+# NOTE: combined_models = 71 for ion model, 72 for the rest
 CompareSeq_dict = {
-    'combined_models': 6,
-    'ion': 40,
-    'hog': 7,
-    'volume': 10
+    'combined_models': 72,
+    'ion': 53,
+    'hog': 12,
+    'volume': 18
 }
 
-SingleModels = ['ion']
+SingleModels = ['volume']
 for i in SingleModels:
     CompareSeq = {}
     CompareSeq['combined_models'] = CompareSeq_dict['combined_models']
@@ -336,6 +366,11 @@ for i in SingleModels:
                                        TestSubstance=TestSubstance_dict[i],
                                        ModelSeq=CompareSeq
                                        )
+
+    if i == 'volume':
+        """radius to volume"""
+        x['volume'] = (4/3) * np.pi * x['volume']**3
+        x['combined_models'] = (4/3) * np.pi * x['combined_models']**3
 
     # sql_USUBJID = TestSubstance_dict[i]
 
@@ -353,6 +388,11 @@ used_EXTRT_list = []
 
 """iterate over the specific simulation / experimental runs"""
 for RUN_SEQ in ADaM_dict.values():
+
+    """for data exchange
+    
+    .csv file it the choice for data exchange between systems
+    """
     if dict_system_switch.get('create_ADaM_csv') == True:
         ADaM_preparation.create_ADaM_csv(RUN_SEQ = RUN_SEQ)
 
@@ -532,7 +572,11 @@ for RUN_SEQ in ADaM_dict.values():
 
 
         if USUBJID == 'combined_models':
-            ODE_RESULTS['Hog1PPn'] = ODE_RESULTS['Hog1PPn'] * 1E5
+            try:
+                ODE_RESULTS['Hog1PPn'] = ODE_RESULTS['Hog1PPn'] * 1E7
+                # ODE_RESULTS['Cl_in'] = ODE_RESULTS['Cl_in'] / 10
+            except:
+                pass
 
         """group the keys by their units"""
         PDORRESU_grouped = {}
@@ -642,8 +686,10 @@ if dict_visualisation.get('dose_response') == True:
     for i in range(len(used_EXTRT_list)):
         for j in EXDOSE_TESTCD_list:
             if used_EXTRT_list[i] in j.keys():
-                j[used_EXTRT_list[i]]["{}-{}".format(used_EXTRT_list[i],TESTCD)] \
+                j[used_EXTRT_list[i]]["{} stimulus".format(used_EXTRT_list[i])] \
                                             = j[used_EXTRT_list[i]].pop(TESTCD)
+                # j[used_EXTRT_list[i]]["{}-{}".format(used_EXTRT_list[i], TESTCD)] \
+                #     = j[used_EXTRT_list[i]].pop(TESTCD)
                 split_ET_list[i].append(j[used_EXTRT_list[i]])
 
     """final version of dose-response

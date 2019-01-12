@@ -42,7 +42,8 @@ combined_models_parameter = {
                 'beta': [0.6, 'dimensionless'],
                 'gamma': [0.18 * 1e6, 'Pa'],  # original: [0.9626 *1e6 ,'Pa']
                 'tau' : [20 * 60 ,'s'],
-
+                # 'hill_exponent': [4, 'dimensionless'],
+                # 'hill_exponent_eflux': [4, 'dimensionless'],
                 'hill_exponent': [8, 'dimensionless'],
                 'hill_exponent_eflux': [12, 'dimensionless'],
 
@@ -69,7 +70,7 @@ combined_models_parameter = {
                 'pbc' : [200,'mM pH^-1'],
                 'C_m' : [1e-2, 'xxxxxxx'],
                 'c_strich_ATP' : [0.316, 'mM'],
-                'K_eq' : [1e-6, 'dimensionless'],
+                'K_eq' : [1e-6, 'dimensionless'], 
 
                 'L_HHaG' : [0.0019  , 'mol^2 J^-1 m^-2 s^-1'],
                 'L_ArHaG' : [-0.00195 , 'mol^2 J^-1 m^-2 s^-1'],
@@ -110,75 +111,75 @@ k_ATPdecr = k_ATPincr / ATP_stimulus
 k_decrArH =  k_incrArH / L_ArHaG
 k_decrHH = k_incrHH / L_HHaG
 
-combined_models_init_values = {
-                'Pbs2' : [0.1231 * 1e-3, 'Pbs2', 'mM', 'original/hog_model'],              # unphosphorylated Pbs2
-                'Pbs2PP' : [0.000616 * 1e-3, 'Pbs2PP', 'mM', 'original/hog_model'],            # phosphorylated Pbs2
-                'Hog1c' : [0.3426 * 1e-3, 'Hog1c', 'mM', 'original/hog_model'],            # unphosphorylated cytoplasmic Hog1
-                'Hog1PPc' : [0.004443 * 1e-3, 'Hog1PPc', 'mM', 'original/hog_model'],        # phosphorylated cytoplasmic Hog1
-                'Hog1n' : [0.2918 * 1e-3, 'Hog1n', 'mM', 'original/hog_model'],              # unphosphorylated nuclear Hog1
-                'Hog1PPn' : [0.00338 * 1e-3, 'Hog1PPn', 'mM', 'original/hog_model'],          # phosphorylated nuclear Hog1
-                'Glyc_in' : [57600 * 1e-3, 'Glyc_in', 'mM', 'original/hog_model'],            # intracellular glycerol
+# combined_models_init_values = {
+#                 'Pbs2' : [0.1231 * 1e-3, 'Pbs2', 'mM', 'original/hog_model'],              # unphosphorylated Pbs2
+#                 'Pbs2PP' : [0.000616 * 1e-3, 'Pbs2PP', 'mM', 'original/hog_model'],            # phosphorylated Pbs2
+#                 'Hog1c' : [0.3426 * 1e-3, 'Hog1c', 'mM', 'original/hog_model'],            # unphosphorylated cytoplasmic Hog1
+#                 'Hog1PPc' : [0.004443 * 1e-3, 'Hog1PPc', 'mM', 'original/hog_model'],        # phosphorylated cytoplasmic Hog1
+#                 'Hog1n' : [0.2918 * 1e-3, 'Hog1n', 'mM', 'original/hog_model'],              # unphosphorylated nuclear Hog1
+#                 'Hog1PPn' : [0.00338 * 1e-3, 'Hog1PPn', 'mM', 'original/hog_model'],          # phosphorylated nuclear Hog1
+#                 'Glyc_in' : [57600 * 1e-3, 'Glyc_in', 'mM', 'original/hog_model'],            # intracellular glycerol
 
-                # Yt is the time delay for the expression of glycerol-producing proteins
-                'Yt' : [1.811 * 1e-3, 'Yt', 'mM', 'original/hog_model'],
+#                 # Yt is the time delay for the expression of glycerol-producing proteins
+#                 'Yt' : [1.811 * 1e-3, 'Yt', 'mM', 'original/hog_model'],
 
-                'z1' : [0.00338 * 1e-3, 'z1', 'mM', 'original/hog_model'],              # z = delay of transcriptional feedback on glycerol production
-                'z2' : [0.00338 * 1e-3, 'z2', 'mM', 'original/hog_model'],
-                'z3' : [0.00338 * 1e-3, 'z3', 'mM', 'original/hog_model'],
-                'z4' : [0.00338 * 1e-3, 'z4', 'mM', 'original/hog_model'],
+#                 'z1' : [0.00338 * 1e-3, 'z1', 'mM', 'original/hog_model'],              # z = delay of transcriptional feedback on glycerol production
+#                 'z2' : [0.00338 * 1e-3, 'z2', 'mM', 'original/hog_model'],
+#                 'z3' : [0.00338 * 1e-3, 'z3', 'mM', 'original/hog_model'],
+#                 'z4' : [0.00338 * 1e-3, 'z4', 'mM', 'original/hog_model'],
 
-                'r_os' : [1.819281, 'r_os', 'um', 'simulated/volume_model for V=58fl'],
-                'r_b' : [0.580719, 'r_b', 'um', 'simulated/volume_model for V=58fl'],
-                'r' : [2.4, 'r', 'um', 'simulated/volume_model for V=58fl'],
-                'R_ref' : [1.783877, 'R_ref', 'um', 'simulated/volume_model for V=58fl'],
+#                 'r_os' : [1.819281, 'r_os', 'um', 'simulated/volume_model for V=58fl'],
+#                 'r_b' : [0.580719, 'r_b', 'um', 'simulated/volume_model for V=58fl'],
+#                 'r' : [2.4, 'r', 'um', 'simulated/volume_model for V=58fl'],
+#                 'R_ref' : [1.783877, 'R_ref', 'um', 'simulated/volume_model for V=58fl'],
 
-                # NOTE: the volume of the initial V_os is now calculated --> V_os = 57 fL
-                #V_os = [4/3 * np.pi * r[0]**3 - 4/3*np.pi*r_b[0]**3,\
-                #        'V_os', 'fL', 'osmotic volume of the cell', 'calculated/volume_model']
+#                 # NOTE: the volume of the initial V_os is now calculated --> V_os = 57 fL
+#                 #V_os = [4/3 * np.pi * r[0]**3 - 4/3*np.pi*r_b[0]**3,\
+#                 #        'V_os', 'fL', 'osmotic volume of the cell', 'calculated/volume_model']
 
-                #V_cell = [58, 'V_cell', 'fL', 'original/hog_model']
-                #V_os = [34.8, 'V_os', 'fL', 'osmotic volume of the cell', 'original/hog_model']
+#                 #V_cell = [58, 'V_cell', 'fL', 'original/hog_model']
+#                 #V_os = [34.8, 'V_os', 'fL', 'osmotic volume of the cell', 'original/hog_model']
 
-                'pi_t' : [2e5, 'pi_t', 'Pa','turgor pressure','original/volume_model'],
+#                 'pi_t' : [2e5, 'pi_t', 'Pa','turgor pressure','original/volume_model'],
 
-                # * 1.95 Faktor wegen Normierung auf c_i = 320 mM
-                'H_in' : [3.063e-3  , 'H_in', 'mM','original/ion_model'],
-                'K_in' : [75.54 , 'K_in', 'mM','original/ion_model'],
-                'Cl_in' : [0.545 ,'Cl_in' , 'mM','original/ion_model'],
-                'Na_in' : [29.98 , 'Na_in', 'mM','original/ion_model'],
+#                 # * 1.95 Faktor wegen Normierung auf c_i = 320 mM
+#                 'H_in' : [3.063e-3  , 'H_in', 'mM','original/ion_model'],
+#                 'K_in' : [75.54 , 'K_in', 'mM','original/ion_model'],
+#                 'Cl_in' : [0.545 ,'Cl_in' , 'mM','original/ion_model'],
+#                 'Na_in' : [29.98 , 'Na_in', 'mM','original/ion_model'],
 
 
-                # NOTE: external concentration were normed, that the sum for c_e is approximatly 240mM
-                #       faktor * 1126 ist für die Normierung da
-                # 'H_out' : [(3.162e-3)* 1126 , 'H_out', 'mM','original/ion_model'],
-                # 'K_out' : [0.1 * 1126, 'K_out', 'mM','original/ion_model'],
-                # 'Cl_out' : [0.1 * 1126, 'Cl_out', 'mM','original/ion_model'],
-                # 'Na_out' : [0.01 * 1126 , 'Na_out', 'mM','original/ion_model'],
-                'H_out': [3.162e-3, 'H_out', 'mM'],
-                'K_out': [0.1, 'K_out', 'mM'],
-                'Cl_out': [0.1, 'Cl_out', 'mM'],
-                'Na_out': [0.01, 'Na_out', 'mM'],
+#                 # NOTE: external concentration were normed, that the sum for c_e is approximatly 240mM
+#                 #       faktor * 1126 ist für die Normierung da
+#                 # 'H_out' : [(3.162e-3)* 1126 , 'H_out', 'mM','original/ion_model'],
+#                 # 'K_out' : [0.1 * 1126, 'K_out', 'mM','original/ion_model'],
+#                 # 'Cl_out' : [0.1 * 1126, 'Cl_out', 'mM','original/ion_model'],
+#                 # 'Na_out' : [0.01 * 1126 , 'Na_out', 'mM','original/ion_model'],
+#                 'H_out': [3.162e-3, 'H_out', 'mM'],
+#                 'K_out': [0.1, 'K_out', 'mM'],
+#                 'Cl_out': [0.1, 'Cl_out', 'mM'],
+#                 'Na_out': [0.01, 'Na_out', 'mM'],
 
-                # NOTE: Sorbitol is now implemented as an ODE 
-                'Sorbitol_out': [0, 'Sorbitol_out', 'mM'],
+#                 # NOTE: Sorbitol is now implemented as an ODE 
+#                 'Sorbitol_out': [0, 'Sorbitol_out', 'mM'],
 
-                # energy
-                'ATP' : [2.477, 'ATP', 'mM'],
-                #ATP = [1.3, 'ATP', 'mM']
+#                 # energy
+#                 'ATP' : [2.477, 'ATP', 'mM'],
+#                 #ATP = [1.3, 'ATP', 'mM']
 
-                # membrane voltage
-                'Deltaphi' : [-0.168, 'Deltaphi', 'V'],
+#                 # membrane voltage
+#                 'Deltaphi' : [-0.168, 'Deltaphi', 'V'],
 
-                # changeable coefficients
-                'L_ArH' : [0, 'L_ArH', '... s^-1'],
-                'L_HH' : [1.62 * 1e-9, 'L_HH', '... s^-1'],
+#                 # changeable coefficients
+#                 'L_ArH' : [0, 'L_ArH', '... s^-1'],
+#                 'L_HH' : [1.62 * 1e-9, 'L_HH', '... s^-1'],
 
-            #    c_i = [6.38904517734e-12, 'c_i', 'mmol', 'original/volume_model'] # internal concentration of osmolytes
-                # NOTE: c_i is now calculated
-                'c_i' : [0, 'c_i', 'mM', 'internal concentration of osmolytes']
-                }
+#             #    c_i = [6.38904517734e-12, 'c_i', 'mmol', 'original/volume_model'] # internal concentration of osmolytes
+#                 # NOTE: c_i is now calculated
+#                 'c_i' : [0, 'c_i', 'mM', 'internal concentration of osmolytes']
+#                 }
 
-substance_for_c_i = ['H_in', 'K_in', 'Cl_in', 'Na_in', 'Glyc_in']
+# substance_for_c_i = ['H_in', 'K_in', 'Cl_in', 'Na_in', 'Glyc_in']
 
-for i in substance_for_c_i:
-    combined_models_init_values['c_i'][0] += combined_models_init_values[i][0]
+# for i in substance_for_c_i:
+#     combined_models_init_values['c_i'][0] += combined_models_init_values[i][0]

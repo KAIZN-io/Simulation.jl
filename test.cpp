@@ -1,18 +1,2 @@
-#include <stdio.h>
-#include <conio.h>
-#include <Python/Python.h>
-
-int main()
-{
-	PyObject* pInt;
-
-	Py_Initialize();
-
-	PyRun_SimpleString("print('Hello World from Embedded Python!!!')");
-	
-	Py_Finalize();
-
-	printf("\nPress any key to exit...\n");
-	if(!_getch()) _getch();
-	return 0;
-}
+//The Boost Python Library is a framework for interfacing Python and C++.
+//Python calls  the C++ funtions!!! Not in the other direction

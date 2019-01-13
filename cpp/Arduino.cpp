@@ -6,8 +6,8 @@
 #include <vector>
 // #include <pqxx/stringconv>
 
-#include "/usr/local/Cellar/postgresql/11.1/include/libpq/libpq-fs.h" 
-#include <pqxx/pqxx>
+// #include "/usr/local/Cellar/postgresql/11.1/include/libpq/libpq-fs.h" 
+// #include <pqxx/pqxx>
 using namespace std;
 // using namespace pqxx;
 

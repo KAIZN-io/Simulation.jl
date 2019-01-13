@@ -10,7 +10,7 @@ A simulation of the combined model can take several minutes. The thereafter calc
 For the construction of this workflow a PostgreSQL database was implemented and connected with the python script. Pure python3 code was the choice for this thesis.  \\
 A concept from CDISC for clinicial trials was used for the data storing achitecture. This allows to construct useful column names, data types and table in the database.\\ 
 Because a simulation of ODEs and algebraic equations can have pending sets of initial values, parameter values or equations terms, the concept of CDISC was expanded to the area of system biology by designing new data storage procedures. This helps to keep track for all model settings and changes and use any of them for a new simulation. The intention for the  implementation of CDISC to system biology was the fact, that the FDA is moving towards CDISC standards for regulatory submissions \cite{SDTMStandard}. \\
-In picture (!!! Bild zeichnen lassen und hier einfügen) you can see  the proposed workflow. \\ .\\\\
+In picture (!!! Bild zeichnen lassen und hier einfügen) you can see  the proposed workflow.\\\\
 With this approach, we can analysis and try new codes snippets with the results of a long simulation in few seconds. \\
 The whole software development framework is visualized in (hier das Bild einfügen !!!!!!!!). \\\\
 Furthermore, the storage of the model in a JSON file was designed in a way, that a natively typed equation in a .txt file format like 

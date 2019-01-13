@@ -20,16 +20,17 @@ The yeast Saccharomyces cerevisiae (\emph{S. cerevisiae}) is a unicellular eucar
 
 \subsection{state of the art}
 
-In nature, the environment of \emph{S. cerevisiae} varies in factors like temperatur, nutrient levels or osmolarity with the time and the cell must adapt with these changes.  \cite{JannisUhlendorf}. \\To our knowledge, their does not exist a model which combines how \emph{S. cerevisiae} transports ions in response to a extracellular salt stress exposure into the cell with than changing cell volume and hog pathway activity. \\
-Nevertheless, it exists a diveristy of models for \emph{S. cerevisiae} which describes many aspects e.g. hog pathway or ion transort over the plasma membrane in good approximations while assuming other important aspects of the system as constant.
+In nature, the environment of \emph{S. cerevisiae} varies in factors like temperatur, nutrient levels or osmolarity with the time and the cell must adapt with these changes.  \cite{JannisUhlendorf}. \\To our knowledge, their does not exists a model which combines how \emph{S. cerevisiae} transports ions in response to a extracellular salt stress exposure over the cell membrane with than changing cell volume and hog pathway activity. \\
+Nevertheless, it exists a diveristy of models for \emph{S. cerevisiae} which describes many aspects e.g. hog pathway or ion transort over the plasma membrane in good approximations while assuming other important aspects of the system as constant. \\
+In this thesis we constructed a combined model merged from three tested models. The combined model clarifies the dependencies between the hog pathway, the volume regulation and the extra-/ intracellular ion concentrations.
 
 \subsection{theory of the used models}
 \subsubsection{ion model}
 This model was designed to reproduces the experimentally observed potassium and proton fluxes induced by the external stimuli $KCl$ and glucose in \emph{S. cerevisiae}. It implemented eight well characterized transport proteins relevant to the regulation and maintenance of intracellular alkali-metal cation content \cite{Gerber_2016}. \\\\
 The ion model consists out of a non-equivilibrium thermodynamic (NET) approach to model the transport of ions over the plasma membrane. NET is the analysis of spartial inhomogeneous systems and of time dependent processes. It is holds true if these are not very fast or big inhomogeneous. The ion model assumes that both compartimens are well mixed. This way the NET approach is valid.\\
 
-Per diffinition, osmolarity means the amount of substances of osmotic activ particles per volume $V$ of the solution. Osmotic pressure accurs if two solutions with different osmolarity are seperated by a semipermeable membrane, where not all substances can pass the membrane for creating an equilibrium.\\
-\emph{S. cerevisiae} has a plasma membrane which functions as a semipermeable membrane. Water can diffuse freely through it, to adapt to the osmotic changes. \\\\
+Per diffinition, osmolarity means the amount of substances of osmotic activ particles per volume $V$ of a solution. Osmotic pressure accurs if two solutions with different osmolarity are seperated by a semipermeable membrane, where not all substances can pass the membrane for creating an equilibrium.\\
+\emph{S. cerevisiae} has a plasma membrane which works as a semipermeable membrane. Water can diffuse freely through it, to adapt to the osmotic changes. \\\\
 
 Fluxes over membranes are irreversible processes. This will lead to a production of entropy in the system, which is calculated by the entropy production density $\sigma$ which is respresented with the equation \ref{EntropyProductionDensity}
 
@@ -48,6 +49,7 @@ After some other assumption made from the ion model (for deeper insight see \cit
 \begin{equation}\label{IonFlux}
 J_k = \sum_{j=1}^n L_{kj}(RT\cdot ln\left(\frac{c_k^{in}}{c_k^{out}}\right) + z_kF\Delta \phi ) + L_{kAr}A_{Ar}
 \end{equation}
+$A_{Ar}$ represents the reaction affinity for the ATP hydrolysis.
 In the ion model a glycerol stimulus is further simulated. Ion regulation determines many physiological parameters, such as cell volume \cite{Ke_2013}.\\
 The hydrolysis of ATP is the only considered chemical reaction in the model.
 
@@ -59,7 +61,7 @@ The volume model further describes the water flux $J_w$ between the cell and the
 	J_{w} = - \frac{d}{dt} V_{os} = G \cdot Lp \cdot (\pi_e + \pi_t - \pi_i)
 \end{equation}
 with $Lp$ as the hydraulic conductivity, $G$ the cell surface and the internal, external and turgor pressure  ($\pi_i$, $\pi_e$ , $\pi_t$). 
-The cell volume $V$ depends essential on the relation of $\pi_i$, $\pi_e$ and $\pi_t$ due to changes in the osmotic volume $V_os$ (water volume) because the model defined the total cell volume $V = V_{os} + V_b$ as the sum of $V_{os}$ and a solid volume $V_b$ which is not affected by water dynamics \cite{volumeModel}. \\ 
+The cell volume $V$ depends essential on the relation of $\pi_i$, $\pi_e$ and $\pi_t$ due to changes in the osmotic volume $V_{os}$ (water volume) because the model defined the total cell volume $V = V_{os} + V_b$ as the sum of $V_{os}$ and a solid volume $V_b$ which is not affected by water dynamics \cite{volumeModel}. \\ 
 The internal and external pressure $\pi$ depends on the concentration $c$ of the osmotic active substance in the corresponding areas correlated over the equation \ref{osmotic_pressure}
 
 \begin{equation} \label{osmotic_pressure}
@@ -80,7 +82,7 @@ Summarising, it is highlighted that the cell expansion is mainly influeced by th
 
 \subsubsection{hog model}
 The Hog pathway in yeast has a significant role in the adaption process after an osmotic stress exposure. It normalize the volume of the cell and with that the water balance with an accumulation of the osmolyt glycerol inside, by closing the glycerol membran transporter Fps1 \cite{Saito2012} \cite{ASimpleMathematicalModel} and the production of glycerol.  \\
-The hog model is composed out of the Hog1 Mitogen Activated Protein Kinase (MAPK) cascade. This cascade is conserved even in higher eukaryotes including humans (\cite{ASimpleMathematicalModel}). \\ 
+The hog model is composed out of the Hog1 Mitogen Activated Protein Kinase (MAPK) cascade. This cascade is conserved even in higher eukaryotes including humans \cite{ASimpleMathematicalModel}. \\ 
 The Hog1 MAPK is activated in the response to an increase in extracellular osmolarity \cite{Saito2012}. All other non-osmotic stresses (e.g. temperature stres) which are known to also activate the HOG pathway \cite{Saito2012} are not represented in this model. The MAPK pathways are important for transmitting and processing signals from the cell membran into the cell \cite{ASimpleMathematicalModel}. \\
 Hog1 MAPK is activated by the upstream Pbs2 MAP kinase kinase (MAPKK) by phosphorylation. The phoshorylated Hog1c (Hog1PPc) translocates into the nucleus where it activates different transcription factors by phosphorylation \cite{JannisUhlendorf} \cite{Zi_2010}.\\\\
 The model is composed out of these key components for the regulation of the osmo-adaption process.\\

@@ -4,7 +4,7 @@ Before merging the three models together it must be controlled whether each mode
 To better retrace the implementation steps it is recommended to read the paper for the hog \cite{Zi_2010}, ion \cite{Gerber_2016} and volume model  \cite{volumeModel}.
 
 \subsubsection{Ion model}
-The challanges with the implementation of the ion model were, that the presented equations, initial values and parameters did not result in the intended system behaviour. \\
+The challenges with the implementation of the ion model were, that the presented equations, initial values and parameters did not result in the intended system behaviour. \\
 After an in-depth analysis of the equation there were two anomalies:
 
 \begin{enumerate}
@@ -12,7 +12,7 @@ After an in-depth analysis of the equation there were two anomalies:
 	\item the fluxes have the wrong units
 \end{enumerate}
 
-For solving the problem with the undefined parameter in (1) the ODE was constructed by deriving the formula for the calculation of the pH value for diluted solution \ref{pHforDilution}
+For solving the problem with the undefined parameter the ODE was constructed by deriving the formula for the calculation of the pH value for diluted solution equation \ref{pHforDilution}
 \begin{equation*}
 	pH = - log_{10}([H^+])\\
 \end{equation*}
@@ -30,8 +30,9 @@ The equation \ref{usedProtonFlux}
 \Rightarrow \frac{dH^+}{dt}=-\frac{J_H \cdot Surface \cdot ln(10) \cdot H^+}{V_{in} \cdot pbc}
 \end{equation}
 
-was used for modelling the change of the inner proton concentration.\\\\
-To solve the problem with the wrong units it was identified, that the equation for the reported fluxes only missed the unit Kelvin $K$ in its numerator. Multiplying the equation with the temperature $T$ solved this problem and resulted in the equation \ref{IonFlux}.
+was used for modelling the change of the inner proton concentration. $pbc$ is the proton buffer capacity.\\\\
+To solve the problem with the wrong units it was identified, that the equation for the reported fluxes only missed the unit Kelvin ($K$) in its numerator. Multiplying the equation with the temperature $T$ solved this problem and resulted in the equation \ref{IonFlux}.
+This model represents the model with the initial values and global quantities and volumes from Table 4 in the ion paper \cite{Gerber_2016}. The phenomenological and stoichiometric coefficients were adopted from the original Copasi ion model file. In picture \ref{IonImplemented} the implemented ion model is visualized.
 \begin{figure}[htbp]
 	
 	\begin{minipage}{0,5\textwidth}
@@ -51,7 +52,7 @@ To solve the problem with the wrong units it was identified, that the equation f
 
 
 \subsubsection{hog model}
-For the implemtation of the hog model, the \textit{Table S1-S3} and the Matlab code for the used $NaCl$ impulse in \textit{Code S1 } in the supporting informations of the paper were implemented in the python3 environment. No difficulties were encountered. 
+For the implemtation of the hog model, the \textit{Table S1-S3} and the Matlab code for the used $NaCl$ impulse in \textit{Code S1 } in the supporting informations of the paper were implemented in the python3 environment. No difficulties were encountered. The only problems occur with the handling of the intended stimulus time length.
 
 \begin{figure}[htbp]
 	
@@ -71,7 +72,7 @@ For the implemtation of the hog model, the \textit{Table S1-S3} and the Matlab c
 \end{figure}
 
 \subsubsection{volume model}
-The volume model could not be implemented with only the corresponding paper because the model wants to describes the change in the non-osmolytic volume $V_b$ but missed to note down an equation for this.\\
+The volume model could not be implemented with only the corresponding paper because the model wants to describes the change of the non-osmolytic volume $V_b$ but missed to note down an equation for this.\\
 After consultation with my supervisior and one of the author of the model about this information gap, it was recommended that I use the already implemented volume model in their local network "YCM" as a template. After translating this template in my own software structure, no problems were encountered. In the appendix I documented the used ODE, algebraic equation, parameter and initial values for this model. 
 % schritte der volume model implementierung
 \begin{figure}[htbp]
@@ -125,7 +126,7 @@ uptake / dilution of osmotic active compounds & removed & replaced with the equa
 \label{changesOnTheModels}
 \end{center}
 \end{table}
-
+The NaCl stimulus approach from the hog model was not adopted. The reaction of a stimulus takes place with stopping the ODE solver and adding the stimulus concentration to the last values of the affected substances.\\
 In the whole process of merging we must consider their biochemical interpretation to maintain the plausblity of the model \cite{Liebermeister2008ValidityAC}. No parameter value was changed in its biological interpretation.\\\\
 Initial values were changed because, as we can see in figure \ref{IntersectionsOfTheModels}
 
@@ -146,7 +147,7 @@ We removed the volume related variables and $\pi_t$ from the hog model because t
 
 %%% bis hier hin eigentlich ganz ok
 \subsection{combined model}
-For the analysis and validation of the merged model we choosed the nuclear phophorylated Hog1 (Hog1PPn) as the control substance. Hog1PPn is also used in the hog model as the output because it regulates the expression of hundred of genes \cite{Zi_2010}. We borrowed the idea of a drug response curve from the theme field pharmocokinetic as a visualized output, showed below.  \\
+For the analysis and validation of the merged model we choosed the nuclear phophorylated Hog1 (Hog1PPn) as the control substance. Hog1PPn is also used in the hog model as the output because it regulates the expression of hundred of genes \cite{Zi_2010}. We borrowed the idea of a dose response curve from the theme field pharmocokinetic as a visualized output, showed below.  \\
 \begin{figure}[h!]
 	\begin{center}
 		\begin{minipage}{0,8\textwidth}
@@ -163,7 +164,7 @@ As we can see in \ref{SingleDose}, multiple stimulus at predefined times are pos
 	\begin{center}
 		\begin{minipage}{0,8\textwidth}
 			
-			\includegraphics[width=\textwidth]{picture/combined_models_66.png}
+			\includegraphics[width=\textwidth]{picture/combined_models_71.png}
 			\caption{Response of Hog1PPn} 
 			\label{SingleDose} 
 		\end{minipage}
@@ -171,14 +172,14 @@ As we can see in \ref{SingleDose}, multiple stimulus at predefined times are pos
 \end{figure}
 
 \subsubsection{single models with the initial values from the combined model}
-We furhter asked us, how each of the original paper model would behave, if they have the parametrisation and the initial values of the combined model inherited.\\\\
-Every simulation was executed under the condition of a 200 mM NaCl Impuls at $t=30s$.\\
+We furhter asked us, how each of the original paper model would behave, if they have the parametrisation and initial values of the combined model inherited.\\\\
+Every simulation was executed under the condition of a 200 mM NaCl impuls at $t=30s$.\\
 \begin{figure}[h!]
 	\begin{center}
 		\begin{minipage}{0,8\textwidth}
 			
-			\includegraphics[width=\textwidth]{picture/Hog1PPn_11.png}
-			\caption{Response of $Hog1PPn$} 
+			\includegraphics[width=\textwidth]{picture/Hog1PPn_71.png}
+			\caption{Response of Hog1PPn; hog model with 200 mM NaCl shock for $t=30-40s$} 
 			\label{CombiInitHog} 
 		\end{minipage}
 	\end{center}
@@ -187,8 +188,8 @@ Every simulation was executed under the condition of a 200 mM NaCl Impuls at $t=
 	\begin{center}
 		\begin{minipage}{0,8\textwidth}
 			
-			\includegraphics[width=\textwidth]{picture/r_11.png}
-			\caption{Responses of radius $r$} 
+			\includegraphics[width=\textwidth]{picture/r_71.png}
+			\caption{Responses of volume $V$} 
 			\label{CombiInitVolume} 
 		\end{minipage}
 	\end{center}
@@ -197,7 +198,7 @@ Every simulation was executed under the condition of a 200 mM NaCl Impuls at $t=
 	\begin{center}
 		\begin{minipage}{0,8\textwidth}
 			
-			\includegraphics[width=\textwidth]{picture/Deltaphi_11.png}
+			\includegraphics[width=\textwidth]{picture/Deltaphi_71.png}
 			\caption{Response of membrane potential Deltaphi} 
 			\label{CombiInitIon} 
 		\end{minipage}
@@ -206,5 +207,6 @@ Every simulation was executed under the condition of a 200 mM NaCl Impuls at $t=
 As we can see in figure \ref{CombiInitHog} and in figure \ref{CombiInitVolume} the behaviours of the model representing substances show a signifikant difference. For a unknown reason, Hog1PPn (figure \ref{CombiInitHog}) shows a rise in expression a time point $t=20s$ in the abscence of any stimulus. As a side note, the further difference after $t=30s$ are the result of different approaches to simulate the affect of a hyperosmotic shock. \\\\
 Figure \ref{CombiInitVolume} illustrates that the inital values from the combined model for the volume model ODE components does not fit at all. The model 
 ODEs quickly reach a steady state far below from the combined model. It does not exists a drop in volume when faced with a stimulus. The volume model assumes the external osmolyt concentration $c_e$ and corresponding external pressure $\pi_e$ as a constant. It simply does not has an interface for noticing a rise in $c_e$ in a running simulation under the used software development conditions.\\\\
-The ion model (figure \ref{CombiInitIon}) stays in a steady state until the stimulus event. It is shown that in the combined model the ion fluxes representing membrane potential Deltaphi shows a dynamically behaviour in the interplay with volume and hog pathway regulation. The difference between the both models were modeled with an additional glucose stimulus at $t=60s-72s$. After that, the ion components behave approximately the same.
+%The ion model (figure \ref{CombiInitIon}) stays in a steady state until the stimulus event. I
+It is shown that in the combined model the ion fluxes representing membrane potential Deltaphi shows a dynamically behaviour in the interplay with volume and hog pathway regulation. After the adaption to the second stimulus, the ion components behave approximately the same.
 \newpage

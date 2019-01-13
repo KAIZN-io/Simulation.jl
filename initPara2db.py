@@ -1,10 +1,12 @@
-exec(open("SYSTEM/py_packages.py").read())
+__version__ = '0.0.1'
 
-"""clarification --> data entry staff
+"""only execute this script
 
-the data entry / sorting to sql should be the only humanly touch for the
-system
+pushes the initial values and the parameter to the database
 """
+
+
+exec(open("SYSTEM/py_packages.py").read())
 
 
 conn = psycopg2.connect(host='localhost', dbname='simulation_results')

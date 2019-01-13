@@ -53,7 +53,7 @@
                 "patL_ArH1": "k_incrArH",
                 "patL_ArH2": "-k_decrArH*L_ArH"
             },
-            "condition": "if t >= t0_glucose and t < t1_glucose else 0",
+            "condition": "if t >= t0_glucose and t < t1_glucose and Glucose == True else 0",
             "unit": "mol^2 J^-1 m^-2 s^-1"
         },
         "dL_HH": {
@@ -61,7 +61,7 @@
                 "patL_HH1": "k_incrHH",
                 "patL_HH2": "-k_decrHH*L_HH"
             },
-            "condition": "if t >= t0_glucose and t < t1_glucose else 0",
+            "condition": "if t >= t0_glucose and t < t1_glucose and Glucose == True else 0",
             "unit": "mol^2 J^-1 m^-2 s^-1"
         },
         "dATP": {
@@ -69,7 +69,7 @@
                 "patATP1": "k_ATPincr",
                 "patATP2": "-k_ATPdecr*ATP"
             },
-            "condition": "if t >= t0_glucose and ATP < 2.5 else 0",
+            "condition": "if t >= t0_glucose and ATP < 2.5 and Glucose == True else 0",
             "unit": "mM"
         },
         "dH_out": {

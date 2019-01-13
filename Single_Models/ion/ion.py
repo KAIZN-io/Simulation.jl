@@ -31,6 +31,9 @@ ion_parameter = {
                 'k_incrHH' : [3.54 * 1e-9, 'mol^2 J^-1 m^-2 s^-2'],
                 'k_incrArH' : [-3.64 * 1e-9, 'mol^2 J^-1 m^-2 s^-2'],
                 'k_ATPincr' : [10, 'mol m^-3 s^-1'],
+                'k_ATPdecr': [4.0, ''],
+                'k_decrArH': [1.8666666666666669e-06, ''],
+                'k_decrHH': [1.8631578947368422e-06, ''],
 
                 'T' : [303.15, 'K'],
                 'R' : [8.314, 'J K^-1 mol^-1'],
@@ -45,6 +48,8 @@ for key,value in ion_parameter.items():
 k_ATPdecr = k_ATPincr / ATP_stimulus
 k_decrArH =  k_incrArH / L_ArHaG
 k_decrHH = k_incrHH / L_HHaG
+
+print(k_ATPdecr,k_decrArH,k_decrHH)
 
 ion_init_values = {
                 'H_in' : [3.063e-3  , 'H_in', 'mM','original/ion_model'],

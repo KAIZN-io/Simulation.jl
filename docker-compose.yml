@@ -1,0 +1,71 @@
+# the version of the docker-compose file
+version: "2.1"
+
+# list of services - meaning containers - to be managed by docker-compose
+services:
+
+  # the user-db container
+  db:
+
+    image: postgres
+
+    volumes:
+      - user-db:/var/lib/postgresql/data/
+
+    # environment variables which will be accessible in the running container
+    # legt Databank simulation_results an
+    environment:
+      - POSTGRES_DB=simulation_results
+      # - POSTGRES_USER=${DB_USERNAME}
+      # - POSTGRES_PASSWORD=${DB_PASSWORD}
+
+    # this defines how this container will be rated as "healthy"
+    # definiert, wann die Datenbank hochgefahren ist
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+
+    networks:
+      default:
+        aliases:
+          - "db_postgres"
+
+  sdtm:
+
+    # build the api-server with the Dockerfile found at context
+    build:
+      context: .
+
+    # name its this
+    image: python_postgres_image
+
+    # was sdtm braucht: ein hochgefahrene Datenbank (in diesem Beispiel)
+    # wie Verzweigungen zwischen Programmen auslegen
+    depends_on:
+      # the status of the api-db needs to be healthy (see above)
+      db:
+        condition: service_healthy
+
+    # restart: on-failure
+
+    # ports:
+    #   - "${HTTP_PORT}:8000"
+
+    # for development we mount the api-server-code into the container, this way changes made to the code are directly synced with the container
+    volumes:
+      # in welchen Pfad ich mich befinde : WORKDIR von Dockerfile
+      - ./:/ProjektQ/
+
+    # # the command to start the service with
+    # command: "routings.py"
+
+    networks:
+      default:
+        # aliases:
+        #   - ${API_SERVER_HOSTNAME}
+
+# Eigenart von docker-compose file; hier nochmal die verwendeten volumes angeben
+volumes:
+  user-db:

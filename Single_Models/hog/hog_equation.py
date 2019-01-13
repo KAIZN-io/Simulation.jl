@@ -6,7 +6,7 @@ single_impuls_NaCl = dict_stimulus.get('NaCl_impuls')[0]
 
 t0 = dict_time.get('NaCl_impuls_start')
 
-t1 = t0 / 2 if signal_type == 3 else t0 + 300
+t1 = t0 / 2 if signal_type == 3 else t0 + 10
 t2 = t0 / 2 if signal_type == 3 else 1
 
 if signal_type == 1:

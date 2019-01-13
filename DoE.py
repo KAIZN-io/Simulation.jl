@@ -1,7 +1,7 @@
 exec(open("SYSTEM/py_packages.py").read())
 
 
-TargetModel = 'volume'
+TargetModel = 'hog'
 vonWoherIchdieDatenhole = 'combined_models'
 
 conn = psycopg2.connect(host='localhost', dbname='simulation_results')
@@ -15,19 +15,19 @@ cur = conn.cursor()
 
 # SeqToWorkWith = cur.fetchone()[0]
 SeqToWorkWith = 5
-"""find out what the specific model is made of"""
+"""find out what the target model is made of"""
 cur.execute(sql.SQL("""
     SELECT DISTINCT(testcd)
     FROM {}.init_values;
-    """).format(sql.Identifier(vonWoherIchdieDatenhole)))
+    """).format(sql.Identifier(TargetModel)))
 
-ReferenceModelSubstances = []
+TargetModelSubstance = []
 for i in cur.fetchall():
-    ReferenceModelSubstances.append(i[0])
+    TargetModelSubstance.append(i[0])
 
 """
 get the simulation results of the 
-ODE Simulation No. 44 at the specific time point
+ODE Simulation No. 53 at the specific time point
 """
 
 ThresholdTime = 20
@@ -42,11 +42,11 @@ OdeSolutionAtTimepoint_dict = {}
 for i in cur.fetchall():
     OdeSolutionAtTimepoint_dict[i[0]] = i[1]
 
-"""
-we must remove V_os, because in the combined model it is not an ODE
-"""
-if vonWoherIchdieDatenhole == 'hog':
-    ReferenceModelSubstances.remove('V_os')
+
+if TargetModel == 'hog':
+    OdeSolutionAtTimepoint_dict['V_os'] = 4/3 * \
+        np.pi * OdeSolutionAtTimepoint_dict['r_os'] ** 3
+
 
 # TODO: create 4 new possible ODE states --> now i only make number 2
 """
@@ -58,7 +58,7 @@ if vonWoherIchdieDatenhole == 'hog':
 # print(OdeSolutionAtTimepoint_dict)
 Comment = 'changed again again' 
 for TESTCD,ORRES in OdeSolutionAtTimepoint_dict.items():
-    if TESTCD in ReferenceModelSubstances:
+    if TESTCD in TargetModelSubstance:
         cur.execute(sql.SQL("""
             UPDATE {}.init_values
             SET orres = %s, co = %s

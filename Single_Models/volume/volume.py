@@ -9,7 +9,7 @@ volume_parameter = {
                     'E_3D' : [2.58e6, 'Pa', 'measured Youngs modulus', 'Goldenbogen & Giese et al. 2016'],
                     'c_e' : [240, 'mM'],
                     'pi_e' : [604594.08, 'mM'],
-
+                    'E': [3440000.0,'Pa'],
 
                     'T' : [303.15, 'K'],
                     'R' : [8.314, 'J K^-1 mol^-1'],
@@ -22,7 +22,7 @@ for key,value in volume_parameter.items():
 
 modulus_adjustment = (1 - nu ** 2) ** (-1)  # dimensionless
 E = modulus_adjustment * E_3D  # adjusted to 2D Young's modulus (surface)
-
+print(E)
 volume_init_values = {
                     'r_os' : [1.18773900649, 'r_os', 'um'],
                     'r_b' : [0.496161324363, 'r_b', 'um'],

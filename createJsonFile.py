@@ -36,7 +36,7 @@ def pushJsonToPostgresql(json_file={}):
 
 cwd = os.getcwd()
 
-model = 'ion'
+model = 'hog'
 
 system_comp = ['copa','equation','ODE']
 dict_system = {}

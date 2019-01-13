@@ -46,7 +46,7 @@ class VisualisationDesign:
                                                         len(SubplotLogic)))
             exec('ax{}.spines["top"].set_visible(False)'.format(iter_num))
             exec('ax{}.spines["right"].set_visible(False)'.format(iter_num))
-            exec('ax{}.set_xlabel("time [s]",fontsize=12)'.format(iter_num))
+            exec('ax{}.set_xlabel("time [s]",fontsize=fontSize)'.format(iter_num))
 
             
             """fix the y-axis lim for pictures for latex / publication"""
@@ -65,6 +65,10 @@ class VisualisationDesign:
         fig.suptitle(t='{}_Model'.format(sql_USUBJID.title()),
                      fontsize=fontSize)
 
+
+        # fig.suptitle(t='Volume',
+        #              fontsize=fontSize)
+
         with sns.color_palette('cubehelix',len(TimeSeriesData_df.columns.tolist())):
 
             """make the fig more fittet"""
@@ -74,13 +78,13 @@ class VisualisationDesign:
 
             """show the version of the plot"""
             fig.text(0.99, 0.01,
-                     s='{} - {}_Model'.format(current_date,
-                                              sql_USUBJID.title()),
-                    fontstyle='italic',
-                    color='#999999',
-                    ha='right',
-                    va='bottom',
-                    fontsize='x-small'
+                     s='{} - {}'.format(current_date,
+                                        sql_USUBJID.title()),
+                     fontstyle='italic',
+                     color='#999999',
+                     ha='right',
+                     va='bottom',
+                     fontsize='x-small'
                     )
 
             """assign each TESTCD to their right subplot"""
@@ -208,16 +212,15 @@ cwd = os.getcwd()
 
 
 dict_system_switch = {
-                    'export_data_to_sql' : False,
-                    'create_ADaM_csv' : False,
-                    'df_to_latex' : False,
+                    # 'create_ADaM_csv' : False,
+                    # 'df_to_latex' : False,
                     'save_figures': [True, 'png'],
                      }
 
 dict_visualisation = {
                     'graph' : False,
                     # 'subplots' : True,
-                    'dose_response' : True,
+                    'dose_response' : False,
                     'get_terms' : ['r_os'],
                     'dont_do' : True,
 
@@ -239,11 +242,11 @@ sql_STUDYID = 'Yeast_BSc'
 sql_USUBJID = 'combined_models'
 
 # sql_SEQ_list = list(range(31, 44)) #+ list(range(3, 11)) 
-sql_SEQ_list = list(range(73,86))
+# sql_SEQ_list = list(range(73,86))
 # sql_SEQ_list = list(range(73, 75))
 
 # NOTE : 71 for overview --> combined model
-# sql_SEQ_list = [71]
+sql_SEQ_list = [71]
 
 """tracking substance"""
 # NOTE: use Hog1PPn as the output of the dose-response curve
@@ -346,18 +349,18 @@ TestSubstance_dict = {
 TestSubstanceUnit_dict = {
     'ion': 'V',
     'hog':'mM',
-    'volume':'um'
+    'volume':'fL'
 } 
 # NOTE: models must have the same simulation lenght
 # NOTE: combined_models = 71 for ion model, 72 for the rest
 CompareSeq_dict = {
     'combined_models': 72,
     'ion': 53,
-    'hog': 12,
+    'hog': 24,
     'volume': 18
 }
 
-SingleModels = ['volume']
+SingleModels = ['hog']
 for i in SingleModels:
     CompareSeq = {}
     CompareSeq['combined_models'] = CompareSeq_dict['combined_models']
@@ -372,10 +375,10 @@ for i in SingleModels:
         x['volume'] = (4/3) * np.pi * x['volume']**3
         x['combined_models'] = (4/3) * np.pi * x['combined_models']**3
 
-    # sql_USUBJID = TestSubstance_dict[i]
+    sql_USUBJID = TestSubstance_dict[i]
 
-    # VisualisationDesign.plotTimeSeries(TimeSeriesData_df=x,
-    #                                    SubplotLogic={TestSubstanceUnit_dict[i]: [i, 'combined_models']})
+    VisualisationDesign.plotTimeSeries(TimeSeriesData_df=x,
+                                       SubplotLogic={TestSubstanceUnit_dict[i]: [i, 'combined_models']})
 
 
 """try to get the data from the database"""
@@ -393,8 +396,8 @@ for RUN_SEQ in ADaM_dict.values():
     
     .csv file it the choice for data exchange between systems
     """
-    if dict_system_switch.get('create_ADaM_csv') == True:
-        ADaM_preparation.create_ADaM_csv(RUN_SEQ = RUN_SEQ)
+    # if dict_system_switch.get('create_ADaM_csv') == True:
+    #     ADaM_preparation.create_ADaM_csv(RUN_SEQ = RUN_SEQ)
 
     """exclude some ODEs from the visualisation"""
     if dict_visualisation.get('dont_do') == True\
@@ -731,8 +734,8 @@ if dict_visualisation.get('dose_response') == True:
     df.to_latex()
     copy the printed text to latex to visualize the dataframe there
     """
-    if dict_system_switch.get('df_to_latex') == True:
-        print(EXDOSE_TESTCD_df.to_latex())
+    # if dict_system_switch.get('df_to_latex') == True:
+    #     print(EXDOSE_TESTCD_df.to_latex())
 
     """plot the whole Dose-Response curve"""
     VisualisationDesign.plotDoseResponse(EXDOSE_TESTCD_df=EXDOSE_TESTCD_df,

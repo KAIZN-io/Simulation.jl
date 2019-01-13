@@ -24,12 +24,7 @@ class netzwerk_daten_gewinnung:
 
         """assing the initial values to their ODEs"""
         for i in range(len(InitialValues)):
-            try:                
-                
-                # if ColumnNames[i] == 'ATP'\
-                #     and InitialValues[i] > 2.5:
-                #     InitialValues[i] = 2.5
-                
+            try:               
                 exec('{}={}'.format(ColumnNames[i], InitialValues[i]))
 
             except:
@@ -234,9 +229,9 @@ if __name__ == "__main__":
 
     """only one model each time as True"""
     dict_model_switch = {
-                        'combined_models': True,
-                        'dummie': False,
-                        'hog': False,
+                        'combined_models': False,
+                        # 'dummie': False,
+                        'hog': True,
                         'ion': False,
                         'volume': False,
                          }
@@ -245,10 +240,10 @@ if __name__ == "__main__":
                 'start' : 0,
                 'stop' : 80,  
                 'time_steps' : 0.1,
-                'NaCl_impuls_start' : 10,
+                'NaCl_impuls_start': 30,
+                'NaCl_impuls_firststop' : 10,
                 'Glucose_impuls_start' : 1,
                 'Glucose_impuls_end' : 13,
-                'KCL_unique_impuls_start' : 30,
                 }
 
     """make the dict keys as new variables"""
@@ -268,12 +263,13 @@ if __name__ == "__main__":
     """only for the hog model
 
     signal_type :
+        1: one steady impulse
         2: single pulse of NaCl
         3: square pulses of NaCl
         4: up-staircase change of NaCl
     """
     dict_stimulus = {
-                    'KCl' : [[100], 'mM', ['K_out','Cl_out'], True],
+                    'KCl' : [[200], 'mM', ['K_out','Cl_out'], True],
                     'NaCl': [[800], 'mM', ['Na_out', 'Cl_out'], False],
                     'Sorbitol': [[1600], 'mM', ['Sorbitol_out'], False],
 
@@ -281,21 +277,32 @@ if __name__ == "__main__":
                     'signal_type' : [2],
                     }
 
+    signal_type = dict_stimulus.get('signal_type')[0]
+    NaCl_impuls = dict_stimulus.get('NaCl_impuls')[0]
 
     """database management system"""
     # NOTE : SpecificInitValuesVersionSEQ = 2 for combined_models (4 ist alte Version)
     # NOTE : SpecificModelVersionSEQ = 6 for combined_models (oder 14 (mit Glucose * - V_ratio))
     # NOTE : Ion Model --> Model Version 3 hat eine vebesserte ATP Berechnung --> macht aber keine Auswirkung
+    # NOTE : Hog Model --> Model Version 4 ist besser
+    # NOTE: SpecificParameterVersionSEQ muss die 1 behalten, da die Parameter nicht veraendert wurden
     dict_system_switch = {
                         'export_data_to_sql' : False,
                         'export_terms_data_to_sql' : False,
-                        'SpecificInitValuesVersionSEQ' : [2],
-                        'SpecificModelVersionSEQ' : [14]
+                        'SpecificInitValuesVersionSEQ' : [5],
+                        'SpecificModelVersionSEQ' : [1],
+                        'SpecificParameterVersionSEQ' : [1]
                          }
 
     """get the right pipelines for the choosen model simulation"""
     conn = psycopg2.connect(host='localhost', dbname='simulation_results')
-    
+
+    # conn = psycopg2.connect(
+    #     host='db_postgres',
+    #     user='postgres',
+    #     dbname='simulation_results'
+    # )
+
     """open a cursor to perform database operations"""
     cur = conn.cursor()
 
@@ -319,6 +326,7 @@ if __name__ == "__main__":
         if boolean == True:
             list_of_model_names.append(NameOfModel)
 
+            # TODO: notloesung: definiere folgendes als funktion um
             """gets the wanted ModelVersion"""
             if len(dict_system_switch.get('SpecificModelVersionSEQ')) > 0:
                 SpecificModelVersionSEQ = dict_system_switch.get(
@@ -346,39 +354,51 @@ if __name__ == "__main__":
 
                 SpecificInitValuesVersionSEQ = cur.fetchone()[0]
             
+            """gets the wanted ParameterValuesVersion"""
+            if len(dict_system_switch.get('SpecificParameterVersionSEQ')) > 0:
+                SpecificParameterVersionSEQ = dict_system_switch.get(
+                    'SpecificParameterVersionSEQ')[0]
 
-            if NameOfModel != 'hog':
-                """update the local safed json file for the model"""
+            else:
+                """get the MAX(seq) value from the database"""
                 cur.execute(sql.SQL("""
-                    SELECT model_version
-                    FROM {}.json
-                    WHERE seq = %s;
-                    """).format(sql.Identifier(NameOfModel)), [SpecificModelVersionSEQ])
+                    SELECT MAX(seq)
+                    FROM {}.parameter;
+                    """).format(sql.Identifier(NameOfModel)))
 
-                ModelVersionFromDatabase = cur.fetchone()[0]
+                SpecificParameterVersionSEQ = cur.fetchone()[0]
 
-                """create json format"""
+            # if NameOfModel != 'hog':
+            """update the local safed json file for the model"""
+            cur.execute(sql.SQL("""
+                SELECT model_version
+                FROM {}.json
+                WHERE seq = %s;
+                """).format(sql.Identifier(NameOfModel)), [SpecificModelVersionSEQ])
 
-                s = json.dumps(ModelVersionFromDatabase, indent=4)
-                with open('Single_Models/json_files/{0}_system.json'.format(NameOfModel), "w") as f:
-                    f.write(s)
+            ModelVersionFromDatabase = cur.fetchone()[0]
 
-                """query the available ODE components"""
-                cur.execute(sql.SQL("""
+            """create json format"""
+
+            s = json.dumps(ModelVersionFromDatabase, indent=4)
+            with open('Single_Models/json_files/{0}_system.json'.format(NameOfModel), "w") as f:
+                f.write(s)
+
+
+            # else:
+            #     exec(open('Single_Models/{0}/{0}.py'.format(NameOfModel),encoding="utf-8").read())
+
+       
+            """list of the names of the ODE in the model"""
+            cur.execute(sql.SQL("""
                     SELECT testcd
                     FROM {}.init_values
                     WHERE seq = %s
                     """).format(sql.Identifier(NameOfModel)), [SpecificInitValuesVersionSEQ])
 
-                ModelOdeVariable = cur.fetchall()
-                ModelOdeVariable = [x[0] for x in ModelOdeVariable]
+            ModelOdeVariable = cur.fetchall()
+            ModelOdeVariable = [x[0] for x in ModelOdeVariable]
 
-            else:
-                exec(open('Single_Models/{0}/{0}.py'.format(NameOfModel),encoding="utf-8").read())
-
-                """list of the names of the variables in the model"""
-                ModelOdeVariable = eval(
-                    '{}_init_values'.format(NameOfModel)).keys()
 
             """iterating over all activated stimuli"""
             for i in activated_stimuli:
@@ -527,9 +547,23 @@ if __name__ == "__main__":
         init_cond_string = []
         init_cond_unit = []
 
-        """get the parameter and initial values"""
-        exec(open('{0}/Single_Models/{1}/{1}.py'.format(cwd, model_name)\
-                    ,encoding="utf-8").read())
+        """get the parameter from the database"""
+        cur.execute(sql.SQL("""
+            SELECT testcd, orres
+            FROM {}.parameter 
+            WHERE seq=%s;
+            """).format(sql.Identifier(model_name)), [SpecificParameterVersionSEQ])
+
+        TESTCD_ORRESU_tuple = cur.fetchall()
+
+        """init_dict creation"""
+        parameter_dict = {}
+        for i in TESTCD_ORRESU_tuple:
+            parameter_dict[i[0]] = i[1]
+        
+        """make the dict keys as new variables"""
+        locals().update(parameter_dict)
+
 
         if model_name != 'dummie':
 
@@ -629,29 +663,30 @@ if __name__ == "__main__":
         DfAsMatrix = ijj['results'].values
         ColumnsOfDataframe = ijj['results'].columns.tolist()
         
-        def truncate(n, decimals=0):
-            multiplier = 10 ** decimals
-            return int(n * multiplier) / multiplier
+        if list_of_model_names[0] != 'volume':
+            def truncate(n, decimals=0):
+                multiplier = 10 ** decimals
+                return int(n * multiplier) / multiplier
 
-        RoundAfterDigitsCound = 5
-        NumbersWithoutZero = list(range(1, 10))
-        NumbersWithoutZero = [str(x) for x in NumbersWithoutZero]
+            RoundAfterDigitsCound = 5
+            NumbersWithoutZero = list(range(1, 10))
+            NumbersWithoutZero = [str(x) for x in NumbersWithoutZero]
 
-        for (x, y), UnroundedValue in np.ndenumerate(DfAsMatrix):
+            for (x, y), UnroundedValue in np.ndenumerate(DfAsMatrix):
 
-            GetDecimalPointPosition = str(UnroundedValue).find('.')
-            for index, i in enumerate(str(UnroundedValue)):
-                if i in NumbersWithoutZero:
-                    FirstOccurenceNaturalNumber = index
-                    if index > GetDecimalPointPosition:
-                        FirstOccurenceNaturalNumber -= 1
-                    break
+                GetDecimalPointPosition = str(UnroundedValue).find('.')
+                for index, i in enumerate(str(UnroundedValue)):
+                    if i in NumbersWithoutZero:
+                        FirstOccurenceNaturalNumber = index
+                        if index > GetDecimalPointPosition:
+                            FirstOccurenceNaturalNumber -= 1
+                        break
 
-            TruncateIndex = FirstOccurenceNaturalNumber + RoundAfterDigitsCound - GetDecimalPointPosition
+                TruncateIndex = FirstOccurenceNaturalNumber + RoundAfterDigitsCound - GetDecimalPointPosition
 
-            RoundedValue = truncate(UnroundedValue, decimals=TruncateIndex)
+                RoundedValue = truncate(UnroundedValue, decimals=TruncateIndex)
 
-            DfAsMatrix[x, y] = RoundedValue
+                DfAsMatrix[x, y] = RoundedValue
 
 
         ijj['results'] = pd.DataFrame(DfAsMatrix, 

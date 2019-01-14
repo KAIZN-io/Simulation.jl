@@ -214,11 +214,11 @@ cwd = os.getcwd()
 dict_system_switch = {
                     # 'create_ADaM_csv' : False,
                     # 'df_to_latex' : False,
-                    'save_figures': [True, 'png'],
+                    'save_figures': [False, 'png'],
                      }
 
 dict_visualisation = {
-                    'graph' : False,
+                    'graph' : True,
                     # 'subplots' : True,
                     'dose_response' : False,
                     'get_terms' : ['r_os'],
@@ -357,10 +357,10 @@ CompareSeq_dict = {
     'combined_models': 72,
     'ion': 53,
     'hog': 24,
-    'volume': 18
+    'volume': 19
 }
 
-SingleModels = ['hog']
+SingleModels = ['volume']
 for i in SingleModels:
     CompareSeq = {}
     CompareSeq['combined_models'] = CompareSeq_dict['combined_models']
@@ -375,10 +375,10 @@ for i in SingleModels:
         x['volume'] = (4/3) * np.pi * x['volume']**3
         x['combined_models'] = (4/3) * np.pi * x['combined_models']**3
 
-    sql_USUBJID = TestSubstance_dict[i]
+    # sql_USUBJID = TestSubstance_dict[i]
 
-    VisualisationDesign.plotTimeSeries(TimeSeriesData_df=x,
-                                       SubplotLogic={TestSubstanceUnit_dict[i]: [i, 'combined_models']})
+    # VisualisationDesign.plotTimeSeries(TimeSeriesData_df=x,
+    #                                    SubplotLogic={TestSubstanceUnit_dict[i]: [i, 'combined_models']})
 
 
 """try to get the data from the database"""

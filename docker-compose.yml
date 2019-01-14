@@ -33,13 +33,7 @@ services:
           - "db_postgres"
 
   sdtm:
-
-    # build the api-server with the Dockerfile found at context
-    build:
-      context: .
-
-    # name its this
-    image: python_postgres_image
+    image: janlucaklees/docker-image-q
 
     # was sdtm braucht: ein hochgefahrene Datenbank (in diesem Beispiel)
     # wie Verzweigungen zwischen Programmen auslegen

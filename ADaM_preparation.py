@@ -11,7 +11,12 @@ from argparse import Namespace
 def compareModels(ModelsToCompare_list = [], TestSubstance = '', ModelSeq={}):
     """get the data"""
     conn = psycopg2.connect(host='localhost', dbname='simulation_results')
-
+    """host name taken from docker-compose.yml"""
+    # conn = psycopg2.connect(
+    #     host='db_postgres',
+    #     user='postgres',
+    #     dbname='simulation_results'
+    # )
     """open a cursor to perform database operations"""
     cur = conn.cursor()
     
@@ -42,7 +47,12 @@ def compareModels(ModelsToCompare_list = [], TestSubstance = '', ModelSeq={}):
 
 def getDatafromSQL(sql_STUDYID = '', sql_USUBJID = '', sql_SEQ_list = []):
     conn = psycopg2.connect(host='localhost', dbname='simulation_results')
-
+    """host name taken from docker-compose.yml"""
+    # conn = psycopg2.connect(
+    #     host='db_postgres',
+    #     user='postgres',
+    #     dbname='simulation_results'
+    # )
     """open a cursor to perform database operations"""
     cur = conn.cursor()
 
@@ -131,6 +141,12 @@ def getDatafromSQL(sql_STUDYID = '', sql_USUBJID = '', sql_SEQ_list = []):
 def getEquationTermsformSQL(sql_USUBJID='', SqlQueryTerms_list=[]):
     
     conn = psycopg2.connect(host='localhost', dbname='simulation_results')
+    """host name taken from docker-compose.yml"""
+    # conn = psycopg2.connect(
+    #     host='db_postgres',
+    #     user='postgres',
+    #     dbname='simulation_results'
+    # )
 
     sql_USUBJID = sql_USUBJID+'_terms'
     Query = 'SELECT index, ' + ','.join(SqlQueryTerms_list) +' FROM {}."51";'
@@ -189,89 +205,3 @@ def create_ADaM_csv(RUN_SEQ = {}):
         writer.writeheader()
         writer.writerows(toCSV)
 
-def get_data_from_csv():
-    pass
-    # with open('csv_datafiles/{0}/ADaM.csv'.format(sql_USUBJID),\
-    #             'r', newline='') as csvfile:
-    #     reader = csv.reader(csvfile)
-    #     reader_list = [x for x in reader]
-    #     ADaM_column_names = reader_list[0]
-    #
-    #     ADaM_df_dict = {}
-    #     ORRES_list = []
-    #     ADaM_df_index = []
-    #     PDTESTCD_list = []
-    #
-    #     for TESTCD_iterator in reader_list[1:]:
-    #
-    #         ORRES_list.append(float(TESTCD_iterator[ADaM_column_names.index('PDORRES')]))
-    #         ADaM_df_index.append(float(TESTCD_iterator[ADaM_column_names.index('PDDTC')]))
-    #         TESTCD_candidate = TESTCD_iterator[ADaM_column_names.index('PDTESTCD')]
-    #
-    #         if TESTCD_candidate not in PDTESTCD_list:
-    #             PDTESTCD_list.append(TESTCD_candidate)
-    #
-    #
-    #     ADaM_chunks = [ORRES_list[x:x+len(PDTESTCD_list)] for x in
-    #                     range(0, len(ORRES_list), len(PDTESTCD_list))]
-    #
-    #     ADaM_df_index = list(set(ADaM_df_index))
-    #     ADaM_df_index.sort()
-    #
-    #     # create the ODE_RESULTS DataFrame
-    #     ODE_RESULTS_csv = pd.DataFrame(ADaM_chunks,
-    #                                     index=ADaM_df_index,
-    #                                     columns=PDTESTCD_list)
-
-        # dict_running_chit[SEQ]['USUBJID'] = sql_USUBJID
-        # dict_running_chit[SEQ]['SEQ'] = SEQ
-        # dict_running_chit[SEQ]['EXCAT'] = EX_dict['excat']
-        # dict_running_chit[SEQ]['EXTRT'] = EX_dict['extrt']
-        # dict_running_chit[SEQ]['EXDOSE'] = EX_dict['exdose']
-        # dict_running_chit[SEQ]['EXDOSU'] = EX_dict['exdosu']
-        # dict_running_chit[SEQ]['EXSTDTC'] = EX_dict['exstdtc']
-        # dict_running_chit[SEQ]['ODE_RESULTS'] = ODE_RESULTS_csv
-        # dict_running_chit[SEQ]['PDORRESU'] = PDORRESU_dict
-
-# TODO: automatische kreierung der benoetigten database tabellen
-# EX_PD_table_creation()
-
-
-# sql_STUDYID = 'Yeast_BSc'
-# sql_USUBJID = 'combined_models'
-# sql_SEQ_list = [1]
-# testtest = get_the_data(sql_STUDYID=sql_STUDYID,sql_USUBJID=sql_USUBJID, \
-#                         sql_SEQ_list=sql_SEQ_list)
-# print(testtest)
-
-# testtst = get_the_data()
-
-# # NOTE: update database
-# keys_db = tuple(EX_dict.keys())
-# values_db = tuple(EX_dict.values())
-# print(len(keys_db))
-
-
-# NOTE: dict to sql database
-# try:
-# cur.execute(sql.SQL("INSERT INTO combined_models.extest (UPPER({})) VALUES {};").format(\
-#                 sql.Identifier(keys_db),sql.Identifier(values_db)))
-# insert_statement = 'insert into combined_models.extest upper(%s) values %s'
-# cur.execute("INSERT INTO combined_models.extest ("DOMAIN", "USUBJID", "EXSEQ", "EXCAT", "EXTRT", "EXDOSE", "EXDOSU", "EXSTDTC", "CO") VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)", values_db)
-# cur.execute(cur.mogrify(insert_statement, (AsIs(','.join(keys_db)), tuple(values_db))))
-
-# except:
-#     pass
-
-# conn.commit()
-
-# NOTE: following code works!
-# with open('csv_datafiles/{0}/PD.csv'.format(schema_name), 'r') as f:
-#     next(f)
-#     # copy_from(file, table, sep='\t', null='\\N', size=8192, columns=None)
-#
-#     # upper case letters must be in double quotes
-#     cur.copy_from(f,'combined_models.pd', sep=',')
-#
-# # When commit is called, the PostgreSQL engine will run all the queries at once.
-# conn.commit()

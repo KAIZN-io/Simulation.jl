@@ -231,9 +231,9 @@ if __name__ == "__main__":
     dict_model_switch = {
                         'combined_models': False,
                         # 'dummie': False,
-                        'hog': True,
+                        'hog': False,
                         'ion': False,
-                        'volume': False,
+                        'volume': True,
                          }
 
     dict_time = {
@@ -287,7 +287,7 @@ if __name__ == "__main__":
     # NOTE : Hog Model --> Model Version 4 ist besser
     # NOTE: SpecificParameterVersionSEQ muss die 1 behalten, da die Parameter nicht veraendert wurden
     dict_system_switch = {
-                        'export_data_to_sql' : False,
+                        'export_data_to_sql' : True,
                         'export_terms_data_to_sql' : False,
                         'SpecificInitValuesVersionSEQ' : [5],
                         'SpecificModelVersionSEQ' : [1],
@@ -296,7 +296,7 @@ if __name__ == "__main__":
 
     """get the right pipelines for the choosen model simulation"""
     conn = psycopg2.connect(host='localhost', dbname='simulation_results')
-
+    # """host name taken from docker-compose.yml"""
     # conn = psycopg2.connect(
     #     host='db_postgres',
     #     user='postgres',

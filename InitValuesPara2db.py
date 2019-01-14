@@ -1,6 +1,6 @@
 __version__ = '0.0.1'
 
-"""only execute this script
+""""create the second part of the database structure
 
 pushes the initial values and the parameter to the database
 """
@@ -8,13 +8,18 @@ pushes the initial values and the parameter to the database
 
 exec(open("SYSTEM/py_packages.py").read())
 
-
-conn = psycopg2.connect(host='localhost', dbname='simulation_results')
+"""host name taken from docker-compose.yml"""
+conn = psycopg2.connect(
+    host='db_postgres',
+    user='postgres',
+    dbname='simulation_results'
+)
+# conn = psycopg2.connect(host='localhost', dbname='simulation_results')
 cur = conn.cursor()
 
 
-# allModels_list = ['ion','hog', 'volume', 'combined_models']
-allModels_list = ['combined_models']
+allModels_list = ['ion','hog', 'volume', 'combined_models']
+# allModels_list = ['combined_models']
 
 
 
@@ -131,3 +136,49 @@ for model in allModels_list:
             conn.commit()
     except:
         pass
+
+    """create units sql table"""
+    try:
+        cur.execute(sql.SQL("""
+            CREATE TABLE {}.{}(
+                "testcd" text,
+                "test" text,
+                "orresu" text,
+                PRIMARY KEY ("testcd")
+            )
+            """).format(sql.Identifier(model), sql.Identifier("orresu_equations")))
+    except:
+        pass
+
+    conn.commit()
+
+    try:
+        """get all the units"""
+        exec(open('Single_Models/{0}/{0}_orresu_dict.py'.format(model), encoding="utf-8").read())
+
+        ORRESU_dict = {}
+        ORRESU_dict = eval('{}_orresu_dict'.format(model))
+
+        for i in ORRESU_dict.values():
+            Orresu2Sql_dict = {}
+            Orresu2Sql_dict['testcd'] = i[0]
+            Orresu2Sql_dict['orresu'] = i[1]
+
+            """update database"""
+            keys_db = tuple(Orresu2Sql_dict.keys())
+            values_db = tuple(Orresu2Sql_dict.values())
+
+            """dict to sql database"""
+            try:
+                insert_statement = 'insert into {}.orresu_equations (%s) values %s'.format(
+                    model)
+                cur.execute(cur.mogrify(insert_statement, (AsIs(','.join(keys_db)), tuple(values_db))))
+            except:
+                pass
+
+            conn.commit()
+    except:
+        pass
+
+    cur.close()
+    conn.close()

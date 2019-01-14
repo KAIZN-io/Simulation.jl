@@ -394,24 +394,7 @@ try:
 
 except:
     pass
-# try:
-#     cur.execute(sql.SQL("""
-#         CREATE TABLE {}.{}(
-#             DOMAIN text,
-#             USUBJID text,
-#             SEQ text,
-#             GRPID text,
-#             TESTCD text,
-#             TEST text,
-#             CAT text,
-#             ORRES numeric,
-#             ORRESU text,
-#             PRIMARY KEY (USUBJID, SEQ)
-#         )
-#         """).format(sql.Identifier(schema_name),sql.Identifier("parameter")))
-#
-# except:
-#     pass
+
 conn.commit()
 
 SEQ = 1
@@ -464,31 +447,6 @@ cur.close()
 conn.close()
 
 
-
-
-
-
-row = 10
-ion_schablone = ion_df.columns.tolist()
-# for test_substance in ion_schablone:
-#     print(test_substance)
-#     print(combined_df[test_substance].iloc[row])
-#     print(ion_df[test_substance].iloc[row])
-
-# T = 303.15,
-# R = 8.314
-# L_HCl = 1.298 * 1e-9
-# Cl_in = 0.545
-# Cl_out = 0.1 * 1126
-# a_log = np.log(Cl_in/Cl_out)
-# # a_test = R*T*(L_HCl*np.log(Cl_in/Cl_out))
-
-# xyz = 'patJ_H3'
-# plt.plot(ion_df[xyz])
-# plt.plot(combined_df[xyz])
-# plt.plot(ion_df)
-# # plt.plot(combined_df)
-# plt.show()
 
 # NOTE: for calculation of correlation, the values must have the same timestamps!
 # new scale

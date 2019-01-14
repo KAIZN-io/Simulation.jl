@@ -1,7 +1,11 @@
+__version__ = "0.0.1"
+
+"""does not work yet in the cluster format. will be updated in the future"""
+
 exec(open("SYSTEM/py_packages.py").read())
 
 
-TargetModel = 'hog'
+TargetModel = 'volume'
 vonWoherIchdieDatenhole = 'combined_models'
 
 conn = psycopg2.connect(host='localhost', dbname='simulation_results')
@@ -47,6 +51,11 @@ if TargetModel == 'hog':
     OdeSolutionAtTimepoint_dict['V_os'] = 4/3 * \
         np.pi * OdeSolutionAtTimepoint_dict['r_os'] ** 3
 
+"""some unit changes for c_i volume model"""
+if TargetModel == 'volume':
+    OdeSolutionAtTimepoint_dict['V'] = 4/3 * \
+        np.pi * OdeSolutionAtTimepoint_dict['r'] ** 3
+    OdeSolutionAtTimepoint_dict['c_i'] = OdeSolutionAtTimepoint_dict['c_i'] * OdeSolutionAtTimepoint_dict['V'] * 1e-18
 
 # TODO: create 4 new possible ODE states --> now i only make number 2
 """

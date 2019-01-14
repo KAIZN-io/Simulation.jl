@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.12.12)  13 JAN 2019 10:42
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.12.12)  14 JAN 2019 11:48
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -260,7 +260,7 @@ Class scrartcl Warning: Usage of package `fancyhdr' together
 (scrartcl)              `\addtokomafont' for the page style elements need
 (scrartcl)              explicite user intervention to work.
 (scrartcl)              Nevertheless, using requested
-(scrartcl)              package `fancyhdr' on input line 9.
+(scrartcl)              package `fancyhdr' on input line 10.
 
 (/usr/local/texlive/2018/texmf-dist/tex/latex/fancyhdr/fancyhdr.sty
 Package: fancyhdr 2017/06/30 v3.9a Extensive control of page headers and footer
@@ -2010,25 +2010,25 @@ Package: chemformula 2017/03/23 v4.15e typeset chemical compounds and reactions
 (./Bachelor_Thesis.aux)
 \openout1 = `Bachelor_Thesis.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 25.
-LaTeX Font Info:    ... okay on input line 25.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 25.
-LaTeX Font Info:    ... okay on input line 25.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 25.
-LaTeX Font Info:    ... okay on input line 25.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 25.
-LaTeX Font Info:    ... okay on input line 25.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 25.
-LaTeX Font Info:    ... okay on input line 25.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 25.
-LaTeX Font Info:    ... okay on input line 25.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 25.
-LaTeX Font Info:    Try loading font information for TS1+cmr on input line 25.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 26.
+LaTeX Font Info:    ... okay on input line 26.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 26.
+LaTeX Font Info:    ... okay on input line 26.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 26.
+LaTeX Font Info:    ... okay on input line 26.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 26.
+LaTeX Font Info:    ... okay on input line 26.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 26.
+LaTeX Font Info:    ... okay on input line 26.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 26.
+LaTeX Font Info:    ... okay on input line 26.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 26.
+LaTeX Font Info:    Try loading font information for TS1+cmr on input line 26.
 
 (/usr/local/texlive/2018/texmf-dist/tex/latex/base/ts1cmr.fd
 File: ts1cmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
-LaTeX Font Info:    ... okay on input line 25.
+LaTeX Font Info:    ... okay on input line 26.
 
 (/usr/local/texlive/2018/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
@@ -2082,11 +2082,11 @@ File: translations-basic-dictionary-english.trsl (english translation file `tra
 nslations-basic-dictionary')
 )
 Package translations Info: loading dictionary `translations-basic-dictionary' f
-or `english'. on input line 25.
+or `english'. on input line 26.
 .................................................
 . chemgreek info: "mapping-activated"
 . 
-. Activating mapping `default' on line 25.
+. Activating mapping `default' on line 26.
 .................................................
 
 *************************************************
@@ -2100,30 +2100,30 @@ ABD: EveryShipout initializing macros
 .................................................
 . LaTeX info: "xparse/define-command"
 . 
-. Defining command \insitu with sig. 'O{}' on line 25.
+. Defining command \insitu with sig. 'O{}' on line 26.
 .................................................
 .................................................
 . LaTeX info: "xparse/define-command"
 . 
-. Defining command \abinitio with sig. 'O{}' on line 25.
+. Defining command \abinitio with sig. 'O{}' on line 26.
 .................................................
 .................................................
 . LaTeX info: "xparse/define-command"
 . 
-. Defining command \invacuo with sig. 'O{}' on line 25.
+. Defining command \invacuo with sig. 'O{}' on line 26.
 .................................................
  (./chapter/Titelblatt.tex
 <picture/HUlogo.png, id=4, 661.0296pt x 132.495pt>
 File: picture/HUlogo.png Graphic file (type png)
 <use picture/HUlogo.png>
-Package pdftex.def Info: picture/HUlogo.png  used on input line 8.
+Package pdftex.def Info: picture/HUlogo.png  used on input line 12.
 (pdftex.def)             Requested size: 448.13095pt x 89.82448pt.
-LaTeX Font Info:    Try loading font information for U+msa on input line 8.
+LaTeX Font Info:    Try loading font information for U+msa on input line 12.
 
 (/usr/local/texlive/2018/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 8.
+LaTeX Font Info:    Try loading font information for U+msb on input line 12.
 
 (/usr/local/texlive/2018/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
@@ -2131,17 +2131,12 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 
 LaTeX Warning: No \author given.
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 9--12
-
- []
-
 [1
 Non-PDF special ignored!
 <special> header=psfrag.pro
 
 {/usr/local/texlive/2018/texmf-var/fonts/map/pdftex/updmap/pdftex.map} <./pictu
-re/HUlogo.png>]) (./chapter/Abstract.tex
+re/HUlogo.png>] [2]) (./chapter/Abstract.tex
 LaTeX Font Info:    Try loading font information for T1+cmss on input line 1.
 
 (/usr/local/texlive/2018/texmf-dist/tex/latex/base/t1cmss.fd
@@ -2168,36 +2163,36 @@ Underfull \hbox (badness 10000) in paragraph at lines 12--16
  []
 
 [1]
-Underfull \hbox (badness 10000) in paragraph at lines 28--30
+Underfull \hbox (badness 10000) in paragraph at lines 29--31
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 28--30
+Underfull \hbox (badness 10000) in paragraph at lines 29--31
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 31--33
+Underfull \hbox (badness 10000) in paragraph at lines 32--34
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 31--33
+Underfull \hbox (badness 10000) in paragraph at lines 32--34
 
  []
 
 [2] [3]
-Underfull \hbox (badness 10000) in paragraph at lines 82--88
+Underfull \hbox (badness 10000) in paragraph at lines 84--90
 
  []
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 93--96
+[4]
+Underfull \hbox (badness 10000) in paragraph at lines 95--98
 
  []
 
-[4]) (./chapter/MaterialAndMethods.tex
+[5]) (./chapter/MaterialAndMethods.tex
 Underfull \hbox (badness 10000) in paragraph at lines 10--17
 
  []
@@ -2212,13 +2207,13 @@ Underfull \hbox (badness 10000) in paragraph at lines 19--21
 
  []
 
-[5]) (./chapter/Results.tex
-<picture/Ion_Paper.png, id=51, 363.3575pt x 255.95625pt>
+[6]) (./chapter/Results.tex
+<picture/Ion_Paper.png, id=58, 363.3575pt x 255.95625pt>
 File: picture/Ion_Paper.png Graphic file (type png)
 <use picture/Ion_Paper.png>
 Package pdftex.def Info: picture/Ion_Paper.png  used on input line 40.
 (pdftex.def)             Requested size: 224.06548pt x 157.83981pt.
-<picture/ion_examine.png, id=52, 705.1143pt x 540.21825pt>
+<picture/ion_examine.png, id=59, 705.1143pt x 540.21825pt>
 File: picture/ion_examine.png Graphic file (type png)
 <use picture/ion_examine.png>
 Package pdftex.def Info: picture/ion_examine.png  used on input line 46.
@@ -2233,13 +2228,13 @@ Underfull \hbox (badness 10000) in paragraph at lines 33--52
 
  []
 
-[6]
-<picture/Hog_Paper.png, id=56, 356.33125pt x 392.46625pt>
+[7]
+<picture/Hog_Paper.png, id=63, 356.33125pt x 392.46625pt>
 File: picture/Hog_Paper.png Graphic file (type png)
 <use picture/Hog_Paper.png>
 Package pdftex.def Info: picture/Hog_Paper.png  used on input line 61.
 (pdftex.def)             Requested size: 224.06548pt x 246.78792pt.
-<picture/hog_examine.png, id=57, 699.21225pt x 540.21825pt>
+<picture/hog_examine.png, id=64, 699.21225pt x 540.21825pt>
 File: picture/hog_examine.png Graphic file (type png)
 <use picture/hog_examine.png>
 Package pdftex.def Info: picture/hog_examine.png  used on input line 67.
@@ -2249,12 +2244,12 @@ Overfull \hbox (2.61049pt too wide) in paragraph at lines 59--71
 []$[]$ $[]$ 
  []
 
-<picture/Volume_Paper.png, id=58, 263.98625pt x 196.735pt>
+<picture/Volume_Paper.png, id=65, 263.98625pt x 196.735pt>
 File: picture/Volume_Paper.png Graphic file (type png)
 <use picture/Volume_Paper.png>
 Package pdftex.def Info: picture/Volume_Paper.png  used on input line 82.
 (pdftex.def)             Requested size: 224.06548pt x 166.98236pt.
-<picture/volume_examine.png, id=59, 691.58376pt x 540.21825pt>
+<picture/volume_examine.png, id=66, 691.58376pt x 540.21825pt>
 File: picture/volume_examine.png Graphic file (type png)
 <use picture/volume_examine.png>
 Package pdftex.def Info: picture/volume_examine.png  used on input line 88.
@@ -2264,9 +2259,8 @@ Overfull \hbox (2.61049pt too wide) in paragraph at lines 80--92
 []$[]$ $[]$ 
  []
 
-[7 <./picture/Ion_Paper.png> <./picture/ion_examine.png>] [8 <./picture/Hog_Pap
-er.png> <./picture/hog_examine.png> <./picture/Volume_Paper.png> <./picture/vol
-ume_examine.png>]
+[8 <./picture/Ion_Paper.png> <./picture/ion_examine.png>] [9 <./picture/Hog_Pap
+er.png> <./picture/hog_examine.png>]
 Underfull \hbox (badness 10000) in paragraph at lines 117--117
 []|\T1/cmr/m/n/10 internal / ex-ter-nal
  []
@@ -2292,11 +2286,14 @@ Overfull \hbox (8.97615pt too wide) in paragraph at lines 110--127
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 130--132
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 129--132
 
  []
 
-<picture/model_intersections.png, id=72, 788.546pt x 518.738pt>
+<picture/model_intersections.png, id=78, 788.546pt x 518.738pt>
 File: picture/model_intersections.png Graphic file (type png)
 <use picture/model_intersections.png>
 Package pdftex.def Info: picture/model_intersections.png  used on input line 13
@@ -2310,12 +2307,12 @@ Underfull \hbox (badness 10000) in paragraph at lines 144--146
 
  []
 
-<picture/Drug_response.png, id=73, 422.98026pt x 330.23375pt>
+<picture/Drug_response.png, id=79, 422.98026pt x 330.23375pt>
 File: picture/Drug_response.png Graphic file (type png)
 <use picture/Drug_response.png>
 Package pdftex.def Info: picture/Drug_response.png  used on input line 155.
 (pdftex.def)             Requested size: 358.50612pt x 279.8988pt.
-<picture/combined_models_71.png, id=74, 828.2945pt x 490.03075pt>
+<picture/combined_models_71.png, id=80, 828.2945pt x 490.03075pt>
 File: picture/combined_models_71.png Graphic file (type png)
 <use picture/combined_models_71.png>
 Package pdftex.def Info: picture/combined_models_71.png  used on input line 167
@@ -2326,40 +2323,41 @@ Underfull \hbox (badness 10000) in paragraph at lines 150--173
 
  []
 
-[9]
+[10 <./picture/Volume_Paper.png> <./picture/volume_examine.png>]
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
+[11]
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-<picture/Hog1PPn_71.png, id=85, 843.35075pt x 482.80376pt>
-File: picture/Hog1PPn_71.png Graphic file (type png)
-<use picture/Hog1PPn_71.png>
-Package pdftex.def Info: picture/Hog1PPn_71.png  used on input line 181.
-(pdftex.def)             Requested size: 358.50612pt x 205.23677pt.
-<picture/r_71.png, id=86, 810.6285pt x 482.80376pt>
+<picture/r_71.png, id=96, 810.6285pt x 540.21825pt>
 File: picture/r_71.png Graphic file (type png)
 <use picture/r_71.png>
-Package pdftex.def Info: picture/r_71.png  used on input line 191.
-(pdftex.def)             Requested size: 358.50612pt x 213.51726pt.
-<picture/Deltaphi_71.png, id=87, 821.8705pt x 490.03075pt>
+Package pdftex.def Info: picture/r_71.png  used on input line 181.
+(pdftex.def)             Requested size: 358.50612pt x 238.90848pt.
+<picture/Hog1PPn_71.png, id=97, 850.7785pt x 540.21825pt>
+File: picture/Hog1PPn_71.png Graphic file (type png)
+<use picture/Hog1PPn_71.png>
+Package pdftex.def Info: picture/Hog1PPn_71.png  used on input line 191.
+(pdftex.def)             Requested size: 358.50612pt x 227.64023pt.
+<picture/Deltaphi_71.png, id=98, 821.8705pt x 490.03075pt>
 File: picture/Deltaphi_71.png Graphic file (type png)
 <use picture/Deltaphi_71.png>
 Package pdftex.def Info: picture/Deltaphi_71.png  used on input line 201.
 (pdftex.def)             Requested size: 358.50612pt x 213.75983pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 175--212
+Underfull \hbox (badness 10000) in paragraph at lines 175--210
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 175--212
+Underfull \hbox (badness 10000) in paragraph at lines 175--210
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 175--212
+Underfull \hbox (badness 10000) in paragraph at lines 175--210
 
  []
 
@@ -2372,12 +2370,7 @@ LaTeX Warning: `!h' float specifier changed to `!ht'.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-[10 <./picture/model_intersections.png>]
-
-LaTeX Warning: Text page 11 contains only floats.
-
-[11 <./picture/Drug_response.png> <./picture/combined_models_71.png>] [12 <./pi
-cture/Hog1PPn_71.png> <./picture/r_71.png>] [13 <./picture/Deltaphi_71.png>])
+[12 <./picture/model_intersections.png>] [13 <./picture/Drug_response.png>])
 (./chapter/Discussion.tex
 Underfull \hbox (badness 10000) in paragraph at lines 2--8
 
@@ -2408,56 +2401,61 @@ Underfull \hbox (badness 10000) in paragraph at lines 2--8
 
  []
 
-[14])
-Underfull \hbox (badness 10000) in paragraph at lines 11--35
+[14 <./picture/combined_models_71.png> <./picture/r_71.png>]
+Overfull \vbox (10.74971pt too high) has occurred while \output is active []
+
+
+[15 <./picture/Hog1PPn_71.png> <./picture/Deltaphi_71.png>] [16])
+Underfull \hbox (badness 10000) in paragraph at lines 11--36
 
  []
 
-(./Bachelor_Thesis.bbl [15]) [16] (./chapter/Danksagung.tex [17])
+(./Bachelor_Thesis.bbl [17] [18]) [19] (./chapter/Danksagung.tex [20])
 (./chapter/appendix.tex
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-) [18] [19] (./Bachelor_Thesis.aux) ) 
+[21]) [22] (./Bachelor_Thesis.aux) ) 
 Here is how much of TeX's memory you used:
- 31736 strings out of 492649
- 661255 string characters out of 6129621
- 799848 words of memory out of 5000000
- 35040 multiletter control sequences out of 15000+600000
- 553913 words of font info for 88 fonts, out of 8000000 for 9000
+ 31742 strings out of 492649
+ 661328 string characters out of 6129621
+ 799854 words of memory out of 5000000
+ 35043 multiletter control sequences out of 15000+600000
+ 556233 words of font info for 91 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 103i,11n,107p,10363b,402s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/local/texlive/2018/texmf-dist/fonts/
-enc/dvips/cm-super/cm-super-t1.enc}</usr/local/texlive/2018/texmf-dist/fonts/ty
-pe1/public/amsfonts/cm/cmex10.pfb></usr/local/texlive/2018/texmf-dist/fonts/typ
-e1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type
-1/public/amsfonts/cm/cmmi12.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1
-/public/amsfonts/cm/cmmi5.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/p
-ublic/amsfonts/cm/cmmi6.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/pub
-lic/amsfonts/cm/cmmi7.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/publi
-c/amsfonts/cm/cmmi8.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/
-amsfonts/cm/cmr10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/am
-sfonts/cm/cmr12.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsf
-onts/cm/cmr6.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfont
-s/cm/cmr7.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/c
-m/cmr8.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/c
-msy10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cm
-sy7.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy
-8.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/cm-super/sfbx1000.
-pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/cm-super/sfbx1200.pf
-b></usr/local/texlive/2018/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb>
-</usr/local/texlive/2018/texmf-dist/fonts/type1/public/cm-super/sfrm1200.pfb></
-usr/local/texlive/2018/texmf-dist/fonts/type1/public/cm-super/sfrm1440.pfb></us
-r/local/texlive/2018/texmf-dist/fonts/type1/public/cm-super/sfrm2074.pfb></usr/
-local/texlive/2018/texmf-dist/fonts/type1/public/cm-super/sfsl1200.pfb></usr/lo
-cal/texlive/2018/texmf-dist/fonts/type1/public/cm-super/sfsx1200.pfb></usr/loca
-l/texlive/2018/texmf-dist/fonts/type1/public/cm-super/sfsx1440.pfb></usr/local/
-texlive/2018/texmf-dist/fonts/type1/public/cm-super/sfsx1728.pfb></usr/local/te
-xlive/2018/texmf-dist/fonts/type1/public/cm-super/sfti1200.pfb>
-Output written on Bachelor_Thesis.pdf (22 pages, 4302797 bytes).
+ 103i,11n,107p,10363b,418s stack positions out of 5000i,500n,10000p,200000b,80000s
+{/usr/local/texlive/2018/texmf-dist/fonts/e
+nc/dvips/cm-super/cm-super-t1.enc}</usr/local/texlive/2018/texmf-dist/fonts/typ
+e1/public/amsfonts/cm/cmex10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type
+1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1
+/public/amsfonts/cm/cmmi12.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/
+public/amsfonts/cm/cmmi5.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/pu
+blic/amsfonts/cm/cmmi6.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/publ
+ic/amsfonts/cm/cmmi7.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public
+/amsfonts/cm/cmmi8.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/a
+msfonts/cm/cmr10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/ams
+fonts/cm/cmr12.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfo
+nts/cm/cmr6.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts
+/cm/cmr7.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm
+/cmr8.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cm
+sy10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cms
+y7.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8
+.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/cm-super/sfbx1000.p
+fb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/cm-super/sfbx1200.pfb
+></usr/local/texlive/2018/texmf-dist/fonts/type1/public/cm-super/sfbx1440.pfb><
+/usr/local/texlive/2018/texmf-dist/fonts/type1/public/cm-super/sfbx1728.pfb></u
+sr/local/texlive/2018/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb></usr
+/local/texlive/2018/texmf-dist/fonts/type1/public/cm-super/sfrm1200.pfb></usr/l
+ocal/texlive/2018/texmf-dist/fonts/type1/public/cm-super/sfrm1440.pfb></usr/loc
+al/texlive/2018/texmf-dist/fonts/type1/public/cm-super/sfsl1200.pfb></usr/local
+/texlive/2018/texmf-dist/fonts/type1/public/cm-super/sfsx1200.pfb></usr/local/t
+exlive/2018/texmf-dist/fonts/type1/public/cm-super/sfsx1440.pfb></usr/local/tex
+live/2018/texmf-dist/fonts/type1/public/cm-super/sfsx1728.pfb></usr/local/texli
+ve/2018/texmf-dist/fonts/type1/public/cm-super/sfti1200.pfb>
+Output written on Bachelor_Thesis.pdf (26 pages, 4368587 bytes).
 PDF statistics:
- 211 PDF objects out of 1000 (max. 8388607)
- 133 compressed objects within 2 object streams
+ 228 PDF objects out of 1000 (max. 8388607)
+ 145 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
  78 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -147,7 +147,7 @@ We removed the volume related variables and $\pi_t$ from the hog model because t
 
 %%% bis hier hin eigentlich ganz ok
 \subsection{combined model}
-For the analysis and validation of the merged model we choosed the nuclear phophorylated Hog1 (Hog1PPn) as the control substance. Hog1PPn is also used in the hog model as the output because it regulates the expression of hundred of genes \cite{Zi_2010}. We borrowed the idea of a dose response curve from the theme field pharmocokinetic as a visualized output, showed below.  \\
+For the analysis and validation of the merged model we choosed the nuclear phophorylated Hog1 (Hog1PPn) as the control substance. Hog1PPn is also used in the hog model as the output because it regulates the expression of hundred of genes \cite{Zi_2010}. We borrowed the idea of a dose response curve from the theme field pharmocokinetic as a visualized output, showed below in figure \ref{DrugResponseCurve}.  \\
 \begin{figure}[h!]
 	\begin{center}
 		\begin{minipage}{0,8\textwidth}
@@ -158,14 +158,14 @@ For the analysis and validation of the merged model we choosed the nuclear phoph
 		\end{minipage}
 	\end{center}
 \end{figure}
-Under the used settings of the combined model, no difference in the respone of Hog1PPn between different sets of hyperosmotic shocks occured. The simulation time was set to 200s, with an inital glucose stimulus at $t=1s$ and the unique hyperosmotic shock at $t=30s$. \\\\
-As we can see in \ref{SingleDose}, multiple stimulus at predefined times are possible with the model environment. A second stimulus does not results in the same volume and turgor pressure drop as the first one. Cause of clarity, only a set of ODE are visualized. They represent the other ODEs, because they are the output of multiple interacting components. 
+It is indicated that a NaCl stimulus results in a higher overall expression of Hog1PPn in contrast to KCl. Furthermore, picture \ref{DrugResponseCurve} visualizes that a sorbitol shock results in a slight higher overall expression of Hog1PPn per the amount of osmotic activ particles than.\\ The simulation time was set to 200s, with an inital glucose stimulus at $t=1s$ and the unique hyperosmotic shock at $t=30s$. \\\\
+As we can see in figure \ref{SingleDose}, multiple stimulus at predefined times are possible with the model and with the software environment. A second stimulus does not results in the same volume $V$ and turgor pressure $\pi_t$ drop as the first one. Cause of clarity, only a set of ODE are visualized. They represent the other ODEs, because they are the output of multiple interacting components. 
 \begin{figure}[h!]
 	\begin{center}
 		\begin{minipage}{0,8\textwidth}
 			
 			\includegraphics[width=\textwidth]{picture/combined_models_71.png}
-			\caption{Response of Hog1PPn} 
+			\caption{visualized results of a selected set of ODEs from the combined model} 
 			\label{SingleDose} 
 		\end{minipage}
 	\end{center}
@@ -174,6 +174,16 @@ As we can see in \ref{SingleDose}, multiple stimulus at predefined times are pos
 \subsubsection{single models with the initial values from the combined model}
 We furhter asked us, how each of the original paper model would behave, if they have the parametrisation and initial values of the combined model inherited.\\\\
 Every simulation was executed under the condition of a 200 mM NaCl impuls at $t=30s$.\\
+\begin{figure}[h!]
+	\begin{center}
+		\begin{minipage}{0,8\textwidth}
+			
+			\includegraphics[width=\textwidth]{picture/r_71.png}
+			\caption{Responses of the volume $V$} 
+			\label{CombiInitVolume} 
+		\end{minipage}
+	\end{center}
+\end{figure}
 \begin{figure}[h!]
 	\begin{center}
 		\begin{minipage}{0,8\textwidth}
@@ -188,25 +198,14 @@ Every simulation was executed under the condition of a 200 mM NaCl impuls at $t=
 	\begin{center}
 		\begin{minipage}{0,8\textwidth}
 			
-			\includegraphics[width=\textwidth]{picture/r_71.png}
-			\caption{Responses of volume $V$} 
-			\label{CombiInitVolume} 
-		\end{minipage}
-	\end{center}
-\end{figure}
-\begin{figure}[h!]
-	\begin{center}
-		\begin{minipage}{0,8\textwidth}
-			
 			\includegraphics[width=\textwidth]{picture/Deltaphi_71.png}
-			\caption{Response of membrane potential Deltaphi} 
+			\caption{Response of the membrane potential Deltaphi; a second stimulus of 200 mM NaCl at $t=100s$ } 
 			\label{CombiInitIon} 
 		\end{minipage}
 	\end{center}
 \end{figure}
-As we can see in figure \ref{CombiInitHog} and in figure \ref{CombiInitVolume} the behaviours of the model representing substances show a signifikant difference. For a unknown reason, Hog1PPn (figure \ref{CombiInitHog}) shows a rise in expression a time point $t=20s$ in the abscence of any stimulus. As a side note, the further difference after $t=30s$ are the result of different approaches to simulate the affect of a hyperosmotic shock. \\\\
 Figure \ref{CombiInitVolume} illustrates that the inital values from the combined model for the volume model ODE components does not fit at all. The model 
 ODEs quickly reach a steady state far below from the combined model. It does not exists a drop in volume when faced with a stimulus. The volume model assumes the external osmolyt concentration $c_e$ and corresponding external pressure $\pi_e$ as a constant. It simply does not has an interface for noticing a rise in $c_e$ in a running simulation under the used software development conditions.\\\\
-%The ion model (figure \ref{CombiInitIon}) stays in a steady state until the stimulus event. I
-It is shown that in the combined model the ion fluxes representing membrane potential Deltaphi shows a dynamically behaviour in the interplay with volume and hog pathway regulation. After the adaption to the second stimulus, the ion components behave approximately the same.
+On the other hand, figure \ref{CombiInitHog} and \ref{CombiInitIon} show similary results between the corresponding models. It is shown in figure \ref{CombiInitIon} that in the combined model the ion fluxes representing membrane potential Deltaphi shows a more dynamically behaviour in the interplay with volume and hog pathway regulation. Deltaphi from the ion model drops only slightly. After the adaption to the second stimulus, the ion components behave approximately the same between the two models.\\
+
 \newpage

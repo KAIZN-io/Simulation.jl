@@ -9,12 +9,12 @@ pushes the initial values and the parameter to the database
 exec(open("SYSTEM/py_packages.py").read())
 
 """host name taken from docker-compose.yml"""
-conn = psycopg2.connect(
-    host='db_postgres',
-    user='postgres',
-    dbname='simulation_results'
-)
-# conn = psycopg2.connect(host='localhost', dbname='simulation_results')
+# conn = psycopg2.connect(
+#     host='db_postgres',
+#     user='postgres',
+#     dbname='simulation_results'
+# )
+conn = psycopg2.connect(host='localhost', dbname='simulation_results')
 cur = conn.cursor()
 
 
@@ -24,6 +24,7 @@ allModels_list = ['ion','hog', 'volume', 'combined_models']
 
 
 for model in allModels_list:
+
     """create initial values table"""
     try:
         cur.execute(sql.SQL("""
@@ -180,5 +181,5 @@ for model in allModels_list:
     except:
         pass
 
-    cur.close()
-    conn.close()
+cur.close()
+conn.close()

@@ -49,7 +49,7 @@ k_ATPdecr = k_ATPincr / ATP_stimulus
 k_decrArH =  k_incrArH / L_ArHaG
 k_decrHH = k_incrHH / L_HHaG
 
-print(k_ATPdecr,k_decrArH,k_decrHH)
+
 
 ion_init_values = {
                 'H_in' : [3.063e-3  , 'H_in', 'mM','original/ion_model'],

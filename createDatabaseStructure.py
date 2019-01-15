@@ -12,10 +12,7 @@ cur = conn.cursor()
 
 allModels_list = ['ion', 'hog', 'volume', 'combined_models']
 
-
-NameOfModel_list = ['test5']
-
-for NameOfModel in NameOfModel_list:
+for NameOfModel in allModels_list:
 
     """check if the model structure is already created"""
     cur.execute("""

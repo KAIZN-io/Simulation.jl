@@ -109,52 +109,52 @@
                 "patNa_indt2": "-(J_Na*G)/V_os*1e6",
                 "patNa_indt3": "-Na_in*V_ratio"
             },
-            "unit": "mM"
+            "unit": "mM s^-1"
         },
         "Cl_indt": {
             "component": {
                 "patCl_indt2": "-(J_Cl*G)/V_os*1e6",
                 "patCl_indt3": "-Cl_in*V_ratio"
             },
-            "unit": "mM"
+            "unit": "mM s^-1"
         },
         "K_indt": {
             "component": {
                 "patK_indt2": "-(J_K*G)/V_os*1e6",
                 "patK_indt3": "-K_in*V_ratio"
             },
-            "unit": "mM"
+            "unit": "mM s^-1"
         },
         "H_indt": {
             "component": {
                 "patH_indt2": "-(J_H*G*np.log(10)*H_in)/(V_os*pbc)*1e6",
                 "patH_indt3": "-H_in*V_ratio"
             },
-            "unit": "mM"
+            "unit": "mM s^-1"
         },
         "Na_outdt": {
             "component": {
                 "patNa_outdt1": "(J_Na*G)/V_out*1e6"
             },
-            "unit": "mM"
+            "unit": "mM s^-1"
         },
         "Cl_outdt": {
             "component": {
                 "patCl_outdt1": "(J_Cl*G)/V_out*1e6"
             },
-            "unit": "mM"
+            "unit": "mM s^-1"
         },
         "K_outdt": {
             "component": {
                 "patK_outdt1": "(J_K*G)/V_out*1e6"
             },
-            "unit": "mM"
+            "unit": "mM s^-1"
         },
         "H_outdt": {
             "component": {
                 "patH_outdt1": "(J_H*G)/V_out*1e6"
             },
-            "unit": "mM"
+            "unit": "mM s^-1"
         },
         "R_ref": {
             "component": {
@@ -172,7 +172,7 @@
             "component": {
                 "patR_refdt1": "phi*R_ref*r/(2*d)*max(pi_t-pi_c,0)"
             },
-            "unit": "um"
+            "unit": "um s^-1"
         },
         "r_osdt": {
             "component": {
@@ -180,20 +180,20 @@
                 "patr_osdt3": "-Lp*pi_t",
                 "patr_osdt4": "+Lp*pi_i"
             },
-            "unit": "um"
+            "unit": "um s^-1"
         },
         "r_bdt": {
             "component": {
                 "patr_bdt1": "0.2*R_refdt"
             },
-            "unit": "um"
+            "unit": "um s^-1"
         },
         "rdt": {
             "component": {
                 "patrdt1": "r_bdt",
                 "patrdt2": "+r_osdt"
             },
-            "unit": "um"
+            "unit": "um s^-1"
         },
         "n_totalHog1": {
             "component": {
@@ -205,7 +205,7 @@
             "component": {
                 "pattotalHog1PP1": "(Hog1PPc*V_cyt+Hog1PPn*V_nuc)/n_totalHog1"
             },
-            "unit": "mM fL"
+            "unit": "dimensionless"
         }
     },
     "ODE": {
@@ -231,14 +231,14 @@
                 "patATP2": "-k_ATPdecr*ATP",
                 "patATP3": "-ATP*V_ratio"
             },
-            "condition": "if t >= t0_glucose and ATP < 2.5 and Glucose == True else 0",
+            "condition": "if t >= t0_glucose and ATP < 2.5 and Glucose == True else - ATP * V_ratio",
             "unit": "mM"
         },
         "dDeltaphi": {
             "component": {
                 "patDeltaphi2": "-(2*F/C_m)*(J_H+J_K+J_Na-J_Cl)"
             },
-            "unit": "V"
+            "unit": "J C^-1"
         },
         "dPbs2": {
             "component": {
@@ -376,7 +376,8 @@
                 "patc_i3": "+Cl_indt",
                 "patc_i4": "+H_indt",
                 "patc_i5": "+dGlyc_in",
-                "patc_i6": "+(k_uptake*G-k_consumption*V_cell)/V_cell*1e18"
+                "patc_i6": "+(k_uptake*G-k_consumption*V_cell)/V_cell*1e18",
+                "patc_i7": "-c_i*V_ratio"
             },
             "unit": "mM"
         },

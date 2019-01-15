@@ -3,6 +3,7 @@ __email__ = 'jan.piotraschke@mail.de'
 __version__ = 'bachelor_thesis'
 __license__ = 'private'
 
+# from ADaM import AdaMCreatePNG
 """import the standard used packages"""
 exec(open("SYSTEM/py_packages.py").read())
 from decimal import Decimal
@@ -93,7 +94,13 @@ class netzwerk_daten_gewinnung:
         and dict_system_switch.get('export_terms_data_to_sql') == True:
 
             """sql connection"""
-            engine = create_engine('postgres://janpiotraschke:@localhost:5432/simulation_results', echo=False)
+            engine = create_engine(
+                'postgres://postgres:@localhost:5433/simulation_results', echo=False)
+
+
+            # engine = create_engine(
+            #     'postgres://janpiotraschke:@localhost:5432/simulation_results', echo=False)
+
 
             df_dict_term = {}
             for i in t_ODE_comp:
@@ -289,22 +296,23 @@ if __name__ == "__main__":
     dict_system_switch = {
                         'export_data_to_sql' : True,
                         'export_terms_data_to_sql' : False,
-                        'SpecificInitValuesVersionSEQ' : [5],
+                        'SpecificInitValuesVersionSEQ' : [1],
                         'SpecificModelVersionSEQ' : [1],
                         'SpecificParameterVersionSEQ' : [1]
                          }
 
     """get the right pipelines for the choosen model simulation"""
-    conn = psycopg2.connect(host='localhost', dbname='simulation_results')
-    # """host name taken from docker-compose.yml"""
-    # conn = psycopg2.connect(
-    #     host='db_postgres',
-    #     user='postgres',
-    #     dbname='simulation_results'
-    # )
+    # conn = psycopg2.connect(host='localhost', dbname='simulation_results')
+    """host name taken from docker-compose.yml"""
+    conn = psycopg2.connect(
+        host='db_postgres',
+        user='postgres',
+        dbname='simulation_results'
+    )
 
     """open a cursor to perform database operations"""
     cur = conn.cursor()
+
 
 
     """activated stimuli
@@ -743,5 +751,14 @@ if __name__ == "__main__":
 
                     conn.commit()
 
+            """the following code is only for the first docker vision
+            
+            will be replaced, if the application has a web interface
+            """
+            plt.plot(ijj['results'])
+            plt.show()
+
     cur.close()
     conn.close()
+
+    # AdaMCreatePNG(NameOfModel, SEQ)

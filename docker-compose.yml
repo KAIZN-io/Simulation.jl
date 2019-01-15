@@ -26,7 +26,10 @@ services:
       interval: 10s
       timeout: 10s
       retries: 15
-
+    # erstellt Portmapping; wenn Rechner angesprochen wird, reicht er es ihn den
+    # Container weiter
+    ports: 
+      - "5433:5432"
     networks:
       default:
         aliases:

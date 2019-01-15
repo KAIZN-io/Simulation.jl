@@ -10,6 +10,18 @@ __license__ = 'private'
 exec(open("SYSTEM/py_packages.py").read())
 import ADaM_preparation
 
+
+
+
+
+# def AdaMCreatePNG(NameOfModel, SEQ):
+    
+
+"""choose the model"""
+sql_USUBJID = 'combined_models'
+"""choose the corresponding seq key(s)"""
+sql_SEQ_list = [71]
+
 class VisualisationDesign:
     def plotTimeSeries(TimeSeriesData_df = pd.DataFrame(),
                      SubplotLogic = {},
@@ -62,12 +74,12 @@ class VisualisationDesign:
         """x axis is shared and the ticks are rotated"""
         fig.autofmt_xdate(bottom = 0.2,
                         rotation = 30)
-        fig.suptitle(t='{}_Model'.format(sql_USUBJID.title()),
-                     fontsize=fontSize)
-
-
-        # fig.suptitle(t='Volume',
+        # fig.suptitle(t='{}_Model'.format(sql_USUBJID.title()),
         #              fontsize=fontSize)
+
+
+        fig.suptitle(t='Volume',
+                     fontsize=fontSize)
 
         with sns.color_palette('cubehelix',len(TimeSeriesData_df.columns.tolist())):
 
@@ -76,16 +88,16 @@ class VisualisationDesign:
             #                 rect = [0,0,0.85,1]
             #                 )
 
-            """show the version of the plot"""
-            fig.text(0.99, 0.01,
-                     s='{} - {}'.format(current_date,
-                                        sql_USUBJID.title()),
-                     fontstyle='italic',
-                     color='#999999',
-                     ha='right',
-                     va='bottom',
-                     fontsize='x-small'
-                    )
+            # """show the version of the plot"""
+            # fig.text(0.99, 0.01,
+            #          s='{} - {}'.format(current_date,
+            #                             sql_USUBJID.title()),
+            #          fontstyle='italic',
+            #          color='#999999',
+            #          ha='right',
+            #          va='bottom',
+            #          fontsize='x-small'
+            #         )
 
             """assign each TESTCD to their right subplot"""
             if GeneralizePlot == False:
@@ -211,6 +223,8 @@ current_date = datetime.now().strftime("%Y-%m-%d")
 cwd = os.getcwd()
 
 
+
+
 dict_system_switch = {
                     # 'create_ADaM_csv' : False,
                     # 'df_to_latex' : False,
@@ -237,16 +251,37 @@ dict_visualisation = {
                      }
 
 
-"""choose the model"""
 sql_STUDYID = 'Yeast_BSc'
-sql_USUBJID = 'combined_models'
 
+"""compare models"""
+TestSubstance_dict = {
+    'ion': 'Deltaphi',
+    'hog': 'Hog1PPn',
+    'volume': 'r'
+}
+
+TestSubstanceUnit_dict = {
+    'ion': 'V',
+    'hog': 'mM',
+    'volume': 'fL'
+}
+
+# NOTE: models must have the same simulation lenght
+# NOTE: combined_models = 71 for ion model, 72 for the rest
+CompareSeq_dict = {
+    'combined_models': 72,
+    'ion': 53,
+    'hog': 24,
+    'volume': 19
+}
+
+SingleModels = ['volume']
 # sql_SEQ_list = list(range(31, 44)) #+ list(range(3, 11)) 
 # sql_SEQ_list = list(range(73,86))
 # sql_SEQ_list = list(range(73, 75))
 
 # NOTE : 71 for overview --> combined model
-sql_SEQ_list = [71]
+
 
 """tracking substance"""
 # NOTE: use Hog1PPn as the output of the dose-response curve
@@ -339,28 +374,7 @@ if len(get_terms) > 0:
                                         SubplotLogic=TermsPlotLogic,
                                         Terms=True)
 
-"""compare models"""
-TestSubstance_dict = {
-    'ion': 'Deltaphi',
-    'hog': 'Hog1PPn',
-    'volume': 'r'
-    }
 
-TestSubstanceUnit_dict = {
-    'ion': 'V',
-    'hog':'mM',
-    'volume':'fL'
-} 
-# NOTE: models must have the same simulation lenght
-# NOTE: combined_models = 71 for ion model, 72 for the rest
-CompareSeq_dict = {
-    'combined_models': 72,
-    'ion': 53,
-    'hog': 24,
-    'volume': 19
-}
-
-SingleModels = ['volume']
 for i in SingleModels:
     CompareSeq = {}
     CompareSeq['combined_models'] = CompareSeq_dict['combined_models']

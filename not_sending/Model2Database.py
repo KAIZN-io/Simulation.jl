@@ -8,41 +8,37 @@ import os
 exec(open("SYSTEM/py_packages.py").read())
 
 
-def pushJsonToPostgresql(json_file={}):
-    conn = psycopg2.connect(host='localhost', dbname='simulation_results')
-    cur = conn.cursor()
+# def pushJsonToPostgresql(json_file={}):
+#     conn = psycopg2.connect(host='localhost', dbname='simulation_results')
+#     cur = conn.cursor()
 
-    """create the table for the model versions"""
-    try:
-        cur.execute(sql.SQL("""
-            CREATE TABLE {}.json(
-                seq serial PRIMARY KEY,
-                model_version json 
-            );
-            """).format(sql.Identifier(model)))
-    except:
-        pass
-    conn.commit()
+#     """create the table for the model versions"""
+#     try:
+#         cur.execute(sql.SQL("""
+#             CREATE TABLE {}.json(
+#                 seq serial PRIMARY KEY,
+#                 model_version json 
+#             );
+#             """).format(sql.Identifier(model)))
+#     except:
+#         pass
+#     conn.commit()
 
-    """prepare the json file for the upload"""
-    test = str(json_file)
-    test = test.replace("'", '"')
+#     """prepare the json file for the upload"""
+#     test = str(json_file)
+#     test = test.replace("'", '"')
 
-    """upload the json file"""
-    insert_statement = 'insert into '+NameOfModel+ \
-        '.json(model_version) values (%s)'
-    cur.execute(insert_statement, [test])
+#     """upload the json file"""
+#     insert_statement = 'insert into '+NameOfModel+ \
+#         '.json(model_version) values (%s)'
+#     cur.execute(insert_statement, [test])
 
-    conn.commit()
+#     conn.commit()
 
 """host name taken from docker-compose.yml"""
-conn = psycopg2.connect(
-    host='db_postgres',
-    user='postgres',
-    dbname='simulation_results'
-)
+
     
-# conn = psycopg2.connect(host='localhost', dbname='simulation_results')
+conn = psycopg2.connect(host='localhost', dbname='simulation_results')
 cur = conn.cursor()
 
 """create the database structure for all models"""
@@ -62,70 +58,70 @@ for NameOfModel in ModelList:
         system_comp.remove(i)
 
     """initialize a new model schema"""
-    try:
-        cur.execute(sql.SQL("CREATE SCHEMA {};").format(
-            sql.Identifier(NameOfModel)))
-    except:
-        pass
+    # try:
+    #     cur.execute(sql.SQL("CREATE SCHEMA {};").format(
+    #         sql.Identifier(NameOfModel)))
+    # except:
+    #     pass
 
-    conn.commit()
+    # conn.commit()
 
-    """intervention (EX) domain table creation"""
-    try:
-        cur.execute(sql.SQL("""
-            CREATE TABLE {}.{}(
-                STUDYID text,
-                DOMAIN text,
-                USUBJID text,
-                EXSEQ integer,
-                EXCAT text,
-                EXTRT text,
-                EXDOSE real,
-                EXDOSU text,
-                EXSTDTC_array double precision[],
-                SIMULATION_START double precision,
-                SIMULATION_STOP double precision,
-                CO text,
-                MODELVERSION integer,
-                INITVALUESVERSION integer, 
-                PRIMARY KEY (USUBJID, EXSEQ, EXTRT)
-            )
-            """).format(sql.Identifier(NameOfModel), sql.Identifier('ex')))
+    # """intervention (EX) domain table creation"""
+    # try:
+    #     cur.execute(sql.SQL("""
+    #         CREATE TABLE {}.{}(
+    #             STUDYID text,
+    #             DOMAIN text,
+    #             USUBJID text,
+    #             EXSEQ integer,
+    #             EXCAT text,
+    #             EXTRT text,
+    #             EXDOSE real,
+    #             EXDOSU text,
+    #             EXSTDTC_array double precision[],
+    #             SIMULATION_START double precision,
+    #             SIMULATION_STOP double precision,
+    #             CO text,
+    #             MODELVERSION integer,
+    #             INITVALUESVERSION integer, 
+    #             PRIMARY KEY (USUBJID, EXSEQ, EXTRT)
+    #         )
+    #         """).format(sql.Identifier(NameOfModel), sql.Identifier('ex')))
 
-    except:
-        pass
-    conn.commit()
+    # except:
+    #     pass
+    # conn.commit()
 
-    """findings (PD) domain table creation"""
-    try:
-        cur.execute(sql.SQL("""
-            CREATE TABLE {}.{}(
-                STUDYID text,
-                DOMAIN text,
-                USUBJID text,
-                PDSEQ integer,
-                PDTESTCD text,
-                PDTEST text,
-                PDORRES double precision,
-                PDORRESU text,
-                PDDTC double precision,
-                CO text,
-                PRIMARY KEY (USUBJID, PDSEQ, PDTESTCD, PDDTC)
-            )
-            """).format(sql.Identifier(NameOfModel), sql.Identifier('pd')))
+    # """findings (PD) domain table creation"""
+    # try:
+    #     cur.execute(sql.SQL("""
+    #         CREATE TABLE {}.{}(
+    #             STUDYID text,
+    #             DOMAIN text,
+    #             USUBJID text,
+    #             PDSEQ integer,
+    #             PDTESTCD text,
+    #             PDTEST text,
+    #             PDORRES double precision,
+    #             PDORRESU text,
+    #             PDDTC double precision,
+    #             CO text,
+    #             PRIMARY KEY (USUBJID, PDSEQ, PDTESTCD, PDDTC)
+    #         )
+    #         """).format(sql.Identifier(NameOfModel), sql.Identifier('pd')))
 
-    except:
-        pass
+    # except:
+    #     pass
 
-    conn.commit()
+    # conn.commit()
 
-    """create the term schema"""
-    try:
-        cur.execute(("CREATE SCHEMA {}_terms;").format(NameOfModel))
-    except:
-        pass
+    # """create the term schema"""
+    # try:
+    #     cur.execute(("CREATE SCHEMA {}_terms;").format(NameOfModel))
+    # except:
+    #     pass
 
-    conn.commit()
+    # conn.commit()
 
 
     cur.execute(sql.SQL("""

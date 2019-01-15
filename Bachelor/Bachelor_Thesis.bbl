@@ -14,7 +14,7 @@ Samik Ghosh, Yukiko Matsuoka, Yoshiyuki Asai, Kun-Yi Hsin, and Hiroaki Kitano.
 \bibitem{Feyder2015}
 Serge Feyder, Johan-Owen~De Craene, S{\'{e}}verine Bär, Dimitri Bertazzi, and
   Sylvie Friant.
-\newblock Membrane trafficking in the yeast saccharomyces cerevisiae model.
+\newblock Membrane trafficking in the yeast {Saccharomyces} cerevisiae model.
 \newblock {\em International Journal of Molecular Sciences}, 16(1):1509--1525,
   jan 2015.
 
@@ -34,13 +34,13 @@ Jannis Uhlendorf.
 Susanne Gerber, Martina Fröhlich, Hella Lichtenberg-Frat{\'{e}}, Sergey
   Shabala, Lana Shabala, and Edda Klipp.
 \newblock A thermodynamic model of monovalent cation homeostasis in the yeast
-  saccharomyces cerevisiae.
+  {Saccharomyces} cerevisiae.
 \newblock {\em {PLOS} Computational Biology}, 12(1):e1004703, jan 2016.
 
 \bibitem{volumeModel}
 Tom Altenburg, Björn Goldenbogen, Jannis Uhlendorf, and Edda Klipp.
 \newblock Osmolyte homeostasis controls single cell growth rate and maximum
-  cell size of saccharomyces cerevisiae.
+  cell size of {Saccharomyces} cerevisiae.
 \newblock unpublished, April 2018.
 
 \bibitem{ASimpleMathematicalModel}
@@ -57,7 +57,7 @@ H.~Saito and F.~Posas.
 \bibitem{Zi_2010}
 Zhike Zi, Wolfram Liebermeister, and Edda Klipp.
 \newblock A quantitative study of the hog1 {MAPK} response to fluctuating
-  osmotic stress in saccharomyces cerevisiae.
+  osmotic stress in {Saccharomyces} cerevisiae.
 \newblock {\em {PLoS} {ONE}}, 5(3):e9522, mar 2010.
 
 \bibitem{SDTMStandard}

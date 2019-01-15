@@ -1,45 +1,38 @@
-% \cfoot[{\thepage\ of \pageref*{LastPage}}]{\thepage\ of \pageref*{LastPage}} 
-
-
-% durchgelesen und korrigiert (03 JAN 2019) --> wirkt vollständig
-
-
-\section{Introduction}
 \pagestyle{headings}
+\section{Introduction}
 
-
-\subsection{system biology}
-System biology is used for the extraction of a system wide understanding of living organismen. This includes the interaction of multiple proteins, genes, metabolits et cetera, which are measured in the laboratory. This approach gets more significant in the analysis of executed omics experiments which easily results in data in the gigabyte range. Mathematical modeling has proven to be a promising tool for the study of the complex processes of environmental stress adaptation, to reveal the role of each biological component in the system and to reveal how the system level properties emerged from collected activites of individual components \cite{Ke_2013}. \\\\
-Currently limitations of the system biology approach are the usages and constructions of mathematical equations which represent the biological system. This is a trade off between reduction of the system of interest without diminishing the information value or reasonableness intended digital twin. Another important problem is that there does not exists a complete biological understanding and knowledge of all system component. The system biological appproach is therefore only a heuristic approach. \\\\
+\subsection{System biology}
+System biology is used for the extraction of a system wide understanding of living organisms. This includes the interaction of multiple proteins, genes, metabolites et cetera, which are measured in the laboratory. This approach gets more significant in the analysis of executed omics experiments which easily results in data in the gigabyte range. Mathematical modeling has proven to be a promising tool for the study of the complex processes of environmental stress adaptation, to reveal the role of each biological component in the system and to reveal how the system level properties emerged from collected activities of individual components \cite{Ke_2013}. \\\\
+Currently limitations of the system biology approach are the usages and constructions of mathematical equations which represent the biological system. This is a trade off between reduction of the system of interest without diminishing the information value or reasonableness intended digital twin. Another important problem is that there does not exists a complete biological understanding and knowledge of all system component. The system biological approach is therefore only a heuristic approach. \\\\
 In-depth insights of an investigated system are e.g. useful for medicine and the biotechnology sector \cite{Ghosh2013} because this results in the improvement of well constructed mathematical models of a cell system which could be useful for the design of target-oriented medications. \\\\
 Mathematical models are further helpful to test laboratory experiments \textit{in silico} to identify meaningful experiments by construction of DoE (Design of Experiment). This helps to save the resources (e.g. money, time) of the experimentalist and could accelerate the understanding of the underlying biological system.
 
 \subsection{Saccharomyces cerevisiae}
-The yeast Saccharomyces cerevisiae (\emph{S. cerevisiae}) is a unicellular eucaryotic organism and belongs to the class of fungi \cite{Feyder2015}. It was the first eucaryotic organism where the whole genome had been full sequenced. \cite{goffeau1996life}. \emph{S. cerevisiae} is one of the beast characterized eukaryotic models \cite{Feyder2015}.
+The yeast Saccharomyces cerevisiae (\emph{S. cerevisiae}) is a unicellular eukaryotic organism and belongs to the class of fungi \cite{Feyder2015}. It was the first eukaryotic organism where the whole genome had been full sequenced. \cite{goffeau1996life}. \emph{S. cerevisiae} is one of the beast characterized eukaryotic models \cite{Feyder2015}.
 
 
-\subsection{state of the art}
+\subsection{State of the art}
 
-In nature, the environment of \emph{S. cerevisiae} varies in factors like temperatur, nutrient levels or osmolarity with the time and the cell must adapt with these changes.  \cite{JannisUhlendorf}. \\To our knowledge, their does not exists a model which combines how \emph{S. cerevisiae} transports ions in response to a extracellular salt stress exposure over the cell membrane with than changing cell volume and hog pathway activity. \\
-Nevertheless, it exists a diveristy of models for \emph{S. cerevisiae} which describes many aspects e.g. hog pathway or ion transort over the plasma membrane in good approximations while assuming other important aspects of the system as constant. \\
+In nature, the environment of \emph{S. cerevisiae} varies in factors like temperature, nutrient levels or osmolarity with the time and the cell must adapt with these changes.  \cite{JannisUhlendorf}. \\To our knowledge, their does not exists a model which combines how \emph{S. cerevisiae} transports ions in response to a extracellular salt stress exposure over the cell membrane with than changing cell volume and hog pathway activity. \\
+Nevertheless, it exists a diversity of models for \emph{S. cerevisiae} which describes many aspects e.g. hog pathway or ion transport over the plasma membrane in good approximations while assuming other important aspects of the system as constant. \\
 In this thesis we constructed a combined model merged from three tested models. The combined model clarifies the dependencies between the hog pathway, the volume regulation and the extra-/ intracellular ion concentrations.
 
-\subsection{theory of the used models}
-\subsubsection{ion model}
-This model was designed to reproduces the experimentally observed potassium and proton fluxes induced by the external stimuli $KCl$ and glucose in \emph{S. cerevisiae}. It implemented eight well characterized transport proteins relevant to the regulation and maintenance of intracellular alkali-metal cation content \cite{Gerber_2016}. \\\\
-The ion model consists out of a non-equivilibrium thermodynamic (NET) approach to model the transport of ions over the plasma membrane. NET is the analysis of spartial inhomogeneous systems and of time dependent processes. It is holds true if these are not very fast or big inhomogeneous. The ion model assumes that both compartimens are well mixed. This way the NET approach is valid.\\
+\subsection{Theory of the used models}
+\subsubsection{Ion model}
+This model was designed to reproduces the experimentally observed potassium and proton fluxes induced by the external stimuli KCl and glucose in \emph{S. cerevisiae}. It implemented eight well characterized transport proteins relevant to the regulation and maintenance of intracellular alkali-metal cation content \cite{Gerber_2016}. \\\\
+The ion model consists out of a non-equivilibrium thermodynamic (NET) approach to model the transport of ions over the plasma membrane. NET is the analysis of spatial inhomogeneous systems and of time dependent processes. It is holds true if these are not very fast or big inhomogeneous. The ion model assumes that both compartments are well mixed. This way the NET approach is valid.\\
 
-Per diffinition, osmolarity means the amount of substances of osmotic activ particles per volume $V$ of a solution. Osmotic pressure accurs if two solutions with different osmolarity are seperated by a semipermeable membrane, where not all substances can pass the membrane for creating an equilibrium.\\
+Per definition, osmolarity means the amount of substances of osmotic active particles per volume $V$ of a solution. Osmotic pressure occurs if two solutions with different osmolarity are separated by a semipermeable membrane, where not all substances can pass the membrane for creating an equilibrium.\\
 \emph{S. cerevisiae} has a plasma membrane which works as a semipermeable membrane. Water can diffuse freely through it, to adapt to the osmotic changes. \\\\
 
-Fluxes over membranes are irreversible processes. This will lead to a production of entropy in the system, which is calculated by the entropy production density $\sigma$ which is respresented with the equation \ref{EntropyProductionDensity}
+Fluxes over membranes are irreversible processes. This will lead to a production of entropy in the system, which is calculated by the entropy production density $\sigma$ which is represented with the equation \ref{EntropyProductionDensity}
 
 \begin{equation}\label{EntropyProductionDensity}
 	\sigma = \vec{J_Q}\left(\frac{1}{T}\right) - \sum_{i=1}^{k}\vec{J_{c_i}}grad \left(\frac{\eta _i}{T}\right) + \sum_{r=1}^{R}J_r \frac{A_r}{T} \geq 0
 \end{equation}
 
-Equation \ref{EntropyProductionDensity} summeries the production of entropy under the conditions of temperatur difference, concentration difference and chemical reactions. \\
-Fundamentally, $\sigma$ can only be created by fluxes $J$ with it’s forces $X$. In the area around equilibrium we can further assume that a flux $J$ is linearly coupled over a phenomenological coefficient $L$ with it’s forces $X$, because at equilibrium all forces and fluxes vanish. Under this condition the following statement \ref{stoeachimetricCoeff} holds true:
+Equation \ref{EntropyProductionDensity} summaries the production of entropy under the conditions of temperature difference, concentration difference and chemical reactions. \\
+Fundamentally, $\sigma$ can only be created by fluxes $J$ with it’s forces $X$. In the area around equilibrium we can further assume that a flux $J$ is linearly coupled over a phenomenological coefficient $L$ with it’s force $X$, because at equilibrium all forces and fluxes vanish. Under this condition the following statement \ref{stoeachimetricCoeff} holds true:
 
 \begin{equation}\label{stoeachimetricCoeff}
 	\sigma = \sum_{i}J_i X_i = \sum_{i}\sum_{j} \frac{\delta J_i}{\delta X_j}X_j X_i= \sum_{i}\sum_{j}L_{ij}X_j X_i
@@ -49,13 +42,13 @@ After some other assumption made from the ion model (for deeper insight see \cit
 \begin{equation}\label{IonFlux}
 J_k = \sum_{j=1}^n L_{kj}(RT\cdot ln\left(\frac{c_k^{in}}{c_k^{out}}\right) + z_kF\Delta \phi ) + L_{kAr}A_{Ar}
 \end{equation}
-$A_{Ar}$ represents the reaction affinity for the ATP hydrolysis.
-In the ion model a glycerol stimulus is further simulated. Ion regulation determines many physiological parameters, such as cell volume \cite{Ke_2013}.\\
-The hydrolysis of ATP is the only considered chemical reaction in the model.
+$A_{Ar}$ represents the reaction affinity for the ATP hydrolysis. The hydrolysis of ATP is the only considered chemical reaction in the model.\\
+In the ion model a glycerol stimulus is further simulated. Ion regulation determines many physiological parameters, such as cell volume \cite{Ke_2013}.
 
-\subsubsection{volume model}
+
+\subsubsection{Volume model}
 The volume model only holds true for an individual yeast cell in G1 phase. It can describes the small and steady volume variations during normal growth and the growth caused by hyper- or hypoosmotic shocks \cite{volumeModel}.\\
-Turgor pressure $\pi_t$ prevents exaggerated swelling and maintains cell shape \cite{volumeModel}. $\pi_t$ equals the hydrostatic pressure acting on the cell wall. For this the volume model desribes the elastically and plastically expansion of the membrane by involving the strain on the wall\\
+Turgor pressure $\pi_t$ prevents exaggerated swelling and maintains cell shape \cite{volumeModel}. $\pi_t$ equals the hydrostatic pressure acting on the cell wall. For this the volume model describes the elastically and plastically expansion of the membrane by involving the strain on the wall\\
 The volume model further describes the water flux $J_w$ between the cell and the environment with 
 \begin{equation}\label{waterFlux}
 	J_{w} = - \frac{d}{dt} V_{os} = G \cdot Lp \cdot (\pi_e + \pi_t - \pi_i)
@@ -74,17 +67,19 @@ Furthermore, the model simulates the changes in the inner osmolyte concentration
 	\dot c_{in} = \frac{1}{V}(k_{uptake}G - k_{consumption}V-c_{in} \dot V)
 \end{equation*}
 
-Summarising, it is highlighted that the cell expansion is mainly influeced by the interaction of
+Summarizing, it is highlighted that the cell expansion is mainly influenced by the interaction of
 \begin{enumerate}
 	\item the control of the internal osmolarity $c_{in}$, which together with $\pi_t$ drives $J_w$ and therefore $V_{os}$
 	\item the elasto-plastic deformation of the cell wall due to $\pi_t$. $J_w < 0$ expands the cell wall and increase therefore $\pi_t$
 \end{enumerate}
 
-\subsubsection{hog model}
-The Hog pathway in yeast has a significant role in the adaption process after an osmotic stress exposure. It normalize the volume of the cell and with that the water balance with an accumulation of the osmolyt glycerol inside, by closing the glycerol membran transporter Fps1 \cite{Saito2012} \cite{ASimpleMathematicalModel} and the production of glycerol.  \\
-The hog model is composed out of the Hog1 Mitogen Activated Protein Kinase (MAPK) cascade. This cascade is conserved even in higher eukaryotes including humans \cite{ASimpleMathematicalModel}. \\ 
-The Hog1 MAPK is activated in the response to an increase in extracellular osmolarity \cite{Saito2012}. All other non-osmotic stresses (e.g. temperature stres) which are known to also activate the HOG pathway \cite{Saito2012} are not represented in this model. The MAPK pathways are important for transmitting and processing signals from the cell membran into the cell \cite{ASimpleMathematicalModel}. \\
-Hog1 MAPK is activated by the upstream Pbs2 MAP kinase kinase (MAPKK) by phosphorylation. The phoshorylated Hog1c (Hog1PPc) translocates into the nucleus where it activates different transcription factors by phosphorylation \cite{JannisUhlendorf} \cite{Zi_2010}.\\\\
+
+
+\subsubsection{Hog model}
+The hog pathway in \emph{S. cerevisiae} has a significant role in the adaption process after an osmotic stress exposure. It normalize the volume of the cell and with that the water balance with an accumulation of the osmolyte glycerol inside, by closing the glycerol membrane transporter Fps1 \cite{Saito2012} \cite{ASimpleMathematicalModel} and the production of glycerol.  \\
+The hog model is composed out of the Hog1 Mitogen Activated Protein Kinase (MAPK) cascade. This cascade is well conserved even in higher eukaryotes including humans \cite{ASimpleMathematicalModel}. \\ 
+The Hog1 MAPK is activated in the response to an increase in extracellular osmolarity \cite{Saito2012}. All other non-osmotic stresses (e.g. temperature stress) which are known to also activate the HOG pathway \cite{Saito2012} are not represented in this model. The MAPK pathways are important for transmitting and processing signals from the cell membrane into the cell \cite{ASimpleMathematicalModel}. \\
+Hog1 MAPK is activated by the upstream Pbs2 MAP kinase kinase (MAPKK) by phosphorylation. The phosphorylated Hog1c (Hog1PPc) translocates into the nucleus where it activates different transcription factors by phosphorylation \cite{JannisUhlendorf} \cite{Zi_2010}.\\\\
 The model is composed out of these key components for the regulation of the osmo-adaption process.\\
 It consists of ODEs of the following form:
 
@@ -93,7 +88,7 @@ It consists of ODEs of the following form:
 \end{equation}
 
 Equation \ref{VratioChange} describes in general  with the first term at the right hand side the changes of a concentration due to a chemical process and with the second term the changes in the concentration due to changes in volume \cite{Ke_2013}.\\
-Osmotic stress impulses with precise concentration level were used. This approach holds true because the experiemental data sets used for the parameter fitting were yielded from microfluidic devices. Microfluidic devices allow a rapid medium change, because the cells are exposed to a constant switchable flow of external media which come from different reservoirs \cite{Zi_2010}. \\\\
+Osmotic stress impulses with precise concentration level were used. This approach holds true because the experimental data sets used for the parameter fitting were yielded from microfluidic devices. Microfluidic devices allow a rapid medium change, because the cells are exposed to a constant, switchable flow of external media which comes from different reservoirs \cite{Zi_2010}. \\\\
 Finally, two important assumptions for this model were made:
 \begin{enumerate}
 	\item no cell growth

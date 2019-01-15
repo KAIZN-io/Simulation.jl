@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.12.12)  14 JAN 2019 11:48
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.12.12)  15 JAN 2019 09:04
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -2148,72 +2148,76 @@ File: t1cmss.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 
  [2])
 (./chapter/Introduction.tex
-Underfull \hbox (badness 10000) in paragraph at lines 12--16
+Underfull \hbox (badness 10000) in paragraph at lines 5--9
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 12--16
+Underfull \hbox (badness 10000) in paragraph at lines 5--9
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 12--16
+Underfull \hbox (badness 10000) in paragraph at lines 5--9
 
  []
 
 [1]
-Underfull \hbox (badness 10000) in paragraph at lines 29--31
+Underfull \hbox (badness 10000) in paragraph at lines 22--24
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 29--31
+Underfull \hbox (badness 10000) in paragraph at lines 22--24
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 32--34
+Underfull \hbox (badness 10000) in paragraph at lines 25--27
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 32--34
+Underfull \hbox (badness 10000) in paragraph at lines 25--27
 
  []
 
 [2] [3]
-Underfull \hbox (badness 10000) in paragraph at lines 84--90
+Underfull \hbox (badness 10000) in paragraph at lines 79--85
 
  []
 
 [4]
-Underfull \hbox (badness 10000) in paragraph at lines 95--98
+Underfull \hbox (badness 10000) in paragraph at lines 90--93
 
  []
 
 [5]) (./chapter/MaterialAndMethods.tex
-Underfull \hbox (badness 10000) in paragraph at lines 10--17
+<picture/proposedWorkflow.png, id=54, 796.9775pt x 1127.21124pt>
+File: picture/proposedWorkflow.png Graphic file (type png)
+<use picture/proposedWorkflow.png>
+Package pdftex.def Info: picture/proposedWorkflow.png  used on input line 16.
+(pdftex.def)             Requested size: 358.50612pt x 507.05118pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 8--24
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 10--17
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 26--28
 
  []
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 19--21
-
- []
-
-[6]) (./chapter/Results.tex
-<picture/Ion_Paper.png, id=58, 363.3575pt x 255.95625pt>
+[6]) (./chapter/Results.tex [7 <./picture/proposedWorkflow.png>]
+<picture/Ion_Paper.png, id=63, 363.3575pt x 255.95625pt>
 File: picture/Ion_Paper.png Graphic file (type png)
 <use picture/Ion_Paper.png>
 Package pdftex.def Info: picture/Ion_Paper.png  used on input line 40.
 (pdftex.def)             Requested size: 224.06548pt x 157.83981pt.
-<picture/ion_examine.png, id=59, 705.1143pt x 540.21825pt>
+<picture/ion_examine.png, id=64, 705.1143pt x 540.21825pt>
 File: picture/ion_examine.png Graphic file (type png)
 <use picture/ion_examine.png>
 Package pdftex.def Info: picture/ion_examine.png  used on input line 46.
@@ -2228,202 +2232,216 @@ Underfull \hbox (badness 10000) in paragraph at lines 33--52
 
  []
 
-[7]
-<picture/Hog_Paper.png, id=63, 356.33125pt x 392.46625pt>
+[8] [9 <./picture/Ion_Paper.png> <./picture/ion_examine.png>]
+<picture/Hog_Paper.png, id=74, 356.33125pt x 392.46625pt>
 File: picture/Hog_Paper.png Graphic file (type png)
 <use picture/Hog_Paper.png>
-Package pdftex.def Info: picture/Hog_Paper.png  used on input line 61.
+Package pdftex.def Info: picture/Hog_Paper.png  used on input line 60.
 (pdftex.def)             Requested size: 224.06548pt x 246.78792pt.
-<picture/hog_examine.png, id=64, 699.21225pt x 540.21825pt>
+<picture/hog_examine.png, id=75, 699.21225pt x 540.21825pt>
 File: picture/hog_examine.png Graphic file (type png)
 <use picture/hog_examine.png>
-Package pdftex.def Info: picture/hog_examine.png  used on input line 67.
+Package pdftex.def Info: picture/hog_examine.png  used on input line 66.
 (pdftex.def)             Requested size: 224.06548pt x 173.11241pt.
 
-Overfull \hbox (2.61049pt too wide) in paragraph at lines 59--71
-[]$[]$ $[]$ 
+Overfull \hbox (2.61049pt too wide) in paragraph at lines 58--71
+[]$[]$ $[]$
  []
 
-<picture/Volume_Paper.png, id=65, 263.98625pt x 196.735pt>
+[10 <./picture/Hog_Paper.png> <./picture/hog_examine.png>]
+<picture/Volume_Paper.png, id=81, 263.98625pt x 196.735pt>
 File: picture/Volume_Paper.png Graphic file (type png)
 <use picture/Volume_Paper.png>
-Package pdftex.def Info: picture/Volume_Paper.png  used on input line 82.
+Package pdftex.def Info: picture/Volume_Paper.png  used on input line 81.
 (pdftex.def)             Requested size: 224.06548pt x 166.98236pt.
-<picture/volume_examine.png, id=66, 691.58376pt x 540.21825pt>
+<picture/volume_examine.png, id=82, 691.58376pt x 540.21825pt>
 File: picture/volume_examine.png Graphic file (type png)
 <use picture/volume_examine.png>
-Package pdftex.def Info: picture/volume_examine.png  used on input line 88.
+Package pdftex.def Info: picture/volume_examine.png  used on input line 87.
 (pdftex.def)             Requested size: 224.06548pt x 175.0248pt.
 
-Overfull \hbox (2.61049pt too wide) in paragraph at lines 80--92
+Overfull \hbox (2.61049pt too wide) in paragraph at lines 79--91
 []$[]$ $[]$ 
  []
 
-[8 <./picture/Ion_Paper.png> <./picture/ion_examine.png>] [9 <./picture/Hog_Pap
-er.png> <./picture/hog_examine.png>]
-Underfull \hbox (badness 10000) in paragraph at lines 117--117
+[11 <./picture/Volume_Paper.png> <./picture/volume_examine.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 116--116
 []|\T1/cmr/m/n/10 internal / ex-ter-nal
  []
 
 
-Underfull \hbox (badness 2846) in paragraph at lines 121--122
+Underfull \hbox (badness 2846) in paragraph at lines 120--121
 []|\T1/cmr/m/n/10 implementation of sor-bitol stim-u-lus
  []
 
 
-Underfull \hbox (badness 1845) in paragraph at lines 123--123
+Underfull \hbox (badness 1845) in paragraph at lines 122--122
 []|\T1/cmr/m/n/10 uptake / di-lu-tion of
  []
 
 
-Underfull \hbox (badness 5771) in paragraph at lines 123--123
+Underfull \hbox (badness 5771) in paragraph at lines 122--122
 \T1/cmr/m/n/10 os-motic ac-tive com-
  []
 
 
-Overfull \hbox (8.97615pt too wide) in paragraph at lines 110--127
+Overfull \hbox (8.97615pt too wide) in paragraph at lines 109--126
  [] 
  []
 
 
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 129--132
+Underfull \hbox (badness 10000) in paragraph at lines 128--131
 
  []
 
-<picture/model_intersections.png, id=78, 788.546pt x 518.738pt>
+<picture/model_intersections.png, id=88, 788.546pt x 518.738pt>
 File: picture/model_intersections.png Graphic file (type png)
 <use picture/model_intersections.png>
 Package pdftex.def Info: picture/model_intersections.png  used on input line 13
-7.
+6.
 (pdftex.def)             Requested size: 358.50612pt x 235.8362pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 144--146
+Underfull \hbox (badness 10000) in paragraph at lines 143--145
 
  []
 
-<picture/Drug_response.png, id=79, 422.98026pt x 330.23375pt>
+[12]
+<picture/Interplay.png, id=99, 1127.21124pt x 796.9775pt>
+File: picture/Interplay.png Graphic file (type png)
+<use picture/Interplay.png>
+Package pdftex.def Info: picture/Interplay.png  used on input line 154.
+(pdftex.def)             Requested size: 336.0982pt x 237.63579pt.
+
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+[13 <./picture/model_intersections.png>]
+<picture/Drug_response.png, id=104, 422.98026pt x 330.23375pt>
 File: picture/Drug_response.png Graphic file (type png)
 <use picture/Drug_response.png>
-Package pdftex.def Info: picture/Drug_response.png  used on input line 155.
-(pdftex.def)             Requested size: 358.50612pt x 279.8988pt.
-<picture/combined_models_71.png, id=80, 828.2945pt x 490.03075pt>
+Package pdftex.def Info: picture/Drug_response.png  used on input line 165.
+(pdftex.def)             Requested size: 313.69029pt x 244.91335pt.
+
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 171--172
+
+ []
+
+[14 <./picture/Interplay.png>]
+<picture/combined_models_71.png, id=109, 828.2945pt x 490.03075pt>
 File: picture/combined_models_71.png Graphic file (type png)
 <use picture/combined_models_71.png>
-Package pdftex.def Info: picture/combined_models_71.png  used on input line 167
+Package pdftex.def Info: picture/combined_models_71.png  used on input line 177
 .
-(pdftex.def)             Requested size: 358.50612pt x 212.09987pt.
-
-Underfull \hbox (badness 10000) in paragraph at lines 150--173
-
- []
-
-[10 <./picture/Volume_Paper.png> <./picture/volume_examine.png>]
-
-LaTeX Warning: `!h' float specifier changed to `!ht'.
-
-[11]
-
-LaTeX Warning: `!h' float specifier changed to `!ht'.
-
-<picture/r_71.png, id=96, 810.6285pt x 540.21825pt>
+(pdftex.def)             Requested size: 380.91403pt x 225.35706pt.
+<picture/r_71.png, id=110, 810.6285pt x 482.80376pt>
 File: picture/r_71.png Graphic file (type png)
 <use picture/r_71.png>
-Package pdftex.def Info: picture/r_71.png  used on input line 181.
-(pdftex.def)             Requested size: 358.50612pt x 238.90848pt.
-<picture/Hog1PPn_71.png, id=97, 850.7785pt x 540.21825pt>
+Package pdftex.def Info: picture/r_71.png  used on input line 191.
+(pdftex.def)             Requested size: 358.50612pt x 213.51726pt.
+<picture/Hog1PPn_71.png, id=111, 850.7785pt x 482.80376pt>
 File: picture/Hog1PPn_71.png Graphic file (type png)
 <use picture/Hog1PPn_71.png>
-Package pdftex.def Info: picture/Hog1PPn_71.png  used on input line 191.
-(pdftex.def)             Requested size: 358.50612pt x 227.64023pt.
-<picture/Deltaphi_71.png, id=98, 821.8705pt x 490.03075pt>
+Package pdftex.def Info: picture/Hog1PPn_71.png  used on input line 201.
+(pdftex.def)             Requested size: 358.50612pt x 203.4466pt.
+<picture/Deltaphi_71.png, id=112, 821.8705pt x 490.03075pt>
 File: picture/Deltaphi_71.png Graphic file (type png)
 <use picture/Deltaphi_71.png>
-Package pdftex.def Info: picture/Deltaphi_71.png  used on input line 201.
+Package pdftex.def Info: picture/Deltaphi_71.png  used on input line 211.
 (pdftex.def)             Requested size: 358.50612pt x 213.75983pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 175--210
+Underfull \hbox (badness 10000) in paragraph at lines 185--219
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 175--210
+Underfull \hbox (badness 10000) in paragraph at lines 185--219
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 175--210
+Underfull \hbox (badness 10000) in paragraph at lines 185--219
 
  []
 
+
+Underfull \hbox (badness 10000) in paragraph at lines 185--219
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 185--219
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 185--219
+
+ []
+
+[15 <./picture/Drug_response.png> <./picture/combined_models_71.png>]
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-
-LaTeX Warning: `!h' float specifier changed to `!ht'.
-
-[12 <./picture/model_intersections.png>] [13 <./picture/Drug_response.png>])
-(./chapter/Discussion.tex
-Underfull \hbox (badness 10000) in paragraph at lines 2--8
+[16 <./picture/r_71.png>] [17 <./picture/Hog1PPn_71.png> <./picture/Deltaphi_71
+.png>]) (./chapter/Discussion.tex
+Underfull \hbox (badness 10000) in paragraph at lines 3--9
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2--8
+Underfull \hbox (badness 10000) in paragraph at lines 3--9
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2--8
+Underfull \hbox (badness 10000) in paragraph at lines 3--9
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2--8
+Underfull \hbox (badness 10000) in paragraph at lines 3--9
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2--8
+Underfull \hbox (badness 10000) in paragraph at lines 3--9
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2--8
+Underfull \hbox (badness 10000) in paragraph at lines 3--9
 
  []
 
-[14 <./picture/combined_models_71.png> <./picture/r_71.png>]
-Overfull \vbox (10.74971pt too high) has occurred while \output is active []
-
-
-[15 <./picture/Hog1PPn_71.png> <./picture/Deltaphi_71.png>] [16])
-Underfull \hbox (badness 10000) in paragraph at lines 11--36
+[18]
+Underfull \hbox (badness 10000) in paragraph at lines 12--15
 
  []
 
-(./Bachelor_Thesis.bbl [17] [18]) [19] (./chapter/Danksagung.tex [20])
+[19]) (./Bachelor_Thesis.bbl [20]) [21] (./chapter/Danksagung.tex [22])
 (./chapter/appendix.tex
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-[21]) [22] (./Bachelor_Thesis.aux) ) 
+[23]) [24] (./Bachelor_Thesis.aux) ) 
 Here is how much of TeX's memory you used:
- 31742 strings out of 492649
- 661328 string characters out of 6129621
- 799854 words of memory out of 5000000
- 35043 multiletter control sequences out of 15000+600000
+ 31754 strings out of 492649
+ 661624 string characters out of 6129621
+ 799875 words of memory out of 5000000
+ 35053 multiletter control sequences out of 15000+600000
  556233 words of font info for 91 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 103i,11n,107p,10363b,418s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 103i,11n,107p,10363b,406s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2018/texmf-dist/fonts/e
 nc/dvips/cm-super/cm-super-t1.enc}</usr/local/texlive/2018/texmf-dist/fonts/typ
 e1/public/amsfonts/cm/cmex10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type
@@ -2452,10 +2470,10 @@ al/texlive/2018/texmf-dist/fonts/type1/public/cm-super/sfsl1200.pfb></usr/local
 exlive/2018/texmf-dist/fonts/type1/public/cm-super/sfsx1440.pfb></usr/local/tex
 live/2018/texmf-dist/fonts/type1/public/cm-super/sfsx1728.pfb></usr/local/texli
 ve/2018/texmf-dist/fonts/type1/public/cm-super/sfti1200.pfb>
-Output written on Bachelor_Thesis.pdf (26 pages, 4368587 bytes).
+Output written on Bachelor_Thesis.pdf (28 pages, 4464057 bytes).
 PDF statistics:
- 228 PDF objects out of 1000 (max. 8388607)
- 145 compressed objects within 2 object streams
+ 238 PDF objects out of 1000 (max. 8388607)
+ 149 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
- 78 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 88 words of extra memory for PDF output out of 10000 (max. 10000000)
 

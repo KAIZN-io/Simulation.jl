@@ -8,6 +8,7 @@ __license__ = 'private'
 exec(open("SYSTEM/py_packages.py").read())
 from decimal import Decimal
 import uuid
+import sys
 
 class netzwerk_daten_gewinnung:
     def __init__(self):
@@ -432,34 +433,53 @@ if __name__ == "__main__":
     STUDYID = 'Yeast_BSc'
     EXCAT = 'Salz'
 
-    """only one model each time as True"""
-    dict_model_switch = {
-                        'combined_models': False,
-                        # 'dummie': False,
-                        'hog': False,
-                        'ion': True,
-                        'volume': False,
-                         }
+    json_args = sys.argv[1]
+    args = json.loads(json_args)
 
     dict_time = {
-                'start' : 0,
-                'stop' : 80,  
-                'time_steps' : 0.1,
-                'NaCl_impuls_start': 30,
-                'NaCl_impuls_firststop' : 10,
-                'Glucose_impuls_start' : 1,
-                'Glucose_impuls_end' : 13,
-                }
+            'start': float(args['dict_time']['start']),
+            'stop': float(args['dict_time']['stop']),
+            'time_steps': float(args['dict_time']['time_steps']),
+            'Glucose_impuls_start': float(args['dict_time']['Glucose_impuls_start']),
+            'Glucose_impuls_end': float(args['dict_time']['Glucose_impuls_end']),
+            'NaCl_impuls_start': float(args['dict_time']['NaCl_impuls_start']),
+            'NaCl_impuls_firststop': float(args['dict_time']['NaCl_impuls_firststop']),
+        }
+    
+
+    dict_model_switch = args['dict_model_switch']
+    dict_unique_EXSTDTC = args['dict_unique_EXSTDTC']
+    dict_stimulus = args['dict_stimulus']
+    dict_system_switch = args['dict_system_switch']
+
+    """only one model each time as True"""
+    # dict_model_switch = {
+    #                     'combined_models': False,
+    #                     # 'dummie': False,
+    #                     'hog': False,
+    #                     'ion': True,
+    #                     'volume': False,
+    #                      }
+
+    # dict_time = {
+    #             'start' : 0,
+    #             'stop' : 80,  
+    #             'time_steps' : 0.1,
+    #             'NaCl_impuls_start': 30,
+    #             'NaCl_impuls_firststop' : 10,
+    #             'Glucose_impuls_start' : 1,
+    #             'Glucose_impuls_end' : 13,
+    #             }
 
     """make the dict keys as new variables"""
     locals().update(dict_time)
 
     """Stimulus = [time] in s"""
-    dict_unique_EXSTDTC = {                                
-                                'KCl' : [30],
-                                'NaCl' : [30],
-                                'Sorbitol' : [30],
-                            }
+    # dict_unique_EXSTDTC = {                                
+    #                             'KCl' : [30],
+    #                             'NaCl' : [30],
+    #                             'Sorbitol' : [30],
+    #                         }
 
     """implementation rules
 
@@ -473,14 +493,14 @@ if __name__ == "__main__":
         3: square pulses of NaCl
         4: up-staircase change of NaCl
     """
-    dict_stimulus = {
-                    'KCl' : [[200], 'mM', ['K_out','Cl_out'], True],
-                    'NaCl': [[800], 'mM', ['Na_out', 'Cl_out'], False],
-                    'Sorbitol': [[1600], 'mM', ['Sorbitol_out'], False],
+    # dict_stimulus = {
+    #                 'KCl' : [[200], 'mM', ['K_out','Cl_out'], True],
+    #                 'NaCl': [[800], 'mM', ['Na_out', 'Cl_out'], False],
+    #                 'Sorbitol': [[1600], 'mM', ['Sorbitol_out'], False],
 
-                    'NaCl_impuls' : [200, 'mM'],
-                    'signal_type' : [2],
-                    }
+    #                 'NaCl_impuls' : [200, 'mM'],
+    #                 'signal_type' : [2],
+    #                 }
 
     signal_type = dict_stimulus.get('signal_type')[0]
     NaCl_impuls = dict_stimulus.get('NaCl_impuls')[0]
@@ -491,13 +511,13 @@ if __name__ == "__main__":
     # NOTE : Ion Model --> Model Version 3 hat eine vebesserte ATP Berechnung --> macht aber keine Auswirkung
     # NOTE : Hog Model --> Model Version 4 ist besser
     # NOTE: SpecificParameterVersionSEQ muss die 1 behalten, da die Parameter nicht veraendert wurden
-    dict_system_switch = {
-                        'export_data_to_sql' : True,
-                        'export_terms_data_to_sql' : False,
-                        'SpecificInitValuesVersionSEQ' : [1],
-                        'SpecificModelVersionSEQ' : [1],
-                        'SpecificParameterVersionSEQ' : [1]
-                         }
+    # dict_system_switch = {
+    #                     'export_data_to_sql' : True,
+    #                     'export_terms_data_to_sql' : False,
+    #                     'SpecificInitValuesVersionSEQ' : [1],
+    #                     'SpecificModelVersionSEQ' : [1],
+    #                     'SpecificParameterVersionSEQ' : [1]
+    #                      }
     # psycopg2.extras.register_uuid()
     """get the right pipelines for the choosen model simulation"""
     # conn = psycopg2.connect(host='localhost', dbname='simulation_results')
@@ -921,6 +941,10 @@ if __name__ == "__main__":
 
         """export the EX dict to the database"""
         if dict_system_switch.get('export_data_to_sql') == True:
+    #         INSERT INTO ion.ex(
+    #             studyid, domain, usubjid, exseq, excat, extrt, exdose, exdosu, exstdtc_array, simulation_start, simulation_stop, co, modelversion, initvaluesversion, parameterversion, namepicture)
+	# VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+
             keys_db = tuple(EX_dict.keys())
             values_db = tuple(EX_dict.values())
 

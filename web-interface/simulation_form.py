@@ -22,7 +22,7 @@ class SimulationForm( FlaskForm ):
         description = 'Wählen sie hier das gewünschte Simulations modell. \'Kombiniert\' führt alle Modelle zusammen aus.',
         choices     = [
             # links: was an mein Code geht; rechts: was auf der Webseite angezeigt wird
-            ('combined', 'Kombiniert'),
+            ('combined_models', 'Kombiniert'),
             ('hog', 'HOG'),
             ('ion', 'ION'),
             ('volume', 'Volume'),

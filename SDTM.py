@@ -12,7 +12,137 @@ class netzwerk_daten_gewinnung:
     def __init__(self):
         pass
 
-    def prepareVisualization():
+
+    def plotTimeSeries(TimeSeriesData_df=pd.DataFrame(),
+                    SubplotLogic={},
+                    Terms=False):
+            """ def description
+
+            this function only needs the ODE results and the ORRESU_dict to
+            visualise the time-series
+
+            SubplotLogic = {ylabel_str : correspondingSubstance_list}
+            """
+            
+            if len(SubplotLogic.keys()) == 0:
+                SubplotLogic[1] = 'a'
+                GeneralizePlot = True
+            else:
+                GeneralizePlot = False
+
+            sns.set_style(style='whitegrid')
+            # context : dict, None, or one of {paper, notebook, talk, poster}
+            sns.set_context(context='talk')
+            fig = plt.figure(figsize=(10, 7.5))
+
+            """fontSize 16 is a good size for the thesis"""
+            fontSize = 16
+
+            """create the subplots"""
+            iter_num = 1
+
+            """pre define the subplots structures"""
+            for ORRESU, j in SubplotLogic.items():
+                exec('ax{0} = fig.add_subplot({1}, 1, {0})'.format(iter_num,
+                                                                len(SubplotLogic)))
+                exec('ax{}.spines["top"].set_visible(False)'.format(iter_num))
+                exec('ax{}.spines["right"].set_visible(False)'.format(iter_num))
+                exec(
+                    'ax{}.set_xlabel("time [s]",fontsize=fontSize)'.format(iter_num))
+
+                """fix the y-axis lim for pictures for latex / publication"""
+                # exec('ax{}.set_ylim(bottom=-20000, top=50000)'.format(iter_num))
+
+                if GeneralizePlot == True:
+                    exec("ax{}.set_ylabel('no unit',fontsize=fontSize)".format(iter_num))
+                else:
+                    exec('ax{}.set_ylabel(ORRESU,fontsize=fontSize)'.format(iter_num))
+
+                iter_num += 1
+
+            """x axis is shared and the ticks are rotated"""
+            fig.autofmt_xdate(bottom=0.2,
+                            rotation=30)
+            fig.suptitle(t='{}_Model'.format(model_name.title()),
+                         fontsize=fontSize)
+
+            # fig.suptitle(t='Volume',
+            #             fontsize=fontSize)
+
+            with sns.color_palette('cubehelix', len(TimeSeriesData_df.columns.tolist())):
+
+                """make the fig more fittet"""
+                # fig.tight_layout(pad = 3,
+                #                 rect = [0,0,0.85,1]
+                #                 )
+
+                # """show the version of the plot"""
+                # fig.text(0.99, 0.01,
+                #          s='{} - {}'.format(current_date,
+                #                             sql_USUBJID.title()),
+                #          fontstyle='italic',
+                #          color='#999999',
+                #          ha='right',
+                #          va='bottom',
+                #          fontsize='x-small'
+                #         )
+
+                """assign each TESTCD to their right subplot"""
+                if GeneralizePlot == False:
+                    for ORRESU_tuple, axis_index in zip(SubplotLogic.items(),
+                                                        range(1, len(SubplotLogic)+1)):
+                        parameter, substance = ORRESU_tuple
+
+                        for i in substance:
+
+                            if model_name == 'combined_models' and i == 'Hog1PPn':
+                                exec(
+                                    "ax{}.plot(TimeSeriesData_df[i],label='Hog1PPn (*1E7)')".format(axis_index))
+
+                            else:
+                                if Terms == True:
+                                    exec("ax{0}.plot(TimeSeriesData_df[i],label=EquationTerms_dict[i])".format(
+                                        axis_index))
+
+                                else:
+                                    exec('ax{0}.plot(TimeSeriesData_df[i],label=i)'.format(
+                                        axis_index))
+
+                            exec('ax{0}.legend(ncol=1,borderaxespad = 0,bbox_to_anchor=(1.01, 0.5), \
+                                frameon = True,loc={1!r},fontsize=fontSize)'.format(axis_index, 'center left'))
+
+                else:
+                    PlotLabels = TimeSeriesData_df.columns.tolist()
+                    for i in PlotLabels:
+                        exec('ax1.plot(TimeSeriesData_df[i],label=i)')
+                        exec("ax1.legend(ncol=1,borderaxespad = 0,bbox_to_anchor=(1.01, 0.5), \
+                                    frameon = True,loc='center left',fontsize=fontSize)")
+
+                """"save the plot"""
+                
+                PictureName = '{0}_{1}.png'.format(model_name, SEQ)
+                plt.savefig('SimulationPictures/{0}'.format(PictureName),
+                    dpi=360,
+                    format='png',
+                    bbox_inches='tight'
+                )
+
+                """pre check if picture is already saved in database"""
+                cur.execute(sql.SQL("""
+                        Select max(seq) from {0}.analysis 
+                        """).format(sql.Identifier(model_name)))
+                
+                if cur.fetchone()[0] != SEQ:
+                    cur.execute(sql.SQL("""
+                            INSERT INTO {0}.analysis(
+                                seq, namepicture)
+                                VALUES(%s, %s);
+                            """).format(sql.Identifier(model_name)), [SEQ, PictureName])
+
+                    conn.commit()
+                   
+                
+    def prepareVisualization(sql_USUBJID='', ODE_RESULTS = pd.DataFrame(), PDORRESU = {}):
         """conversion r to V
 
         convert the radius to the volume unit for better understandung of the
@@ -20,12 +150,19 @@ class netzwerk_daten_gewinnung:
         """
         if sql_USUBJID == 'combined_models':
             for i in dict_visualisation.get('not_to_visualize'):
-                RUN_SEQ['ODE_RESULTS'] = RUN_SEQ['ODE_RESULTS'].drop(columns=[i])
-                RUN_SEQ['PDORRESU'].pop(i, None)
+                ODE_RESULTS = ODE_RESULTS_raw.drop(columns=[i])
+                PDORRESU.pop(i, None)
+
+            try:
+                ODE_RESULTS['Hog1PPn'] = ODE_RESULTS['Hog1PPn'] * 1E7
+                # ODE_RESULTS['Cl_in'] = ODE_RESULTS['Cl_in'] / 10
+            except:
+                pass
 
         convert_r_to_V = ['r', 'r_os', 'r_b', 'R_ref']
         ODE_RESULTS_columns = ODE_RESULTS.columns.tolist()
         for column_name in ODE_RESULTS_columns:
+
             if column_name in convert_r_to_V:
                 ODE_RESULTS[column_name] = (
                     4/3) * np.pi * ODE_RESULTS[column_name]**3
@@ -40,16 +177,11 @@ class netzwerk_daten_gewinnung:
                                     inplace=True
                                     )
                 """adapt the PDORRESU dict to the new units"""
-                PDORRESU[new_column_name] = PDORRESU.pop(column_name)
-                PDORRESU[new_column_name] = 'fL'
+                if column_name in PDORRESU:
+                    PDORRESU[new_column_name] = PDORRESU.pop(column_name)
+                    PDORRESU[new_column_name] = 'fL'
 
-        if USUBJID == 'combined_models':
-            try:
-                ODE_RESULTS['Hog1PPn'] = ODE_RESULTS['Hog1PPn'] * 1E7
-                # ODE_RESULTS['Cl_in'] = ODE_RESULTS['Cl_in'] / 10
-            except:
-                pass
-
+     
         """group the keys by their units"""
         PDORRESU_grouped = {}
         for key, value in sorted(PDORRESU.items()):
@@ -60,7 +192,7 @@ class netzwerk_daten_gewinnung:
             ODE_RESULTS = pd.DataFrame(ODE_RESULTS['V'])
             PDORRESU_grouped = {'total volume [fL]': ['V']}
 
-        
+        return ODE_RESULTS, PDORRESU_grouped
 
     def ODE_solver(InitialValues, t):
 
@@ -142,27 +274,14 @@ class netzwerk_daten_gewinnung:
         """export the individuel terms to the database"""
         if dict_system_switch.get('export_data_to_sql') == True\
         and dict_system_switch.get('export_terms_data_to_sql') == True:
-            # conn = psycopg2.connect(
-            #     host='db_postgres',
-            #     user='postgres',
-            #     dbname='simulation_results'
-            # )
-            
-            # dialect+driver: // username: password@host: port/database
-
-
-# sdtm_1 | sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) could not connect to server: Connection refused
-# sdtm_1 | Is the server running on host "db_postgres" (172.21.0.2) and accepting
-# sdtm_1 | TCP/IP connections on port 5433?
 
             """sql connection"""
             engine = create_engine(
-                'postgres://postgres:@db_postgres:5433/simulation_results')
+                'postgres://postgres:@db_postgres:5432/simulation_results')
       
-
+            # connection to the computer server 
             # engine = create_engine(
             #     'postgres://janpiotraschke:@localhost:5432/simulation_results', echo=False)
-
 
             df_dict_term = {}
             for i in t_ODE_comp:
@@ -312,8 +431,8 @@ if __name__ == "__main__":
     dict_model_switch = {
                         'combined_models': False,
                         # 'dummie': False,
-                        'hog': True,
-                        'ion': False,
+                        'hog': False,
+                        'ion': True,
                         'volume': False,
                          }
 
@@ -729,34 +848,18 @@ if __name__ == "__main__":
         """replace the time array with the simulation results"""
         ijj['results'] = simulation_frame
 
-        """the following code is only for the first docker vision
-            
-        will be replaced, if the application has a web interface
-        """
-        plt.plot(ijj['results'])
 
-        PictureName = '{0}_{1}.png'.format(model_name, SEQ)
-        plt.savefig('SimulationPictures/{0}'.format(PictureName),
-            dpi=360,
-            format='png',
-            bbox_inches='tight'
-        )
+        """create a copy for the design of the plot"""
+        ODE_RESULTS_raw = ijj['results']
+        PDORRESU = ijj['units']
 
-        """pre check if picture is already saved in database"""
-        cur.execute(sql.SQL("""
-                Select max(seq) from {0}.analysis 
-                """).format(sql.Identifier(NameOfModel)))
-        
-        if cur.fetchone()[0] != SEQ:
-            cur.execute(sql.SQL("""
-                    INSERT INTO {0}.analysis(
-                        seq, namepicture)
-                        VALUES(%s, %s);
-                    """).format(sql.Identifier(NameOfModel)), [SEQ, PictureName])
+        ODE_RESULTS, PDORRESU_grouped = x.prepareVisualization(
+            sql_USUBJID=model_name, ODE_RESULTS=ODE_RESULTS_raw, PDORRESU=PDORRESU)
 
-            conn.commit()
-        
-        
+        """plot the results and save the plot"""
+        x.plotTimeSeries(TimeSeriesData_df=ODE_RESULTS,
+                                           SubplotLogic=PDORRESU_grouped)
+
         print(SEQ, "model_name", model_name)
 
         """last step before pushing results to database

@@ -3,9 +3,16 @@
 {% block title %}Simulation Starten{% endblock %}
 
 {% block content %}
-    <h2>Neue Simluation</h2>
-    <p>Hier können Sie die Starparameter für Ihre neue Simulation verändern und anschließend die Simulation starten.</p>
-    <form method="POST">
+{% if has_running_simulation %}
+<div class="alert alert-warning" role="alert">
+    Beta-Version: Es läuft bereits eine Simulation. Sie können keine neue starten, bis diese abgeschlossen ist.
+</div>
+{% endif %}
+
+<h2>Neue Simluation</h2>
+<p>Hier können Sie die Startparameter für Ihre neue Simulation verändern und anschließend die Simulation starten.</p>
+<form method="POST">
+    <fieldset {{ "disabled" if has_running_simulation }}>
 
         <h5>{{ form.name.label.text }}</h5>
         <div class="row mb-3">
@@ -34,14 +41,15 @@
 
         <h5>Zeitpunkte</h5>
         <div class="mb-5">
-            {% for subfield in [form.start, form.stop, form.step_size, form.glucose_impulse_start, form.glucose_impulse_stop] %}
+            {% for subfield in [form.start, form.stop, form.step_size, form.glucose_impulse_start,
+            form.glucose_impulse_stop] %}
             <div class="form-group row">
                 {{ subfield.label( class_="col-sm-5 col-form-label" ) }}
                 <div class="col-sm-7">
                     <div class="input-group w-25">
                         {{ subfield( class_="form-control text-right" ) }}
                         <div class="input-group-append">
-                            <div class="input-group-text">ms</div>
+                            <div class="input-group-text">s</div>
                         </div>
                     </div>
                     {% if subfield.errors %}
@@ -55,5 +63,6 @@
         </div>
 
         <button type="submit" class="btn btn-primary">Simulation Starten</button>
-    </form>
+    </fieldset>
+</form>
 {% endblock %}

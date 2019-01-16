@@ -11,12 +11,16 @@ class SimulationManager:
         self.simulations = []
 
     def start_new_simulation(self, data):
-        new_simulation = Simulation(data)
-        new_simulation.start()
-        self.simulations.append(new_simulation)
+        if not self.has_running_simulation():
+            new_simulation = Simulation(data)
+            new_simulation.start()
+            self.simulations.append(new_simulation)
 
     def get_running_simulations(self):
         return [sim for sim in self.simulations if sim.is_running()]
+
+    def has_running_simulation(self):
+        return len(self.get_running_simulations()) > 0
 
 
 class SimulationProcess(multiprocessing.Process):
@@ -71,7 +75,7 @@ def get_dict_time(data):
         'Glucose_impuls_start': str(data['glucose_impulse_start']),
         'Glucose_impuls_end': str(data['glucose_impulse_stop']),
         'NaCl_impuls_start': 30,
-        'NaCl_impuls_firststop' : 10,
+        'NaCl_impuls_firststop': 10,
     }
 
 
@@ -98,6 +102,6 @@ def get_dict_system_switch(data):
         'export_data_to_sql': True,
         'export_terms_data_to_sql': False,
         'SpecificInitValuesVersionSEQ': [1],
-        'SpecificModelVersionSEQ' : [1],
-        'SpecificParameterVersionSEQ' : [1]
+        'SpecificModelVersionSEQ': [1],
+        'SpecificParameterVersionSEQ': [1]
     }

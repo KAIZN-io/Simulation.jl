@@ -12,6 +12,56 @@ class netzwerk_daten_gewinnung:
     def __init__(self):
         pass
 
+    def prepareVisualization():
+        """conversion r to V
+
+        convert the radius to the volume unit for better understandung of the
+        cell system
+        """
+        if sql_USUBJID == 'combined_models':
+            for i in dict_visualisation.get('not_to_visualize'):
+                RUN_SEQ['ODE_RESULTS'] = RUN_SEQ['ODE_RESULTS'].drop(columns=[i])
+                RUN_SEQ['PDORRESU'].pop(i, None)
+
+        convert_r_to_V = ['r', 'r_os', 'r_b', 'R_ref']
+        ODE_RESULTS_columns = ODE_RESULTS.columns.tolist()
+        for column_name in ODE_RESULTS_columns:
+            if column_name in convert_r_to_V:
+                ODE_RESULTS[column_name] = (
+                    4/3) * np.pi * ODE_RESULTS[column_name]**3
+
+                """"rename the column name
+
+                change the first letter to 'V' and append then the rest of the
+                old word string to this
+                """
+                new_column_name = 'V' + column_name[1:]
+                ODE_RESULTS.rename(columns={column_name: new_column_name},
+                                    inplace=True
+                                    )
+                """adapt the PDORRESU dict to the new units"""
+                PDORRESU[new_column_name] = PDORRESU.pop(column_name)
+                PDORRESU[new_column_name] = 'fL'
+
+        if USUBJID == 'combined_models':
+            try:
+                ODE_RESULTS['Hog1PPn'] = ODE_RESULTS['Hog1PPn'] * 1E7
+                # ODE_RESULTS['Cl_in'] = ODE_RESULTS['Cl_in'] / 10
+            except:
+                pass
+
+        """group the keys by their units"""
+        PDORRESU_grouped = {}
+        for key, value in sorted(PDORRESU.items()):
+            PDORRESU_grouped.setdefault(value, []).append(key)
+
+        """some design condition for the bachelor plots"""
+        if sql_USUBJID == 'volume':
+            ODE_RESULTS = pd.DataFrame(ODE_RESULTS['V'])
+            PDORRESU_grouped = {'total volume [fL]': ['V']}
+
+        
+
     def ODE_solver(InitialValues, t):
 
         ResultsDict = {}
@@ -92,11 +142,23 @@ class netzwerk_daten_gewinnung:
         """export the individuel terms to the database"""
         if dict_system_switch.get('export_data_to_sql') == True\
         and dict_system_switch.get('export_terms_data_to_sql') == True:
+            # conn = psycopg2.connect(
+            #     host='db_postgres',
+            #     user='postgres',
+            #     dbname='simulation_results'
+            # )
+            
+            # dialect+driver: // username: password@host: port/database
+
+
+# sdtm_1 | sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) could not connect to server: Connection refused
+# sdtm_1 | Is the server running on host "db_postgres" (172.21.0.2) and accepting
+# sdtm_1 | TCP/IP connections on port 5433?
 
             """sql connection"""
             engine = create_engine(
-                'postgres://postgres:@localhost:5433/simulation_results', echo=False)
-
+                'postgres://postgres:@db_postgres:5433/simulation_results')
+      
 
             # engine = create_engine(
             #     'postgres://janpiotraschke:@localhost:5432/simulation_results', echo=False)
@@ -221,7 +283,19 @@ class netzwerk_daten_gewinnung:
 
 
 if __name__ == "__main__":
+    dict_visualisation = {
 
+        'not_to_visualize': ['Yt', 'z1', 'z2', 'z3', 'z4', 'L_ArH', 'L_HH',
+                             'Na_in', 'Na_out', 'K_out', 'K_in',
+                             'Cl_out', 'H_in', 'H_out', 'ATP', 'Hog1PPc',
+                             'Hog1c', 'Hog1n', 'Pbs2', 'Pbs2PP', 'R_ref', 'r_os', 'r_b', 'c_i', 'Sorbitol_out'],
+        # 'exp_rel_var': ['Hog1PPn', 'r', 'Glyc_in', 'pi_t', 'Deltaphi', 'Cl_in'],
+        # # type the name of the ODE substance you are interested in
+        # # if empty --> normal plots
+        # 'special_interest': [],
+
+        # 'each_single_model': False,
+        }
     """momentanes arbeitsverzeichnis = cwd"""
     cwd = os.getcwd()
     #erschafft einen Ordner namens "Pictures"
@@ -238,9 +312,9 @@ if __name__ == "__main__":
     dict_model_switch = {
                         'combined_models': False,
                         # 'dummie': False,
-                        'hog': False,
+                        'hog': True,
                         'ion': False,
-                        'volume': True,
+                        'volume': False,
                          }
 
     dict_time = {
@@ -294,7 +368,7 @@ if __name__ == "__main__":
     # NOTE : Hog Model --> Model Version 4 ist besser
     # NOTE: SpecificParameterVersionSEQ muss die 1 behalten, da die Parameter nicht veraendert wurden
     dict_system_switch = {
-                        'export_data_to_sql' : True,
+                        'export_data_to_sql' : False,
                         'export_terms_data_to_sql' : False,
                         'SpecificInitValuesVersionSEQ' : [1],
                         'SpecificModelVersionSEQ' : [1],
@@ -655,6 +729,34 @@ if __name__ == "__main__":
         """replace the time array with the simulation results"""
         ijj['results'] = simulation_frame
 
+        """the following code is only for the first docker vision
+            
+        will be replaced, if the application has a web interface
+        """
+        plt.plot(ijj['results'])
+
+        PictureName = '{0}_{1}.png'.format(model_name, SEQ)
+        plt.savefig('SimulationPictures/{0}'.format(PictureName),
+            dpi=360,
+            format='png',
+            bbox_inches='tight'
+        )
+
+        """pre check if picture is already saved in database"""
+        cur.execute(sql.SQL("""
+                Select max(seq) from {0}.analysis 
+                """).format(sql.Identifier(NameOfModel)))
+        
+        if cur.fetchone()[0] != SEQ:
+            cur.execute(sql.SQL("""
+                    INSERT INTO {0}.analysis(
+                        seq, namepicture)
+                        VALUES(%s, %s);
+                    """).format(sql.Identifier(NameOfModel)), [SEQ, PictureName])
+
+            conn.commit()
+        
+        
         print(SEQ, "model_name", model_name)
 
         """last step before pushing results to database
@@ -751,13 +853,9 @@ if __name__ == "__main__":
 
                     conn.commit()
 
-            """the following code is only for the first docker vision
             
-            will be replaced, if the application has a web interface
-            """
-            plt.plot(ijj['results'])
-            plt.show()
 
+    print("simulation finished")
     cur.close()
     conn.close()
 

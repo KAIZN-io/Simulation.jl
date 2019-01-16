@@ -3,7 +3,6 @@ __email__ = 'jan.piotraschke@mail.de'
 __version__ = 'bachelor_thesis'
 __license__ = 'private'
 
-# from ADaM import AdaMCreatePNG
 """import the standard used packages"""
 exec(open("SYSTEM/py_packages.py").read())
 from decimal import Decimal
@@ -129,19 +128,21 @@ class netzwerk_daten_gewinnung:
                     bbox_inches='tight'
                 )
 
-                """pre check if picture is already saved in database"""
-                cur.execute(sql.SQL("""
-                        Select max(seq) from {0}.analysis 
-                        """).format(sql.Identifier(model_name)))
+                # """pre check if picture is already saved in database"""
+                # cur.execute(sql.SQL("""
+                #         Select max(seq) from {0}.analysis 
+                #         """).format(sql.Identifier(model_name)))
                 
-                if cur.fetchone()[0] != SEQ:
-                    cur.execute(sql.SQL("""
-                            INSERT INTO {0}.analysis(
-                                seq, namepicture)
-                                VALUES(%s, %s);
-                            """).format(sql.Identifier(model_name)), [SEQ, PictureName])
+                # if cur.fetchone()[0] != SEQ:
+                #     cur.execute(sql.SQL("""
+                #             INSERT INTO {0}.analysis(
+                #                 seq, namepicture)
+                #                 VALUES(%s, %s);
+                #             """).format(sql.Identifier(model_name)), [SEQ, PictureName])
 
-                    conn.commit()
+                #     conn.commit()
+                
+                return PictureName
                    
                 
     def prepareVisualization(sql_USUBJID='', ODE_RESULTS = pd.DataFrame(), PDORRESU = {}):
@@ -196,6 +197,7 @@ class netzwerk_daten_gewinnung:
 
         return ODE_RESULTS, PDORRESU_grouped
 
+
     def ODE_solver(InitialValues, t):
 
         ResultsDict = {}
@@ -203,7 +205,6 @@ class netzwerk_daten_gewinnung:
         OdeResultsForSolver = []
         t_ODE_comp = ()
         
-
         """get the Names of the ODEs"""
         ColumnNames = simulation_frame.columns.tolist()
 
@@ -261,9 +262,6 @@ class netzwerk_daten_gewinnung:
                     if EquationType == 'ODE':
                         ResultsDict[SpeciesName] = eval(SpeciesName)
 
-                    # if KeysPlaceholder == 'dATP':
-                    #     print(dATP)
-
         """sort the OdeResultsForSolverPlaceholder
 
         this must be done because the json file is not sorted!
@@ -280,10 +278,6 @@ class netzwerk_daten_gewinnung:
             """sql connection"""
             engine = create_engine(
                 'postgres://postgres:@db_postgres:5432/simulation_results')
-      
-            # connection to the computer server 
-            # engine = create_engine(
-            #     'postgres://janpiotraschke:@localhost:5432/simulation_results', echo=False)
 
             df_dict_term = {}
             for i in t_ODE_comp:
@@ -295,98 +289,14 @@ class netzwerk_daten_gewinnung:
 
         return OdeResultsForSolver
 
-    # # TEMP: new ode solver version
-    # def new_ODE_solver(t, init):
-    #
-    #     # get the starting values for the ODEs
-    #     for i in range(len(init)):
-    #         exec('{}={}'.format(simulation_frame.columns.tolist()[i],init[i]))
-    #
-    #     # get the data for the system from the json file
-    #     with open('{0}/Single_Models/json_files/{1}_system.json'.format(cwd, model_name)) as json_data:
-    #         data_from_json = json.load(json_data)
-    #
-    #     t_ODE = ()
-    #     t_ODE_comp = ()
-    #     for key,ModelSpecies in data_from_json.items():
-    #         if key == 'copa':
-    #             for key2, value2 in ModelSpecies.items():
-    #                 exec('{}={}'.format(key2,value2))
-    #
-    #         else:
-    #             for keys,value in ModelSpecies.items():
-    #                 if 'condition' in value:
-    #                     for key2,value2 in value['component'].items():
-    #                         exec('{}={} {}'.format(key2,value2,value['condition']))
-    #                         t_ODE_comp = t_ODE_comp + (key2,)
-    #                 else:
-    #                     # print(value)
-    #                     for key2,value2 in value['component'].items():
-    #                         exec('{}={}'.format(key2,value2))
-    #                         t_ODE_comp = t_ODE_comp + (key2,)
-    #
-    #                 list_values = list(value['component'].keys())
-    #                 a = '+'.join(list_values)
-    #
-    #                 # print(keys, " = ", a)
-    #                 if key == 'ODE':
-    #                     t_ODE = t_ODE + (keys,)
-    #
-    #                 exec('{}={}'.format(keys,a))
-    #
-    #     # sort the t_ODE:
-    #     # NOTE: this must be done because the json file is not sorted!
-    #     t_ODE = sorted(t_ODE)
-    #
-    #     # eval the results
-    #     t_tuple = ()
-    #     t_tuple_comp = ()
-    #
-    #     for i in t_ODE:
-    #         t_tuple = t_tuple + (eval(i),)
-    #
-    #     # has the data from the components
-    #     for i in t_ODE_comp:
-    #         t_tuple_comp = t_tuple_comp + (eval(i),)
-    #
-    #     # if dict_system_switch.get('export_data_to_sql') == True:
-    #     #     # sql connection
-    #     #     engine = create_engine('postgres://janpiotraschke:@localhost:5432/simulation_results', echo=False)
-    #     #
-    #     #     df_dict_term = {}
-    #     #     for i in t_ODE_comp:
-    #     #         df_dict_term[i] = eval(i)
-    #     #
-    #     #     df = pd.DataFrame(df_dict_term, index=[t])
-    #     #
-    #     #     df.to_sql(csv_fingerprint, con=engine, schema='{}_terms'.format(model_name), if_exists='append')
-    #     #
-    #     return t_tuple
-
 
     def simulation(DataForSimulation=pd.DataFrame(), i=[]):
         init_cond_from_frame = DataForSimulation.tail(1).values.tolist()[0]
 
-        # print(DataForSimulation.tail(1))
         """solves the ode and algebraic equations"""
         states = odeint(x.ODE_solver, init_cond_from_frame, i)
 
-        # NOTE: test bereich anfang
 
-        # t_span = [i[0],i[-1]]
-        #
-        # """ solve_ivp parameter
-        #
-        # t_span : 2-tuple of floats; Interval of integration (t0, tf)
-        # y0 : array_like, shape (n,)
-        # """
-        # states = solve_ivp(x.new_ODE_solver,
-        #                     t_span=t_span,
-        #                     y0=init_cond_from_frame,
-        #                     method='RK45')
-        # matrix = (states.y).transpose()
-
-        # NOTE: test bereich ende
 
         """ruft die entsprechenden Columns Namen auf"""
         columns_order = DataForSimulation.columns.values.tolist()
@@ -423,10 +333,6 @@ if __name__ == "__main__":
         }
     """momentanes arbeitsverzeichnis = cwd"""
     cwd = os.getcwd()
-    #erschafft einen Ordner namens "Pictures"
-    #os.mkdir('csv_datafiles/volume')
-
-    #os.mkdir('Simulation_Data')
 
     x = netzwerk_daten_gewinnung
 
@@ -518,9 +424,8 @@ if __name__ == "__main__":
     #                     'SpecificModelVersionSEQ' : [1],
     #                     'SpecificParameterVersionSEQ' : [1]
     #                      }
-    # psycopg2.extras.register_uuid()
-    """get the right pipelines for the choosen model simulation"""
-    # conn = psycopg2.connect(host='localhost', dbname='simulation_results')
+
+
     """host name taken from docker-compose.yml"""
     conn = psycopg2.connect(
         host='db_postgres',
@@ -530,8 +435,6 @@ if __name__ == "__main__":
 
     """open a cursor to perform database operations"""
     cur = conn.cursor()
-
-
 
     """activated stimuli
 
@@ -594,7 +497,6 @@ if __name__ == "__main__":
 
                 SpecificParameterVersionSEQ = cur.fetchone()[0]
 
-            # if NameOfModel != 'hog':
             """update the local safed json file for the model"""
             cur.execute(sql.SQL("""
                 SELECT model_version
@@ -609,11 +511,6 @@ if __name__ == "__main__":
             s = json.dumps(ModelVersionFromDatabase, indent=4)
             with open('Single_Models/json_files/{0}_system.json'.format(NameOfModel), "w") as f:
                 f.write(s)
-
-
-            # else:
-            #     exec(open('Single_Models/{0}/{0}.py'.format(NameOfModel),encoding="utf-8").read())
-
        
             """list of the names of the ODE in the model"""
             cur.execute(sql.SQL("""
@@ -765,6 +662,7 @@ if __name__ == "__main__":
                     "co" : "exstdtc in Sekunden",
                     "modelversion": SpecificModelVersionSEQ,
                     "initvaluesversion": SpecificInitValuesVersionSEQ,
+                    "parameterversion": SpecificParameterVersionSEQ
                     }
 
 
@@ -882,9 +780,11 @@ if __name__ == "__main__":
         ODE_RESULTS, PDORRESU_grouped = x.prepareVisualization(
             sql_USUBJID=model_name, ODE_RESULTS=ODE_RESULTS_raw, PDORRESU=PDORRESU)
 
-        """plot the results and save the plot"""
-        x.plotTimeSeries(TimeSeriesData_df=ODE_RESULTS,
+        """plot the results, save the plot and return the PictureName"""
+        PictureName = x.plotTimeSeries(TimeSeriesData_df=ODE_RESULTS,
                                            SubplotLogic=PDORRESU_grouped)
+
+        EX_dict['namepicture'] = PictureName
 
         print(SEQ, "model_name", model_name)
 
@@ -941,9 +841,6 @@ if __name__ == "__main__":
 
         """export the EX dict to the database"""
         if dict_system_switch.get('export_data_to_sql') == True:
-    #         INSERT INTO ion.ex(
-    #             studyid, domain, usubjid, exseq, excat, extrt, exdose, exdosu, exstdtc_array, simulation_start, simulation_stop, co, modelversion, initvaluesversion, parameterversion, namepicture)
-	# VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 
             keys_db = tuple(EX_dict.keys())
             values_db = tuple(EX_dict.values())
@@ -989,9 +886,8 @@ if __name__ == "__main__":
 
             print("Daten hochgeladen")
 
-
     print("simulation finished")
+
     cur.close()
     conn.close()
 
-    # AdaMCreatePNG(NameOfModel, SEQ)

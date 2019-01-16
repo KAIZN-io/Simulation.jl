@@ -28,6 +28,7 @@ services:
       retries: 15
     # erstellt Portmapping; wenn Rechner angesprochen wird, reicht er es ihn den
     # Container weiter
+    # <Port am PC>:<Port am Container>
     ports: 
       - "5433:5432"
     networks:

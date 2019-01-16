@@ -39,7 +39,21 @@ for NameOfModel in allModels_list:
 
         conn.commit()
 
+        """create json table"""
+        cur.execute(sql.SQL("""
+                CREATE TABLE {0}.analysis
+                (
+                    seq serial,
+                    namepicture text,
+                    CONSTRAINT analysis_pkey PRIMARY KEY (seq)
+                )
+                WITH(
+                    OIDS = FALSE
+                )
+                TABLESPACE pg_default;
+                """).format(sql.Identifier(NameOfModel)))
 
+        conn.commit()
 
 
         """create json table"""

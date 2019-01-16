@@ -7,6 +7,7 @@ __license__ = 'private'
 """import the standard used packages"""
 exec(open("SYSTEM/py_packages.py").read())
 from decimal import Decimal
+import uuid
 
 class netzwerk_daten_gewinnung:
     def __init__(self):
@@ -402,6 +403,10 @@ class netzwerk_daten_gewinnung:
 
 
 if __name__ == "__main__":
+
+    exec(open("createDatabaseStructure.py").read())
+    exec(open("initializeModel.py").read())
+
     dict_visualisation = {
 
         'not_to_visualize': ['Yt', 'z1', 'z2', 'z3', 'z4', 'L_ArH', 'L_HH',
@@ -487,13 +492,13 @@ if __name__ == "__main__":
     # NOTE : Hog Model --> Model Version 4 ist besser
     # NOTE: SpecificParameterVersionSEQ muss die 1 behalten, da die Parameter nicht veraendert wurden
     dict_system_switch = {
-                        'export_data_to_sql' : False,
+                        'export_data_to_sql' : True,
                         'export_terms_data_to_sql' : False,
                         'SpecificInitValuesVersionSEQ' : [1],
                         'SpecificModelVersionSEQ' : [1],
                         'SpecificParameterVersionSEQ' : [1]
                          }
-
+    # psycopg2.extras.register_uuid()
     """get the right pipelines for the choosen model simulation"""
     # conn = psycopg2.connect(host='localhost', dbname='simulation_results')
     """host name taken from docker-compose.yml"""
@@ -701,6 +706,7 @@ if __name__ == "__main__":
         simulation_frame = pd.DataFrame()
         model_name = ijj['name']
 
+        # SEQ = str(uuid.uuid4())
 
         """check, how many SEQ number already exists"""
         cur.execute(sql.SQL("SELECT MAX(EXSEQ) FROM {}.ex;").format(\
@@ -954,9 +960,11 @@ if __name__ == "__main__":
                     insert_statement = 'insert into {}.pd (%s) values %s'.format(model_name)
                     cur.execute(cur.mogrify(insert_statement, (AsIs(','.join(keys_db)), tuple(values_db))))
 
+
                     conn.commit()
 
-            
+            print("Daten hochgeladen")
+
 
     print("simulation finished")
     cur.close()

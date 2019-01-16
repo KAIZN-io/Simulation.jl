@@ -21,7 +21,7 @@ for NameOfModel in allModels_list:
             WHERE schema_name = %s;
             """, [NameOfModel])
 
-    if (len(cur.fetchall())>0) == False:
+    if (len(cur.fetchall()) > 0) == False:
 
         """create model terms schema"""
         cur.execute(sql.SQL("""
@@ -54,7 +54,6 @@ for NameOfModel in allModels_list:
                 """).format(sql.Identifier(NameOfModel)))
 
         conn.commit()
-
 
         """create json table"""
         cur.execute(sql.SQL("""
@@ -126,7 +125,6 @@ for NameOfModel in allModels_list:
 
         conn.commit()
 
-
         cur.execute(sql.SQL("""
                 CREATE TABLE {0}.init_values
                 (
@@ -145,7 +143,6 @@ for NameOfModel in allModels_list:
                 """).format(sql.Identifier(NameOfModel)))
 
         conn.commit()
-
 
         cur.execute(sql.SQL("""
                 CREATE TABLE {0}.parameter
@@ -183,9 +180,5 @@ for NameOfModel in allModels_list:
         conn.commit()
 
 
-
 cur.close()
 conn.close()
-
-
-

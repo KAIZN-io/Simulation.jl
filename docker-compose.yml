@@ -37,7 +37,7 @@ services:
           - "db_postgres"
 
   sdtm:
-    image: janlucaklees/docker-image-q
+    image: janlucaklees/docker-image-q:0.2.1-web0.4
 
     # was sdtm braucht: ein hochgefahrene Datenbank (in diesem Beispiel)
     # wie Verzweigungen zwischen Programmen auslegen
@@ -48,16 +48,21 @@ services:
 
     # restart: on-failure
 
-    # ports:
-    #   - "${HTTP_PORT}:8000"
+    ports:
+      - "8080:5000"
+
+    environment:
+      - FLASK_ENV=develompent
+      - FLASK_DEBUG=1
+      - FLASK_APP=web-interface/web-interface.py
 
     # for development we mount the api-server-code into the container, this way changes made to the code are directly synced with the container
     volumes:
       # in welchen Pfad ich mich befinde : WORKDIR von Dockerfile
       - ./:/ProjektQ/
 
-    # # the command to start the service with
-    # command: "routings.py"
+    # Befehl der and ENTRYPOINT aus dem Image dran gehangen wird.
+    command: ["-m", "flask", "run", "--host=0.0.0.0"]
 
     networks:
       default:

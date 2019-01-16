@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Laufende Simulationen{% endblock %}
+
+{% block content %}
+    <h2>Laufende Simulationen</h2>
+
+    {% if running_simulations %}
+        <div id="running-simulations">
+            {% for simulation in running_simulations %}
+                <div class="card">
+                    <div id="sim-{{ simulation.uuid }}"
+                         class="card-header"
+                         data-toggle="collapse"
+                         data-target="#sim-data-{{ simulation.uuid }}">
+                        {{ simulation.name }}
+                        <small class="text-secondary">
+                            gestartet am: {{ simulation.started_at.strftime( "%d.%m.%Y %H:%M" ) }}
+                        </small>
+                    </div>
+                    <div id="sim-data-{{ simulation.uuid }}"
+                        class="collapse"
+                        data-parent="#running-simulations">
+                        <div class="card-body">
+                            {{ simulation.is_running() }}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card">
+            <div class="card-body">
+                Es laufen derzeit keine Simulationen.
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

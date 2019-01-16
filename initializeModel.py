@@ -10,7 +10,6 @@ def createJsonModel(NameOfModel=''):
 
     system_comp_remove = []
 
-
     """pre-check whether the system_comp exists for the specific model"""
     for system in system_comp:
         if os.path.isfile('Single_Models/{0}/{0}_{1}.txt'.format(NameOfModel, system)) == False:
@@ -163,6 +162,7 @@ def createJsonModel(NameOfModel=''):
 
     return JsonModel
 
+
 conn = psycopg2.connect(
     host='db_postgres',
     user='postgres',
@@ -180,7 +180,8 @@ for NameOfModel in allModels_list:
 
     if cur.fetchone()[0] == None:
         """read the model file"""
-        exec(open('Single_Models/{0}/{0}.py'.format(NameOfModel), encoding="utf-8").read())
+        exec(
+            open('Single_Models/{0}/{0}.py'.format(NameOfModel), encoding="utf-8").read())
         ODEVar_dict = eval('{}_init_values'.format(NameOfModel))
         Parameter_dict = eval('{}_parameter'.format(NameOfModel))
 
@@ -188,13 +189,13 @@ for NameOfModel in allModels_list:
         SEQ = 1
 
         """parameter to database"""
-        for i,j in Parameter_dict.items():
+        for i, j in Parameter_dict.items():
 
             cur.execute(sql.SQL("""
                     INSERT INTO {0}.parameter(
             	        seq, testcd, orres, orresu)
                         VALUES(%s, %s, %s, %s);
-                    """).format(sql.Identifier(NameOfModel)),[SEQ, i, j[0], j[1]])
+                    """).format(sql.Identifier(NameOfModel)), [SEQ, i, j[0], j[1]])
 
             conn.commit()
 
@@ -205,12 +206,13 @@ for NameOfModel in allModels_list:
                     INSERT INTO {0}.init_values(
             	        seq, testcd, orres, orresu)
                         VALUES(%s, %s, %s, %s);
-                    """).format(sql.Identifier(NameOfModel)),[SEQ, i[1], i[0], i[2]])
-     
+                    """).format(sql.Identifier(NameOfModel)), [SEQ, i[1], i[0], i[2]])
+
             conn.commit()
 
         """get the units of the equations"""
-        exec(open('Single_Models/{0}/{0}_orresu_dict.py'.format(NameOfModel), encoding="utf-8").read())
+        exec(open(
+            'Single_Models/{0}/{0}_orresu_dict.py'.format(NameOfModel), encoding="utf-8").read())
         ORRESU_dict = eval('{}_orresu_dict'.format(NameOfModel))
 
         for i in ORRESU_dict.values():
@@ -219,8 +221,8 @@ for NameOfModel in allModels_list:
                     INSERT INTO {}.orresu_equations(
                         testcd, orresu)
                         VALUES (%s, %s);
-                    """).format(sql.Identifier(NameOfModel)),[i[0], i[1]])
-     
+                    """).format(sql.Identifier(NameOfModel)), [i[0], i[1]])
+
             conn.commit()
 
         """create the JSON model and push it into the database"""

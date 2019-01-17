@@ -1,4 +1,5 @@
-from wtforms.validators import ValidationError
+from wtforms import StringField
+from wtforms.validators import ValidationError, Regexp
 
 
 class NumberRangeExclusive(object):
@@ -52,7 +53,6 @@ class CompareToField(object):
         self.message = message
 
     def __call__(self, form, field):
-
         try:
             other = form[self.fieldname]
         except KeyError:
@@ -93,4 +93,26 @@ class BiggerOrEqualToField( CompareToField ):
 class EqualToField( CompareToField ):
     def __init__(self, fieldname, message=None):
         super( EqualToField, self ).__init__( fieldname, '==', message )
+
+class IntegerList( Regexp ):
+    def __init__(self, message=None):
+        super( IntegerList, self ).__init__( '^\d+(,\s*\d+)*$', message=message )
+
+class Conditional( object ):
+    def __init__(self, fieldname, value, validators ):
+        self.fieldname = fieldname
+        self.value = value
+        self.validators = validators
+
+    def __call__(self, form, field):
+        try:
+            other = form[self.fieldname]
+        except KeyError:
+            raise ValidationError(
+                field.gettext("Invalid field name '%s'.") % self.fieldname
+            )
+
+        if other.data == self.value:
+            for validator in self.validators:
+                validator(form, field)
 

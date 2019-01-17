@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Simulation starten{% endblock %}
+{% block title %}Simulation Starten{% endblock %}
 
 {% block content %}
 {% if has_running_simulation %}
@@ -42,7 +42,7 @@
         <h5>Zeitpunkte</h5>
         <div class="mb-5">
             {% for subfield in [form.start, form.stop, form.step_size, form.glucose_impulse_start,
-            form.glucose_impulse_stop] %}
+            form.glucose_impulse_stop, form.nacl_impulse_start, form.nacl_impulse_stop] %}
             <div class="form-group row">
                 {{ subfield.label( class_="col-sm-5 col-form-label" ) }}
                 <div class="col-sm-7">
@@ -62,7 +62,121 @@
             {% endfor %}
         </div>
 
-        <button type="submit" class="btn btn-primary">Simulation starten</button>
+        <div class="row mb-2">
+            <div class="col-5">
+                <h5>Stoffe</h5>
+            </div>
+            <div class="col-2 text-center">
+                Menge
+            </div>
+            <div class="col-3 text-center">
+                Impulse
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-5">
+                <div class="form-check">
+                    {{ form.kcl_active( class_="form-check-input" ) }}
+                    {{ form.kcl_active.label( class_="form-check-label" ) }}
+                </div>
+            </div>
+            <div class="col-2">
+                <div class="input-group">
+                    {{ form.kcl_amount( class_="form-control text-right" ) }}
+                    <div class="input-group-append">
+                        <div class="input-group-text">mM</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-3">
+                {{ form.kcl_timing( class_="form-control text-right" ) }}
+            </div>
+            <script type="application/javascript">
+                (function() {
+                    let $active = $( '#{{ form.kcl_active.name }}' );
+                    let $amount = $( '#{{ form.kcl_amount.name }}' );
+                    let $timing = $( '#{{ form.kcl_timing.name }}' );
+
+                    $active.change( function() {
+                        $amount.prop( 'disabled', !this.checked )
+                        $timing.prop( 'disabled', !this.checked )
+                    } )
+
+                    $amount.prop( 'disabled', !$active[0].checked )
+                    $timing.prop( 'disabled', !$active[0].checked )
+                })();
+            </script>
+        </div>
+        <div class="form-group row">
+            <div class="col-5">
+                <div class="form-check">
+                    {{ form.nacl_active( class_="form-check-input" ) }}
+                    {{ form.nacl_active.label( class_="form-check-label" ) }}
+                </div>
+            </div>
+            <div class="col-2">
+                <div class="input-group">
+                    {{ form.nacl_amount( class_="form-control text-right" ) }}
+                    <div class="input-group-append">
+                        <div class="input-group-text">mM</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-3">
+                {{ form.nacl_timing( class_="form-control text-right" ) }}
+            </div>
+            <script type="application/javascript">
+                (function() {
+                    let $active = $( '#{{ form.nacl_active.name }}' );
+                    let $amount = $( '#{{ form.nacl_amount.name }}' );
+                    let $timing = $( '#{{ form.nacl_timing.name }}' );
+
+                    $active.change( function() {
+                        $amount.prop( 'disabled', !this.checked )
+                        $timing.prop( 'disabled', !this.checked )
+                    } )
+
+                    $amount.prop( 'disabled', !$active[0].checked )
+                    $timing.prop( 'disabled', !$active[0].checked )
+                })();
+            </script>
+        </div>
+        <div class="form-group row">
+            <div class="col-5">
+                <div class="form-check">
+                    {{ form.sorbitol_active( class_="form-check-input" ) }}
+                    {{ form.sorbitol_active.label( class_="form-check-label" ) }}
+                </div>
+            </div>
+            <div class="col-2">
+                <div class="input-group">
+                    {{ form.sorbitol_amount( class_="form-control text-right" ) }}
+                    <div class="input-group-append">
+                        <div class="input-group-text">mM</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-3">
+                {{ form.sorbitol_timing( class_="form-control text-right" ) }}
+            </div>
+            <script type="application/javascript">
+                (function() {
+                    let $active = $( '#{{ form.sorbitol_active.name }}' );
+                    let $amount = $( '#{{ form.sorbitol_amount.name }}' );
+                    let $timing = $( '#{{ form.sorbitol_timing.name }}' );
+
+                    $active.change( function() {
+                        $amount.prop( 'disabled', !this.checked )
+                        $timing.prop( 'disabled', !this.checked )
+                    } )
+
+                    $amount.prop( 'disabled', !$active[0].checked )
+                    $timing.prop( 'disabled', !$active[0].checked )
+                })();
+            </script>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Simulation Starten</button>
     </fieldset>
 </form>
 {% endblock %}

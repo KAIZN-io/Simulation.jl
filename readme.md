@@ -1,10 +1,12 @@
-# Dockerized ProjectQ with web interface
-In this repository we develop the code needed to run ProjectQ in docker and exposing the configuration via a web interface.
+# Bachelor Thesis - Software
+This repository enables you to simulate the hog, ion, volume and combined model presented in my thesis.
+**annotation:** This software is only in a beta-version. The whole used analysis of the models is not implemented yet
+but the code is accessible.
 	
 ## How to use
-Get yourself [docker](https://hub.docker.com/search/?type=edition&offering=community) for your system: 
+Download [docker](https://hub.docker.com/search/?type=edition&offering=community) for your system and install it.
 
-run in terminal:
+After that, run in terminal:
 
     docker-compose up
 
@@ -12,4 +14,4 @@ run in terminal:
 Wait for everything to be up and running, then open your browser and go to: [localhost:8080](http://localhost:8080/)
 
 ## Perspective
-This software should be the core for the construction of "Design of Experiment" (DoE)
+This software should be the core for the construction of *Design of Experiment* (DoE)

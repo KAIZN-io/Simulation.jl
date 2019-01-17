@@ -1,4 +1,4 @@
-from wtforms import DecimalField, IntegerField, RadioField, BooleanField, StringField
+from wtforms import DecimalField, IntegerField, RadioField, BooleanField, StringField, SelectField
 from wtforms.widgets import TextInput
 from wtforms.widgets.html5 import NumberInput
 
@@ -31,3 +31,7 @@ class BSRadioField( RadioField ):
 
 class BSBooleanField( BooleanField ):
     pass
+
+class BSSelectField( SelectField ):
+    pass
+

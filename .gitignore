@@ -114,6 +114,11 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# simulated pictures
 SimulationPictures/
-#
+
+# MAC OS X
 .DS_Store
+
+# test environment
+test.py

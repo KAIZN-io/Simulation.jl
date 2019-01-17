@@ -66,3 +66,29 @@ hog_init_values = {
                 'z3' : [0.00338 * 1e-3, 'z3', 'mM', 'original/hog_model'],
                 'z4' : [0.00338 * 1e-3, 'z4', 'mM', 'original/hog_model']
                 }
+                # #hog model with combined_models initial values:
+                # # unphosphorylated Pbs2
+                # 'Pbs2': ["4.24318676149895e-05", 'Pbs2', 'mM', 'original/hog_model'],
+                # # phosphorylated Pbs2
+                # 'Pbs2PP': ["8.36732584742436e-05", 'Pbs2PP', 'mM', 'original/hog_model'],
+                # # unphosphorylated cytoplasmic Hog1
+                # 'Hog1c': ["0.000207330463546301", 'Hog1c', 'mM', 'original/hog_model'],
+                # # phosphorylated cytoplasmic Hog1
+                # 'Hog1PPc': ["0.000140156906030251", 'Hog1PPc', 'mM', 'original/hog_model'],
+                # # unphosphorylated nuclear Hog1
+                # 'Hog1n': ["0.000246949330823297", 'Hog1n', 'mM', 'original/hog_model'],
+                # # phosphorylated nuclear Hog1
+                # 'Hog1PPn': ["9.86274865600528e-05", 'Hog1PPn', 'mM', 'original/hog_model'],
+                # # intracellular glycerol
+                # 'Glyc_in': ["67.7527785984978", 'Glyc_in', 'mM', 'original/hog_model'],
+
+                # # Yt is the time delay for the expression of glycerol-producing proteins
+                # 'Yt': ["0.00184722792271671", 'Yt', 'mM', 'original/hog_model'],
+                # 'V_os': ["24.5563967441086", 'V_os', 'fL', 'original/hog_model'],
+
+                # # z = delay of transcriptional feedback on glycerol production
+                # 'z1': ["1.21924446074792e-05", 'z1', 'mM', 'original/hog_model'],
+                # 'z2': ["3.96671525669479e-06", 'z2', 'mM', 'original/hog_model'],
+                # 'z3': ["3.40995283900317e-06", 'z3', 'mM', 'original/hog_model'],
+                # 'z4': ["3.38122235751438e-06", 'z4', 'mM', 'original/hog_model']
+                

@@ -6,7 +6,7 @@
     <h2>Laufende Simulationen</h2>
 
     {% if running_simulations %}
-        <div id="running-simulations">
+        <div id="running-simulations" class="mb-5">
             {% for simulation in running_simulations %}
                 <div class="card">
                     <div id="sim-{{ simulation.uuid }}"
@@ -40,9 +40,56 @@
             {% endfor %}
         </div>
     {% else %}
-        <div class="card">
+        <div class="card mb-5">
             <div class="card-body">
                 Es laufen derzeit keine Simulationen.
+            </div>
+        </div>
+    {% endif %}
+
+
+    <h2>Beendete Simulationen</h2>
+    {% if finished_simulations %}
+        <div id="finished-simulations">
+            {% for simulation in finished_simulations %}
+                <div class="card">
+                    <div id="sim-{{ simulation.uuid }}"
+                         class="card-header"
+                         data-toggle="collapse"
+                         data-target="#sim-data-{{ simulation.uuid }}">
+                        {{ simulation.name }}
+                        <small class="text-secondary">
+                            gestartet am: {{ simulation.started_at.strftime( "%d.%m.%Y %H:%M" ) }}
+                        </small>
+                    </div>
+                    <div id="sim-data-{{ simulation.uuid }}"
+                         class="collapse"
+                         data-parent="#finished-simulations">
+                        <div class="card-body">
+                            <table class="table">
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">Modell</th>
+                                        <td>{{ simulation.data.get_model_name() }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Simulierter Zeitraum</th>
+                                        <td>{{ simulation.data.start }}s - {{ simulation.data.stop }}s</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <a href="/pictures/{{ simulation.get_picture_name() }}" target="_blank">
+                                <img class="img-fluid" src="/pictures/{{ simulation.get_picture_name() }}" />
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card">
+            <div class="card-body">
+                Es wurden noch keine Simulationen beendet.
             </div>
         </div>
     {% endif %}

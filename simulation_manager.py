@@ -4,8 +4,19 @@ import multiprocessing
 import time
 import datetime
 import uuid
+import psycopg2
+from psycopg2 import sql
+
 from web_interface.simulation_form import simulation_models
 
+
+conn = psycopg2.connect(
+    host='db_postgres',
+    user='postgres',
+    dbname='simulation_results'
+)
+
+cur = conn.cursor()
 
 class SimulationManager:
     def __init__( self ):
@@ -13,16 +24,32 @@ class SimulationManager:
 
     def start_new_simulation(self, data):
         if not self.has_running_simulation():
-            new_simulation = Simulation(data)
+            new_simulation = Simulation(
+                seq = self.get_new_seq_number( data["model"] ),
+                data = data
+            )
             new_simulation.start()
             self.simulations.append(new_simulation)
 
     def get_running_simulations(self):
         return [sim for sim in self.simulations if sim.is_running()]
 
+    def get_finished_simulations(self):
+        return [sim for sim in self.simulations if not sim.is_running()]
+
     def has_running_simulation(self):
         return len(self.get_running_simulations()) > 0
 
+    def get_new_seq_number(self, model):
+        cur.execute(
+            sql.SQL("SELECT MAX(EXSEQ) FROM {}.ex;").format(sql.Identifier(model))
+        )
+
+        SEQ_old = cur.fetchone()[0]
+        if SEQ_old == None:
+            SEQ_old = 0
+
+        return SEQ_old + 1
 
 class SimulationProcess(multiprocessing.Process):
     def __init__(self, dicts):
@@ -35,9 +62,10 @@ class SimulationProcess(multiprocessing.Process):
 
 
 class Simulation:
-    def __init__(self, data):
+    def __init__(self, seq, data):
         self.name = data['name']
         self.uuid = uuid.uuid4()
+        self.seq = seq
         self.data = get_simulation_data_from_form(data)
         self.created_at = datetime.datetime.now()
         self.started_at = None
@@ -52,6 +80,8 @@ class Simulation:
     def is_running(self):
         return self.process.is_alive()
 
+    def get_picture_name(self):
+        return '%s_%d.png'%(self.model, self.seq)
 
 class SimulationData:
     def __init__(self, name, model, start, stop, step_size, impulses, stimuli ):

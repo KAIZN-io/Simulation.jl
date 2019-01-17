@@ -13,18 +13,18 @@ class SimulationForm( FlaskForm ):
 
     name = StringField(
         label       = 'Name',
-        description = 'Geben Sie Ihrer Simulation einen Namen um sie später besser wieder zu finden.',
+        description = 'Geben Sie Ihrer Simulation einen Namen, um sie später besser wiederzufinden.',
         default     = namesgenerator.get_random_name
     )
 
     model = BSRadioField(
         label       = 'Modell',
-        description = 'Wählen sie hier das gewünschte Simulations modell. \'Kombiniert\' führt alle Modelle zusammen aus.',
+        description = 'Wählen Sie hier das gewünschte Simulationsmodell. \'Kombiniert\' ist das Modell zum Bachelor.',
         choices     = [
             # links: was an mein Code geht; rechts: was auf der Webseite angezeigt wird
             ('combined_models', 'Kombiniert'),
-            ('hog', 'HOG'),
-            ('ion', 'ION'),
+            ('hog', 'Hog'),
+            ('ion', 'Ion'),
             ('volume', 'Volume'),
         ],
         default='combined_models'
@@ -49,7 +49,7 @@ class SimulationForm( FlaskForm ):
         widget     = BSNumberInput( min=0.01, step=0.01 )
     )
     glucose_impulse_start = BSDecimalField(
-        label      = 'Start des Glukoseimpuls',
+        label      = 'Start des Glucoseimpuls',
         default    = 1,
         validators = [
             NumberRange( min=0 ),
@@ -60,7 +60,7 @@ class SimulationForm( FlaskForm ):
         widget     = BSNumberInput( min=0, step=0.01 )
     )
     glucose_impulse_stop = BSDecimalField(
-        label      = 'Ende des Glukoseimpuls',
+        label      = 'Ende des Glucoseimpuls',
         default    = 13,
         validators = [
             NumberRange( min=0 ),

@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 
-{% block title %}Simulation Starten{% endblock %}
+{% block title %}Simulation starten{% endblock %}
 
 {% block content %}
 {% if has_running_simulation %}
 <div class="alert alert-warning" role="alert">
-    Beta-Version: Es läuft bereits eine Simulation. Sie können keine neue starten, bis diese abgeschlossen ist.
+    Beta-Version: Es läuft bereits eine Simulation. Sie können keine Neue starten, bis diese abgeschlossen ist.
 </div>
 {% endif %}
 
-<h2>Neue Simluation</h2>
-<p>Hier können Sie die Startparameter für Ihre neue Simulation verändern und anschließend die Simulation starten.</p>
+<h2>Neue Simulation</h2>
+<p>Hier können Sie Einstellungen für Ihre neue Simulation verändern und anschließend die Simulation starten.</p>
 <form method="POST">
     <fieldset {{ "disabled" if has_running_simulation }}>
 
@@ -62,7 +62,7 @@
             {% endfor %}
         </div>
 
-        <button type="submit" class="btn btn-primary">Simulation Starten</button>
+        <button type="submit" class="btn btn-primary">Simulation starten</button>
     </fieldset>
 </form>
 {% endblock %}

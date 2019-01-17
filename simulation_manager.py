@@ -89,7 +89,7 @@ def get_dict_uniqe_EXSTDTC(data):
 
 def get_dict_stimulus(data):
     return {
-        'KCl': [[100], 'mM', ['K_out', 'Cl_out'], True],
+        'KCl': [[10], 'mM', ['K_out', 'Cl_out'], True],
         'NaCl': [[800], 'mM', ['Na_out', 'Cl_out'], False],
         'Sorbitol': [[1600], 'mM', ['Sorbitol_out'], False],
         'NaCl_impuls': [200, 'mM'],

@@ -2,7 +2,7 @@ import namesgenerator
 from wtforms.validators import InputRequired, NumberRange, Length
 from flask_wtf import FlaskForm
 
-from fields import BSDecimalField, BSIntegerField, BSRadioField, BSBooleanField, BSNumberInput, BSStringField
+from fields import BSDecimalField, BSIntegerField, BSRadioField, BSBooleanField, BSNumberInput, BSStringField, BSSelectField
 from fields.validators import NumberRangeExclusive, BiggerOrEqualToField, BiggerThanField, SmallerThanField, IntegerList, Conditional
 
 
@@ -92,10 +92,16 @@ class SimulationForm(FlaskForm):
         label      = 'Start des NaCl-Impuls',
         default    = 30,
         validators = [
-            InputRequired(),
-            NumberRange( min=0 ),
-            BiggerThanField( 'start' ),
-            SmallerThanField( 'stop' ),
+            Conditional(
+                fieldname='model',
+                value='hog',
+                validators = [
+                    InputRequired(),
+                    NumberRange( min=0 ),
+                    BiggerThanField( 'start' ),
+                    SmallerThanField( 'stop' ),
+                ],
+            ),
         ],
         widget     = BSNumberInput( min=0, step=0.01 )
     )
@@ -103,12 +109,44 @@ class SimulationForm(FlaskForm):
         label      = 'Ende des NaCl-Impuls',
         default    = 10,
         validators = [
-            InputRequired(),
-            NumberRange( min=0 ),
-            BiggerThanField( 'start' ),
-            SmallerThanField( 'stop' ),
+            Conditional(
+                fieldname='model',
+                value='hog',
+                validators = [
+                    InputRequired(),
+                    NumberRange( min=0 ),
+                    BiggerThanField( 'start' ),
+                    SmallerThanField( 'stop' ),
+                ],
+            ),
         ],
         widget     = BSNumberInput( min=0, step=0.01 )
+    )
+    hog_nacl_impulse = BSDecimalField(
+        label      = 'NaCl Impuls',
+        default    = 200,
+        validators = [
+            Conditional(
+                fieldname='model',
+                value='hog',
+                validators = [
+                    InputRequired(),
+                    NumberRange( min=0 ),
+                ],
+            ),
+        ],
+        widget     = BSNumberInput( min=0, step=0.01 )
+    )
+    hog_signal_type = BSSelectField(
+        label='Signaltyp',
+        choices=[
+            # links: was an mein Code geht; rechts: was auf der Webseite angezeigt wird
+            ('1', 'one steady impulse'),
+            ('2', 'single pulse of NaCl'),
+            ('3', 'square pulses of NaCl'),
+            ('4', 'up-staircase change of NaCl'),
+        ],
+        default     = 1
     )
 
     kcl_active = BSBooleanField(

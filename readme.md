@@ -4,10 +4,7 @@ In this repository we develop the code needed to run ProjectQ in docker and expo
 ## How to use
 run in terminal:
 
-    docker-compose run --entrypoint "python InitValuesPara2db.py && python Model2Database.py" sdtm
-
     docker-compose up
-
 
 
 Wait for everything to be up and running, then open your browser and go to: [localhost:8080](http://localhost:8080/)

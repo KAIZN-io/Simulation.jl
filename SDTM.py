@@ -365,40 +365,14 @@ if __name__ == "__main__":
             'NaCl_impuls_firststop': float(args['dict_time']['NaCl_impuls_firststop']),
         }
     
-
     dict_model_switch = args['dict_model_switch']
     dict_unique_EXSTDTC = args['dict_unique_EXSTDTC']
     dict_stimulus = args['dict_stimulus']
     dict_system_switch = args['dict_system_switch']
 
-    """only one model each time as True"""
-    # dict_model_switch = {
-    #                     'combined_models': False,
-    #                     # 'dummie': False,
-    #                     'hog': False,
-    #                     'ion': True,
-    #                     'volume': False,
-    #                      }
-
-    # dict_time = {
-    #             'start' : 0,
-    #             'stop' : 80,  
-    #             'time_steps' : 0.1,
-    #             'NaCl_impuls_start': 30,
-    #             'NaCl_impuls_firststop' : 10,
-    #             'Glucose_impuls_start' : 1,
-    #             'Glucose_impuls_end' : 13,
-    #             }
-
     """make the dict keys as new variables"""
     locals().update(dict_time)
 
-    """Stimulus = [time] in s"""
-    # dict_unique_EXSTDTC = {                                
-    #                             'KCl' : [30],
-    #                             'NaCl' : [30],
-    #                             'Sorbitol' : [30],
-    #                         }
 
     """implementation rules
 
@@ -425,18 +399,7 @@ if __name__ == "__main__":
     NaCl_impuls = dict_stimulus.get('NaCl_impuls')[0]
 
     """database management system"""
-    # NOTE : SpecificInitValuesVersionSEQ = 2 for combined_models (4 ist alte Version)
-    # NOTE : SpecificModelVersionSEQ = 6 for combined_models (oder 14 (mit Glucose * - V_ratio))
     # NOTE : Ion Model --> Model Version 3 hat eine vebesserte ATP Berechnung --> macht aber keine Auswirkung
-    # NOTE : Hog Model --> Model Version 4 ist besser
-    # NOTE: SpecificParameterVersionSEQ muss die 1 behalten, da die Parameter nicht veraendert wurden
-    # dict_system_switch = {
-    #                     'export_data_to_sql' : True,
-    #                     'export_terms_data_to_sql' : False,
-    #                     'SpecificInitValuesVersionSEQ' : [1],
-    #                     'SpecificModelVersionSEQ' : [1],
-    #                     'SpecificParameterVersionSEQ' : [1]
-    #                      }
 
 
     """host name taken from docker-compose.yml"""

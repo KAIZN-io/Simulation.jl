@@ -54,7 +54,7 @@ services:
     environment:
       - FLASK_ENV=develompent
       - FLASK_DEBUG=1
-      - FLASK_APP=web-interface/web-interface.py
+      - FLASK_APP=web_interface/routings.py
 
     # for development we mount the api-server-code into the container, this way changes made to the code are directly synced with the container
     volumes:

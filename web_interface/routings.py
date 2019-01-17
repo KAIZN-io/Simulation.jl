@@ -4,7 +4,7 @@ from simulation_manager import SimulationManager
 from simulation_form import SimulationForm
 
 
-app = Flask('ProjectQ', template_folder='web-interface/templates')
+app = Flask('ProjectQ', template_folder='web_interface/templates')
 sm = SimulationManager()
 
 

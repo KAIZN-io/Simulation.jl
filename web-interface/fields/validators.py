@@ -35,15 +35,18 @@ class NumberRangeExclusive(object):
                 # we use %(min)s interpolation to support floats, None, and
                 # Decimals without throwing a formatting exception.
                 if self.max is None:
-                    message = field.gettext("Number must be bigger than %(min)s.")
+                    message = field.gettext(
+                        "Number must be bigger than %(min)s.")
                 elif self.min is None:
-                    message = field.gettext("Number must be smaller than %(max)s.")
+                    message = field.gettext(
+                        "Number must be smaller than %(max)s.")
                 else:
                     message = field.gettext(
                         "Number must be between %(min)s and %(max)s."
                     )
 
             raise ValidationError(message % dict(min=self.min, max=self.max))
+
 
 class CompareToField(object):
     def __init__(self, fieldname, comparator, message=None):
@@ -60,37 +63,43 @@ class CompareToField(object):
                 field.gettext("Invalid field name '%s'.") % self.fieldname
             )
 
-        if self.comparator not in [ '<', '<=', '>', '>=', '==' ]:
-            raise ValidationError( "Invalid comparator '%s' speified." % self.comparator )
+        if self.comparator not in ['<', '<=', '>', '>=', '==']:
+            raise ValidationError(
+                "Invalid comparator '%s' speified." % self.comparator)
         elif (
-            ( self.comparator == '<'  and not field.data <  other.data ) or
-            ( self.comparator == '<=' and not field.data <= other.data ) or
-            ( self.comparator == '>'  and not field.data >  other.data ) or
-            ( self.comparator == '>=' and not field.data >= other.data ) or
-            ( self.comparator == '==' and not field.data == other.data )
+            (self.comparator == '<' and not field.data < other.data) or
+            (self.comparator == '<=' and not field.data <= other.data) or
+            (self.comparator == '>' and not field.data > other.data) or
+            (self.comparator == '>=' and not field.data >= other.data) or
+            (self.comparator == '==' and not field.data == other.data)
         ):
             message = self.message
             if message is None:
-                message = "Must fulfill '%s' %s '%s'."%( field.label.text, self.comparator, other.label.text )
-            raise ValidationError( message )
+                message = "Must fulfill '%s' %s '%s'." % (
+                    field.label.text, self.comparator, other.label.text)
+            raise ValidationError(message)
 
-class SmallerThanField( CompareToField ):
+
+class SmallerThanField(CompareToField):
     def __init__(self, fieldname, message=None):
-        super( SmallerThanField, self ).__init__( fieldname, '<', message )
+        super(SmallerThanField, self).__init__(fieldname, '<', message)
 
-class SmallerOrEqualToField( CompareToField ):
+
+class SmallerOrEqualToField(CompareToField):
     def __init__(self, fieldname, message=None):
-        super( SmallerOrEqualToField, self ).__init__( fieldname, '<=', message )
+        super(SmallerOrEqualToField, self).__init__(fieldname, '<=', message)
 
-class BiggerThanField( CompareToField ):
+
+class BiggerThanField(CompareToField):
     def __init__(self, fieldname, message=None):
-        super( BiggerThanField, self ).__init__( fieldname, '>', message )
+        super(BiggerThanField, self).__init__(fieldname, '>', message)
 
-class BiggerOrEqualToField( CompareToField ):
+
+class BiggerOrEqualToField(CompareToField):
     def __init__(self, fieldname, message=None):
-        super( BiggerOrEqualToField, self ).__init__( fieldname, '>=', message )
+        super(BiggerOrEqualToField, self).__init__(fieldname, '>=', message)
 
-class EqualToField( CompareToField ):
+
+class EqualToField(CompareToField):
     def __init__(self, fieldname, message=None):
-        super( EqualToField, self ).__init__( fieldname, '==', message )
-
+        super(EqualToField, self).__init__(fieldname, '==', message)

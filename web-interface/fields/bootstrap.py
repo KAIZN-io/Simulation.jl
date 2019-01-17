@@ -1,10 +1,10 @@
-from wtforms import DecimalField, RadioField
+from wtforms import DecimalField, IntegerField,  RadioField
 from wtforms.widgets.html5 import NumberInput
 
 
-class BSNumberInput( NumberInput ):
-    def __init__( self, step=None, min=None, max=None):
-        super( BSNumberInput, self ).__init__( step=step, min=min, max=max )
+class BSNumberInput(NumberInput):
+    def __init__(self, step=None, min=None, max=None):
+        super(BSNumberInput, self).__init__(step=step, min=min, max=max)
         self.error_class = 'is-invalid'
 
     def __call__(self, field, **kwargs):
@@ -13,8 +13,14 @@ class BSNumberInput( NumberInput ):
             kwargs['class'] = u'%s %s' % (self.error_class, c)
         return super(BSNumberInput, self).__call__(field, **kwargs)
 
-class BSDecimalField( DecimalField ):
+
+class BSDecimalField(DecimalField):
+    widget = BSNumberInput(step='any')
+
+
+class BSIntegerField(IntegerField):
     widget = BSNumberInput()
 
-class BSRadioField( RadioField ):
+
+class BSRadioField(RadioField):
     pass

@@ -2,14 +2,14 @@ ion_parameter = {
                 'ATP_stimulus' : [2.5, 'mM'],
 
                 # NOTE: original ion parameter values
-                # 'V_out' : [2.85e-6,'m^3'],
-                # 'V_in' : [1.8 * 1e-11,'m^3'],
-                # 'Surf' : [2.29e-5, 'm^2'],
+                'V_out' : [2.85e-6,'m^3'],
+                'V_in' : [1.8 * 1e-11,'m^3'],
+                'Surf' : [2.29e-5, 'm^2'],
 
                 # NOTE: from the combined_models
-                'V_out' : [28.95 * 1e-15,'m^3'],
-                'V_in' : [58 * 1e-18,'m^3'],
-                'Surf' : [72.38 * 1e-12, 'm^2'],
+                # 'V_out' : [28.95 * 1e-15,'m^3'],
+                # 'V_in' : [58 * 1e-18,'m^3'],
+                # 'Surf' : [72.38 * 1e-12, 'm^2'],
 
                 'pbc' : [200,'mM pH^-1'],
                 'C_m' : [1e-2, 'xxxxxxx'],

@@ -1,2 +1,0 @@
-domega = -b * omega - c * np.sin(theta)
-dtheta = omega

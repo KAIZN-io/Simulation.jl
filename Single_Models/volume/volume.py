@@ -22,7 +22,7 @@ for key,value in volume_parameter.items():
 
 modulus_adjustment = (1 - nu ** 2) ** (-1)  # dimensionless
 E = modulus_adjustment * E_3D  # adjusted to 2D Young's modulus (surface)
-print(E)
+
 volume_init_values = {
                     'r_os' : [1.18773900649, 'r_os', 'um'],
                     'r_b' : [0.496161324363, 'r_b', 'um'],

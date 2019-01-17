@@ -2,6 +2,8 @@
 In this repository we develop the code needed to run ProjectQ in docker and exposing the configuration via a web interface.
 	
 ## How to use
+Get yourself [docker](https://hub.docker.com/search/?type=edition&offering=community) for your system: 
+
 run in terminal:
 
     docker-compose up

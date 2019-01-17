@@ -665,34 +665,20 @@ if __name__ == "__main__":
         """make the dict keys as new variables"""
         locals().update(parameter_dict)
 
+        cur.execute(sql.SQL("""
+            SELECT testcd, orres, orresu
+            FROM {}.init_values 
+            WHERE seq=%s;
+            """).format(sql.Identifier(model_name)), [SpecificInitValuesVersionSEQ])
 
-        if model_name != 'dummie':
+        TESTCD_ORRESU_tuple = cur.fetchall()
 
-            cur.execute(sql.SQL("""
-                SELECT testcd, orres, orresu
-                FROM {}.init_values 
-                WHERE seq=%s;
-                """).format(sql.Identifier(model_name)), [SpecificInitValuesVersionSEQ])
-
-            TESTCD_ORRESU_tuple = cur.fetchall()
-
-            """init_dict creation"""
-            init_dict = {}
-            unit_dict = {}
-            for i in TESTCD_ORRESU_tuple:
-                init_dict[i[0]] = i[1]
-                unit_dict[i[0]] = i[2]
-
-        else:
-            dict_of_init_values = eval('{}_init_values'.format(model_name))
-            items_from_dict = dict_of_init_values.items()
-            for key, value in items_from_dict:
-                init_cond.append(value[0])
-                init_cond_string.append(value[1])
-                init_cond_unit.append(value[2])
-
-            init_dict = dict(zip(init_cond_string, init_cond))
-            unit_dict = dict(zip(init_cond_string, init_cond_unit))
+        """init_dict creation"""
+        init_dict = {}
+        unit_dict = {}
+        for i in TESTCD_ORRESU_tuple:
+            init_dict[i[0]] = i[1]
+            unit_dict[i[0]] = i[2]
         
         """DataFrame initialisieren"""
                

@@ -1,20 +1,23 @@
 import namesgenerator
-from wtforms import StringField, IntegerField, BooleanField
-from wtforms.validators import DataRequired, NumberRange
+from wtforms.validators import InputRequired, NumberRange, Length
 from flask_wtf import FlaskForm
 
-from fields import BSDecimalField, BSIntegerField, BSRadioField, BSNumberInput
-from fields.validators import NumberRangeExclusive, BiggerOrEqualToField, BiggerThanField, SmallerThanField
+from fields import BSDecimalField, BSIntegerField, BSRadioField, BSBooleanField, BSNumberInput, BSStringField
+from fields.validators import NumberRangeExclusive, BiggerOrEqualToField, BiggerThanField, SmallerThanField, IntegerList, Conditional
 
 
 class SimulationForm(FlaskForm):
     class Meta:
         csrf = False
 
-    name = StringField(
-        label='Name',
+    name = BSStringField(
+        label       = 'Name',
         description='Geben Sie Ihrer Simulation einen Namen, um sie später besser wiederzufinden.',
-        default=namesgenerator.get_random_name
+        default     = namesgenerator.get_random_name,
+        validators = [
+            InputRequired(),
+            Length( min=3, max=30 ),
+        ],
     )
 
     model = BSRadioField(
@@ -27,116 +30,182 @@ class SimulationForm(FlaskForm):
             ('ion', 'Ion'),
             ('volume', 'Volume'),
         ],
-        default='combined_models'
+        default     = 'combined_models'
     )
 
     start = BSIntegerField(
-        label='Start der Simulation',
-        default=0,
-        validators=[NumberRange(min=0), SmallerThanField('stop')],
-        widget=BSNumberInput(min=0)
+        label      = 'Start der Simulation',
+        default    = 0,
+        validators = [
+            InputRequired(),
+            NumberRange( min=0 ),
+            SmallerThanField( 'stop' )
+        ],
+        widget     = BSNumberInput( min=0 )
     )
     stop = BSIntegerField(
-        label='Ende der Simulation',
-        default=80,
-        validators=[NumberRange(min=0), BiggerThanField('start')],
-        widget=BSNumberInput(min=0, step=0.01)
+        label      = 'Ende der Simulation',
+        default    = 80,
+        validators = [
+            InputRequired(),
+            NumberRange( min=0 ),
+            BiggerThanField( 'start' )
+        ],
+        widget     = BSNumberInput( min=0, step=0.01 )
     )
     step_size = BSDecimalField(
-        label='Schrittgröße',
-        default=0.1,
-        validators=[NumberRangeExclusive(min=0)],
-        widget=BSNumberInput(min=0.01, step=0.01)
+        label      = 'Schrittgröße',
+        default    = 0.1,
+        validators = [
+            InputRequired(),
+            NumberRangeExclusive( min=0 )
+        ],
+        widget     = BSNumberInput( min=0.01, step=0.01 )
     )
 
     glucose_impulse_start = BSDecimalField(
-        label='Start des Glucoseimpuls',
-        default=1,
-        validators=[
-            NumberRange(min=0),
-            SmallerThanField('glucose_impulse_stop'),
-            BiggerThanField('start'),
-            SmallerThanField('stop'),
+        label      = 'Start des Glucoseimpuls',
+        default    = 1,
+        validators = [
+            InputRequired(),
+            NumberRange( min=0 ),
+            SmallerThanField( 'glucose_impulse_stop' ),
+            BiggerThanField( 'start' ),
+            SmallerThanField( 'stop' ),
         ],
         widget=BSNumberInput(min=0, step=0.01)
     )
     glucose_impulse_stop = BSDecimalField(
-        label='Ende des Glucoseimpuls',
-        default=13,
-        validators=[
-            NumberRange(min=0),
-            BiggerThanField('glucose_impulse_start'),
-            BiggerThanField('start'),
-            SmallerThanField('stop'),
+        label      = 'Ende des Glucoseimpuls',
+        default    = 13,
+        validators = [
+            InputRequired(),
+            NumberRange( min=0 ),
+            BiggerThanField( 'glucose_impulse_start' ),
+            BiggerThanField( 'start' ),
+            SmallerThanField( 'stop' ),
         ],
         widget=BSNumberInput(min=0, step=0.01)
     )
 
     nacl_impulse_start = BSDecimalField(
-        label='Start des NaCl-Impuls',
-        default=30,
-        validators=[
-            NumberRange(min=0),
-            BiggerThanField('start'),
-            SmallerThanField('stop'),
+        label      = 'Start des NaCl-Impuls',
+        default    = 30,
+        validators = [
+            InputRequired(),
+            NumberRange( min=0 ),
+            BiggerThanField( 'start' ),
+            SmallerThanField( 'stop' ),
         ],
-        widget=BSNumberInput(min=0, step=0.01)
+        widget     = BSNumberInput( min=0, step=0.01 )
     )
     nacl_impulse_stop = BSDecimalField(
-        label='Ende des NaCl-Impuls',
-        default=10,
-        validators=[
-            NumberRange(min=0),
-            BiggerThanField('start'),
-            SmallerThanField('stop'),
+        label      = 'Ende des NaCl-Impuls',
+        default    = 10,
+        validators = [
+            InputRequired(),
+            NumberRange( min=0 ),
+            BiggerThanField( 'start' ),
+            SmallerThanField( 'stop' ),
         ],
-        widget=BSNumberInput(min=0, step=0.01)
+        widget     = BSNumberInput( min=0, step=0.01 )
     )
 
-    kcl_active = BooleanField(
-        label='KCl',
-        default=True,
+    kcl_active = BSBooleanField(
+        label = 'KCl',
+        default = True,
     )
     kcl_amount = BSIntegerField(
-        label='Menge',
-        default=100,
-        validators=[
-            NumberRangeExclusive(min=0),
+        label = 'Menge',
+        default = 100,
+        validators = [
+            Conditional(
+                fieldname='kcl_active',
+                value=True,
+                validators = [
+                    InputRequired(),
+                    NumberRangeExclusive( min=0 ),
+                ],
+            ),
         ],
     )
-    kcl_timing = StringField(
-        label='Impulse',
-        default='30'
+    kcl_timing = BSStringField(
+        label = 'Impulse',
+        default = '30, 60, 100',
+        validators = [
+            Conditional(
+                fieldname='kcl_active',
+                value=True,
+                validators = [
+                    InputRequired(),
+                    IntegerList(),
+                ],
+            ),
+        ],
     )
 
-    nacl_active = BooleanField(
-        label='NaCl',
-        default=False,
+    nacl_active = BSBooleanField(
+        label = 'NaCl',
+        default = False,
     )
     nacl_amount = BSIntegerField(
-        label='Menge',
-        default=800,
-        validators=[
-            NumberRangeExclusive(min=0),
+        label = 'Menge',
+        default = 800,
+        validators = [
+            Conditional(
+                fieldname='nacl_active',
+                value=True,
+                validators = [
+                    InputRequired(),
+                    NumberRangeExclusive( min=0 ),
+                ],
+            ),
         ],
     )
-    nacl_timing = StringField(
-        label='Impulse',
-        default='30'
+    nacl_timing = BSStringField(
+        label = 'Impulse',
+        default = '30',
+        validators = [
+            Conditional(
+                fieldname='nacl_active',
+                value=True,
+                validators = [
+                    InputRequired(),
+                    IntegerList(),
+                ],
+            ),
+        ],
     )
 
-    sorbitol_active = BooleanField(
-        label='Sorbitol',
-        default=False,
+    sorbitol_active = BSBooleanField(
+        label = 'Sorbitol',
+        default = False,
     )
     sorbitol_amount = BSIntegerField(
-        label='Menge',
-        default=1600,
-        validators=[
-            NumberRangeExclusive(min=0),
+        label = 'Menge',
+        default = 1600,
+        validators = [
+            Conditional(
+                fieldname='sorbitol_active',
+                value=True,
+                validators = [
+                    InputRequired(),
+                    NumberRangeExclusive( min=0 ),
+                ],
+            ),
         ],
     )
-    sorbitol_timing = StringField(
-        label='Impulse',
-        default='30'
+    sorbitol_timing = BSStringField(
+        label = 'Impulse',
+        default = '30',
+        validators = [
+            Conditional(
+                fieldname='sorbitol_active',
+                value=True,
+                validators = [
+                    InputRequired(),
+                    IntegerList(),
+                ],
+            ),
+        ],
     )

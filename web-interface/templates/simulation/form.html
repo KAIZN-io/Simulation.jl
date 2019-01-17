@@ -92,18 +92,18 @@
                 {{ form.kcl_timing( class_="form-control text-right" ) }}
             </div>
             <script type="application/javascript">
-                (function () {
-                    let $active = $('#{{ form.kcl_active.name }}');
-                    let $amount = $('#{{ form.kcl_amount.name }}');
-                    let $timing = $('#{{ form.kcl_timing.name }}');
+                (function() {
+                    let $active = $( '#{{ form.kcl_active.name }}' );
+                    let $amount = $( '#{{ form.kcl_amount.name }}' );
+                    let $timing = $( '#{{ form.kcl_timing.name }}' );
 
-                    $active.change(function () {
-                        $amount.prop('disabled', !this.checked)
-                        $timing.prop('disabled', !this.checked)
-                    })
+                    $active.change( function() {
+                        $amount.prop( 'disabled', !this.checked )
+                        $timing.prop( 'disabled', !this.checked )
+                    } )
 
-                    $amount.prop('disabled', !$active[0].checked)
-                    $timing.prop('disabled', !$active[0].checked)
+                    $amount.prop( 'disabled', !$active[0].checked )
+                    $timing.prop( 'disabled', !$active[0].checked )
                 })();
             </script>
         </div>
@@ -126,18 +126,18 @@
                 {{ form.nacl_timing( class_="form-control text-right" ) }}
             </div>
             <script type="application/javascript">
-                (function () {
-                    let $active = $('#{{ form.nacl_active.name }}');
-                    let $amount = $('#{{ form.nacl_amount.name }}');
-                    let $timing = $('#{{ form.nacl_timing.name }}');
+                (function() {
+                    let $active = $( '#{{ form.nacl_active.name }}' );
+                    let $amount = $( '#{{ form.nacl_amount.name }}' );
+                    let $timing = $( '#{{ form.nacl_timing.name }}' );
 
-                    $active.change(function () {
-                        $amount.prop('disabled', !this.checked)
-                        $timing.prop('disabled', !this.checked)
-                    })
+                    $active.change( function() {
+                        $amount.prop( 'disabled', !this.checked )
+                        $timing.prop( 'disabled', !this.checked )
+                    } )
 
-                    $amount.prop('disabled', !$active[0].checked)
-                    $timing.prop('disabled', !$active[0].checked)
+                    $amount.prop( 'disabled', !$active[0].checked )
+                    $timing.prop( 'disabled', !$active[0].checked )
                 })();
             </script>
         </div>
@@ -160,18 +160,18 @@
                 {{ form.sorbitol_timing( class_="form-control text-right" ) }}
             </div>
             <script type="application/javascript">
-                (function () {
-                    let $active = $('#{{ form.sorbitol_active.name }}');
-                    let $amount = $('#{{ form.sorbitol_amount.name }}');
-                    let $timing = $('#{{ form.sorbitol_timing.name }}');
+                (function() {
+                    let $active = $( '#{{ form.sorbitol_active.name }}' );
+                    let $amount = $( '#{{ form.sorbitol_amount.name }}' );
+                    let $timing = $( '#{{ form.sorbitol_timing.name }}' );
 
-                    $active.change(function () {
-                        $amount.prop('disabled', !this.checked)
-                        $timing.prop('disabled', !this.checked)
-                    })
+                    $active.change( function() {
+                        $amount.prop( 'disabled', !this.checked )
+                        $timing.prop( 'disabled', !this.checked )
+                    } )
 
-                    $amount.prop('disabled', !$active[0].checked)
-                    $timing.prop('disabled', !$active[0].checked)
+                    $amount.prop( 'disabled', !$active[0].checked )
+                    $timing.prop( 'disabled', !$active[0].checked )
                 })();
             </script>
         </div>

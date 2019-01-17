@@ -7,7 +7,7 @@ import uuid
 
 
 class SimulationManager:
-    def __init__(self):
+    def __init__( self ):
         self.simulations = []
 
     def start_new_simulation(self, data):
@@ -41,11 +41,11 @@ class Simulation:
         self.created_at = datetime.datetime.now()
         self.started_at = None
         self.dicts = {
-            'dict_model_switch': get_dict_model_switch(data),
-            'dict_time': get_dict_time(data),
-            'dict_unique_EXSTDTC': get_dict_uniqe_EXSTDTC(data),
-            'dict_stimulus': get_dict_stimulus(data),
-            'dict_system_switch': get_dict_system_switch(data)
+            'dict_model_switch'   : get_dict_model_switch( data ),
+            'dict_time'           : get_dict_time( data ),
+            'dict_unique_EXSTDTC' : get_dict_uniqe_EXSTDTC( data ),
+            'dict_stimulus'       : get_dict_stimulus( data ),
+            'dict_system_switch'  : get_dict_system_switch( data )
         }
 
         self.process = SimulationProcess(dicts=self.dicts)
@@ -60,43 +60,42 @@ class Simulation:
 
 def get_dict_model_switch(data):
     return {
-        'combined_models': data['model'] == 'combined_models',
-        'hog': data['model'] == 'hog',
-        'ion': data['model'] == 'ion',
-        'volume': data['model'] == 'volume',
+        'combined_models' : data['model'] == 'combined_models',
+        'hog'             : data['model'] == 'hog',
+        'ion'             : data['model'] == 'ion',
+        'volume'          : data['model'] == 'volume',
     }
 
 
 def get_dict_time(data):
     return {
-        'start': data['start'],
-        'stop': data['stop'],
-        'time_steps': str(data['step_size']),
-        'Glucose_impuls_start': str(data['glucose_impulse_start']),
-        'Glucose_impuls_end': str(data['glucose_impulse_stop']),
-        'NaCl_impuls_start': str(data['nacl_impulse_start']),
-        'NaCl_impuls_firststop': str(data['nacl_impulse_stop']),
+        'start'                 : data['start'],
+        'stop'                  : data['stop'],
+        'time_steps'            : str( data['step_size'] ),
+        'Glucose_impuls_start'  : str( data['glucose_impulse_start'] ),
+        'Glucose_impuls_end'    : str( data['glucose_impulse_stop'] ),
+        'NaCl_impuls_start'     : str( data['nacl_impulse_start'] ),
+        'NaCl_impuls_firststop' : str( data['nacl_impulse_stop'] ),
     }
 
 
 def get_dict_uniqe_EXSTDTC(data):
     return {
-        'KCl': [int(e) for e in data['kcl_timing'].split(',')],
-        'NaCl': [int(e) for e in data['nacl_timing'].split(',')],
-        'Sorbitol': [int(e) for e in data['sorbitol_timing'].split(',')],
+        'KCl'      : [ int( e ) for e in data['kcl_timing'].split(',') ],
+        'NaCl'     : [ int( e ) for e in data['nacl_timing'].split(',') ],
+        'Sorbitol' : [ int( e ) for e in data['sorbitol_timing'].split(',') ],
     }
 
 
 def get_dict_stimulus(data):
     return {
-        'KCl': [[data['kcl_amount']], 'mM', ['K_out', 'Cl_out'],   data['kcl_active']],
-        'NaCl': [[data['nacl_amount']], 'mM', ['Na_out', 'Cl_out'], data['nacl_active']],
-        'Sorbitol': [[data['sorbitol_amount']], 'mM', ['Sorbitol_out'],     data['sorbitol_active']],
+        'KCl'     : [ [ data['kcl_amount']      ], 'mM', ['K_out','Cl_out'],   data['kcl_active']],
+        'NaCl'    : [ [ data['nacl_amount']     ], 'mM', ['Na_out', 'Cl_out'], data['nacl_active']],
+        'Sorbitol': [ [ data['sorbitol_amount'] ], 'mM', ['Sorbitol_out'],     data['sorbitol_active']],
 
-        'NaCl_impuls': [200, 'mM'],
-        'signal_type': [2],
+        'NaCl_impuls' : [200, 'mM'],
+        'signal_type' : [2],
     }
-
 
 def get_dict_system_switch(data):
     return {

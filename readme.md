@@ -1,5 +1,6 @@
 # Bachelor Thesis - Software
 This repository enables you to simulate the hog, ion, volume and combined model presented in my thesis.
+
 **annotation:** This software is only in a beta-version. The whole used analysis of the models is not implemented yet
 but the code is accessible.
 	

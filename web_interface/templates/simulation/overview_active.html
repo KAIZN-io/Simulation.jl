@@ -19,10 +19,21 @@
                         </small>
                     </div>
                     <div id="sim-data-{{ simulation.uuid }}"
-                        class="collapse"
-                        data-parent="#running-simulations">
+                         class="collapse"
+                         data-parent="#running-simulations">
                         <div class="card-body">
-                            {{ simulation.is_running() }}
+                            <table class="table">
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">Modell</th>
+                                        <td>{{ simulation.get_model_name() }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Simulierter Zeitraum</th>
+                                        <td>{{ simulation.data.start }}s - {{ simulation.data.stop }}s</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>

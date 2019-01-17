@@ -4,6 +4,7 @@ import multiprocessing
 import time
 import datetime
 import uuid
+from web_interface.simulation_form import simulation_models
 
 
 class SimulationManager:
@@ -40,6 +41,7 @@ class Simulation:
         self.data = data
         self.created_at = datetime.datetime.now()
         self.started_at = None
+        self.model = data['model']
         self.dicts = {
             'dict_model_switch'   : get_dict_model_switch( data ),
             'dict_time'           : get_dict_time( data ),
@@ -56,6 +58,9 @@ class Simulation:
 
     def is_running(self):
         return self.process.is_alive()
+
+    def get_model_name(self):
+        return simulation_models[self.data['model']]
 
 
 def get_dict_model_switch(data):

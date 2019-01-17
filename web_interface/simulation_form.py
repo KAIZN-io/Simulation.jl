@@ -6,7 +6,14 @@ from fields import BSDecimalField, BSIntegerField, BSRadioField, BSBooleanField,
 from fields.validators import NumberRangeExclusive, BiggerOrEqualToField, BiggerThanField, SmallerThanField, IntegerList, Conditional
 
 
-class SimulationForm(FlaskForm):
+simulation_models = {
+    'combined_models': 'Kombiniert',
+    'hog': 'Hog',
+    'ion': 'Ion',
+    'volume': 'Volume',
+}
+
+class SimulationForm( FlaskForm ):
     class Meta:
         csrf = False
 
@@ -25,10 +32,10 @@ class SimulationForm(FlaskForm):
         description = 'Wählen Sie hier das gewünschte Simulationsmodell. \'Kombiniert\' ist das Modell zum Bachelor.',
         choices=[
             # links: was an mein Code geht; rechts: was auf der Webseite angezeigt wird
-            ('combined_models', 'Kombiniert'),
-            ('hog', 'Hog'),
-            ('ion', 'Ion'),
-            ('volume', 'Volume'),
+            ('combined_models', simulation_models['combined_models']),
+            ('hog', simulation_models['hog']),
+            ('ion', simulation_models['ion']),
+            ('volume', simulation_models['volume']),
         ],
         default     = 'combined_models'
     )

@@ -27,7 +27,7 @@ class SimulationForm( FlaskForm ):
             ('ion', 'ION'),
             ('volume', 'Volume'),
         ],
-        default     = 'combined'
+        default='combined_models'
     )
 
     start = BSDecimalField(

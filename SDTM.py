@@ -145,22 +145,35 @@ class netzwerk_daten_gewinnung:
                 return PictureName
                    
                 
-    def prepareVisualization(sql_USUBJID='', ODE_RESULTS = pd.DataFrame(), PDORRESU = {}):
+    def prepareVisualization(sql_USUBJID='', ODE_RESULTS = pd.DataFrame(), PDORRESU_x = {}):
         """conversion r to V
 
         convert the radius to the volume unit for better understandung of the
         cell system
         """
+
+        # TEMP: temporary solution; PDORRESU = PDORRESU_x because otherwise it 
+        # overwrites the ijj['units'] dict --> local/global variable problem?
         if sql_USUBJID == 'combined_models':
-            for i in dict_visualisation.get('not_to_visualize'):
-                ODE_RESULTS = ODE_RESULTS_raw.drop(columns=[i])
-                PDORRESU.pop(i, None)
+            NotToVisualize = dict_visualisation.get('not_to_visualize')
+            ColumnsOfDataframe = ODE_RESULTS.columns.tolist()
+
+            ColumnsToVisualize = list(
+                set(ColumnsOfDataframe) - set(NotToVisualize))
+
+            for i in NotToVisualize:
+                ODE_RESULTS = ODE_RESULTS.drop(columns=[i])
+
+            PDORRESU = {
+                i: PDORRESU_x[i] for i in ColumnsToVisualize if i in PDORRESU_x}
 
             try:
                 ODE_RESULTS['Hog1PPn'] = ODE_RESULTS['Hog1PPn'] * 1E7
                 # ODE_RESULTS['Cl_in'] = ODE_RESULTS['Cl_in'] / 10
             except:
                 pass
+        else: 
+            PDORRESU = PDORRESU_x
 
         convert_r_to_V = ['r', 'r_os', 'r_b', 'R_ref']
         ODE_RESULTS_columns = ODE_RESULTS.columns.tolist()
@@ -775,10 +788,9 @@ if __name__ == "__main__":
 
         """create a copy for the design of the plot"""
         ODE_RESULTS_raw = ijj['results']
-        PDORRESU = ijj['units']
 
         ODE_RESULTS, PDORRESU_grouped = x.prepareVisualization(
-            sql_USUBJID=model_name, ODE_RESULTS=ODE_RESULTS_raw, PDORRESU=PDORRESU)
+            sql_USUBJID=model_name, ODE_RESULTS=ODE_RESULTS_raw, PDORRESU_x=ijj['units'])
 
         """plot the results, save the plot and return the PictureName"""
         PictureName = x.plotTimeSeries(TimeSeriesData_df=ODE_RESULTS,
@@ -837,7 +849,6 @@ if __name__ == "__main__":
         only get each (1/time_steps) simulation results
         """
         ijj['results'] = ijj['results'].loc[::int(1/time_steps)]
-
 
         """export the EX dict to the database"""
         if dict_system_switch.get('export_data_to_sql') == True:

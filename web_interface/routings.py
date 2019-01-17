@@ -4,7 +4,12 @@ from simulation_manager import SimulationManager
 from simulation_form import SimulationForm
 
 
-app = Flask('ProjectQ', template_folder='web-interface/templates')
+app = Flask(
+    'ProjectQ',
+    template_folder='web_interface/templates',
+    static_url_path='/pictures',
+    static_folder='SimulationPictures'
+)
 sm = SimulationManager()
 
 
@@ -30,4 +35,9 @@ def start():
 @app.route('/simulation')
 def running():
     running_simulations = sm.get_running_simulations()
-    return render_template('simulation/overview_active.html', running_simulations=running_simulations)
+    finished_simulations = sm.get_finished_simulations()
+    return render_template(
+        'simulation/overview_active.html',
+        running_simulations=running_simulations,
+        finished_simulations=finished_simulations
+    )

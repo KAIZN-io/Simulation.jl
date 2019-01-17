@@ -347,6 +347,9 @@ if __name__ == "__main__":
     """momentanes arbeitsverzeichnis = cwd"""
     cwd = os.getcwd()
 
+    if not os.path.isdir('SimulationPictures'):
+        os.mkdir('SimulationPictures')
+
     x = netzwerk_daten_gewinnung
 
     STUDYID = 'Yeast_BSc'

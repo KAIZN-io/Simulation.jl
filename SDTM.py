@@ -408,6 +408,28 @@ class ModelFromDatabase:
 
         return ModelOdeVariable
 
+class SimulationPreparation:
+    def __init__(self, NameOfModel):
+        self.NameOfModel = NameOfModel
+
+    def isModelAffected(self, ActivatedStimulus=[], ModelOdeVariable = []):
+        AffectedModelFromStimulus = []
+
+        """iterating over all activated stimuli"""
+        for i in ActivatedStimulus:
+
+            """get me the target of the specific stimuli"""
+            target = dict_stimulus.get(i)[2]
+
+            """if the targets are in the specific model"""
+            if set(target).issubset(ModelOdeVariable) == True:
+                AffectedModelFromStimulus.append('{}'.format(self.NameOfModel))
+
+        """deletes multiple listings"""
+        AffectedModelFromStimulus = list(set(AffectedModelFromStimulus))
+
+        return AffectedModelFromStimulus
+
 if __name__ == "__main__":
 
     exec(open("createDatabaseStructure.py").read())
@@ -419,13 +441,8 @@ if __name__ == "__main__":
                              'Na_in', 'Na_out', 'K_out', 'K_in',
                              'Cl_out', 'H_in', 'H_out', 'ATP', 'Hog1PPc',
                              'Hog1c', 'Hog1n', 'Pbs2', 'Pbs2PP', 'R_ref', 'r_os', 'r_b', 'c_i', 'Sorbitol_out'],
-        # 'exp_rel_var': ['Hog1PPn', 'r', 'Glyc_in', 'pi_t', 'Deltaphi', 'Cl_in'],
-        # # type the name of the ODE substance you are interested in
-        # # if empty --> normal plots
-        # 'special_interest': [],
+    }
 
-        # 'each_single_model': False,
-        }
     """momentanes arbeitsverzeichnis = cwd"""
     cwd = os.getcwd()
 
@@ -458,35 +475,9 @@ if __name__ == "__main__":
     """make the dict keys as new variables"""
     locals().update(dict_time)
 
-    
-    # test test 
-    """implementation rules
-
-    Stimulus = [[value(s)], unit, [target(s)], boolean]
-    """
-    """only for the hog model
-
-    signal_type :
-        1: one steady impulse
-        2: single pulse of NaCl
-        3: square pulses of NaCl
-        4: up-staircase change of NaCl
-    """
-    # dict_stimulus = {
-    #                 'KCl' : [[200], 'mM', ['K_out','Cl_out'], True],
-    #                 'NaCl': [[800], 'mM', ['Na_out', 'Cl_out'], False],
-    #                 'Sorbitol': [[1600], 'mM', ['Sorbitol_out'], False],
-
-    #                 'NaCl_impuls' : [200, 'mM'],
-    #                 'signal_type' : [2],
-    #                 }
 
     signal_type = dict_stimulus.get('signal_type')[0]
     NaCl_impuls = dict_stimulus.get('NaCl_impuls')[0]
-
-    """database management system"""
-    # NOTE : Ion Model --> Model Version 3 hat eine vebesserte ATP Berechnung --> macht aber keine Auswirkung
-
 
     """host name taken from docker-compose.yml"""
     conn = psycopg2.connect(
@@ -498,24 +489,14 @@ if __name__ == "__main__":
     """open a cursor to perform database operations"""
     cur = conn.cursor()
 
-    """activated stimuli
-
-    find out which stimulus pipeline is opened for the experiment series
-    """
-    activated_stimuli = [stimulus_name for stimulus_name, items
-                        in dict_stimulus.items() if items[-1] == True]
-
-
-    """ affected models
-
-    find out the from stimuli affected models
-    """
-    models_ext_stimulus = []
-
     """get the used model name"""
     NameOfModel = [i for i,j in dict_model_switch.items() if j == True][0]
 
-    """get the model"""
+    """get the model
+    
+    name of model, initial values for the ODEs, parameterization, model, 
+    and names of the ODEs
+    """
     y = ModelFromDatabase(NameOfModel)
 
     SpecificModelVersionSEQ = y.getModelVersion(
@@ -532,24 +513,26 @@ if __name__ == "__main__":
     """get the ODE Names"""
     ModelOdeVariable = y.getODENames()
 
-    """iterating over all activated stimuli"""
-    for i in activated_stimuli:
 
-        """get me the target of the specific stimuli"""
-        target = dict_stimulus.get(i)[2]
+    """activated stimuli
 
-        """if the targets are in the specific model"""
-        if set(target).issubset(ModelOdeVariable) == True:
-            models_ext_stimulus.append('{}'.format(NameOfModel))
+    find out which stimulus pipeline is opened for the experiment series
+    """
+    activated_stimuli = [stimulus_name for stimulus_name, items
+                         in dict_stimulus.items() if items[-1] == True]
 
-    """deletes multiple listings"""
+    z = SimulationPreparation(NameOfModel)
 
-    models_ext_stimulus = list(set(models_ext_stimulus))
+    """find out how and if the model is affected from the activated stimulus"""
+    AffectedModelFromStimulus = z.isModelAffected(
+        ActivatedStimulus=activated_stimuli, ModelOdeVariable=ModelOdeVariable)
 
-    """preparation for simulation"""
+
+    """"if the model is effected from the stimulus --> get the stimulus settings"""
+    dict_of_EXSTDTC = {}
+    # if len(AffectedModelFromStimulus) > 0:
     list_of_stimuli_conc = []
     list_of_stimuli_name = []
-    dict_of_EXSTDTC = {}
 
     for key,values in dict_stimulus.items():
         if values[-1] == True:
@@ -565,6 +548,10 @@ if __name__ == "__main__":
                 dict_of_EXSTDTC[key] = dict_unique_EXSTDTC[key]
 
     dict_stimuli = dict(zip(list_of_stimuli_name, list_of_stimuli_conc))
+    
+    # else:
+    #     dict_stimuli = {}
+
    
     """simulation
 
@@ -575,7 +562,11 @@ if __name__ == "__main__":
     t = np.linspace(start, stop, (stop-start)/time_steps)
 
     """the 'universal' time list"""
-    time_points = [start, stop, Glucose_impuls_start]
+    time_points = [start, stop]
+
+    # TEMP : bad way
+    if NameOfModel in ['combined_models', 'ion']:
+        time_points.append(Glucose_impuls_start)
 
     running_chit = []
 
@@ -583,7 +574,7 @@ if __name__ == "__main__":
         for SingleDose in DOSE_list:
             """for every dose volume a new Simulation"""
 
-            if NameOfModel in models_ext_stimulus:
+            if NameOfModel in AffectedModelFromStimulus:
 
                 """all the time points for the simulation"""
                 time_points.extend(dict_of_EXSTDTC[TRT])
@@ -617,9 +608,9 @@ if __name__ == "__main__":
             running_chit.append(dict_running_chit)
 
             
-            if NameOfModel not in models_ext_stimulus:
+            if NameOfModel not in AffectedModelFromStimulus:
                 break
-        if NameOfModel not in models_ext_stimulus:
+        if NameOfModel not in AffectedModelFromStimulus:
             break
 
     print(NameOfModel)
@@ -640,7 +631,7 @@ if __name__ == "__main__":
         SEQ = SEQ_old + 1
 
 
-        if NameOfModel not in models_ext_stimulus:
+        if NameOfModel not in AffectedModelFromStimulus:
             EXTRT = 0
             EXDOSE = 0
             EXSTDTC_list = [0]
@@ -725,7 +716,7 @@ if __name__ == "__main__":
             """
           
             if i[0] in EXSTDTC_list\
-            and NameOfModel in models_ext_stimulus:
+            and NameOfModel in AffectedModelFromStimulus:
 
                 for TESTCDAffectedByStimulus in dict_stimulus.get(EXTRT)[2]:
 
@@ -741,7 +732,7 @@ if __name__ == "__main__":
                                                 )
 
             elif i[0] == Glucose_impuls_start\
-            and NameOfModel in models_ext_stimulus:
+            and NameOfModel in AffectedModelFromStimulus:
 
                 # glucose_switch= [True]
                 # note: i exclueded the glucose stimulus 

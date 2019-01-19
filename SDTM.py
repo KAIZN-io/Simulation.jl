@@ -411,9 +411,11 @@ class ModelFromDatabase:
 class SimulationPreparation:
     def __init__(self, NameOfModel):
         self.NameOfModel = NameOfModel
+        self.UsedStimulusWithConcentration = None
+        self.dict_of_EXSTDTC = None
 
     def isModelAffected(self, ActivatedStimulus=[], ModelOdeVariable = []):
-        AffectedModelFromStimulus = []
+        AffectedModelFromStimulus = False
 
         """iterating over all activated stimuli"""
         for i in ActivatedStimulus:
@@ -423,12 +425,88 @@ class SimulationPreparation:
 
             """if the targets are in the specific model"""
             if set(target).issubset(ModelOdeVariable) == True:
-                AffectedModelFromStimulus.append('{}'.format(self.NameOfModel))
-
-        """deletes multiple listings"""
-        AffectedModelFromStimulus = list(set(AffectedModelFromStimulus))
+                AffectedModelFromStimulus = True
 
         return AffectedModelFromStimulus
+    
+    def StimulusRules(self, StimulusDict = {}, StimulusTimePoints = {}):
+        self.dict_of_EXSTDTC = {}
+        list_of_stimuli_conc = []
+        list_of_stimuli_name = []
+
+        """iterate over all available stimulus"""
+        for key, values in StimulusDict.items():
+            if values[-1] == True:
+                """get the concentrations"""
+                # TEMP: bad way, because this only allows one kind of concentrations
+                list_of_stimuli_conc.append(values[0])
+
+                """get the stimulus name"""
+                list_of_stimuli_name.append(key)
+
+                """get all the stimulus time points"""
+                if key in StimulusTimePoints.keys():
+
+                    self.dict_of_EXSTDTC[key] = StimulusTimePoints[key]
+
+        self.UsedStimulusWithConcentration = dict(zip(list_of_stimuli_name, list_of_stimuli_conc))
+
+        return self.UsedStimulusWithConcentration
+
+    def SimulationTimePoints(self):
+        """the 'universal' time list"""
+        time_points = [start, stop]
+
+        # TEMP : bad way
+        if self.NameOfModel in ['combined_models', 'ion']:
+            time_points.append(Glucose_impuls_start)
+
+        running_chit = []
+
+        for TRT, DOSE_list in self.UsedStimulusWithConcentration.items():
+            for SingleDose in DOSE_list:
+                """for every dose volume a new Simulation"""
+
+                if AffectedModelFromStimulus == True:
+
+                    """all the time points for this stimulus"""
+                    time_points.extend(self.dict_of_EXSTDTC[TRT])
+
+                    """if there are multiple stimuli events at one time point"""
+                    time_points = list(set(time_points))
+                    time_points.sort()
+
+                    switchboard = [1, 1, 1, 1, 1]
+
+                else:
+                    switchboard = [1, 0, 0, 0, 1]
+
+                time_of_simulations_test = [np.linspace(i, j, (j-i)/time_steps)
+                                            for i, j in zip(time_points[0::], time_points[1::])
+                                            ]
+
+                dict_running_chit = {'name': self.NameOfModel,
+                                    'EXTRT': TRT,
+                                    'EXDOSE': SingleDose,
+                                    'EXSTDTC_list': self.dict_of_EXSTDTC[TRT],
+                                    'results': time_of_simulations_test,
+                                    }
+
+                liste_compress = list(itertools.compress(
+                    dict_running_chit, switchboard))
+
+                dict_running_chit = {
+                    i: dict_running_chit[i] for i in liste_compress}
+
+                """append to the rest of the toodo simulation"""
+                running_chit.append(dict_running_chit)
+
+                if AffectedModelFromStimulus == False:
+                    break
+            if AffectedModelFromStimulus == False:
+                break
+        return running_chit
+
 
 if __name__ == "__main__":
 
@@ -529,89 +607,18 @@ if __name__ == "__main__":
 
 
     """"if the model is effected from the stimulus --> get the stimulus settings"""
-    dict_of_EXSTDTC = {}
-    # if len(AffectedModelFromStimulus) > 0:
-    list_of_stimuli_conc = []
-    list_of_stimuli_name = []
-
-    for key,values in dict_stimulus.items():
-        if values[-1] == True:
-            list_of_stimuli_conc.append(values[0])
-            list_of_stimuli_name.append(key)
-
-            """find the right stimuli-simulation-time-list for this impuls
-            
-            creates a sub dict of the possible stimilus
-            """
-            if key in dict_unique_EXSTDTC.keys():
-
-                dict_of_EXSTDTC[key] = dict_unique_EXSTDTC[key]
-
-    dict_stimuli = dict(zip(list_of_stimuli_name, list_of_stimuli_conc))
-    
-    # else:
-    #     dict_stimuli = {}
+    UsedStimulusWithConcentration = z.StimulusRules(
+        StimulusDict=dict_stimulus, StimulusTimePoints=dict_unique_EXSTDTC)
 
    
+
     """simulation
 
     the actual simulation begins
     """
-
     """time points for not external stimulated models"""
-    t = np.linspace(start, stop, (stop-start)/time_steps)
+    running_chit = z.SimulationTimePoints()
 
-    """the 'universal' time list"""
-    time_points = [start, stop]
-
-    # TEMP : bad way
-    if NameOfModel in ['combined_models', 'ion']:
-        time_points.append(Glucose_impuls_start)
-
-    running_chit = []
-
-    for TRT,DOSE_list in dict_stimuli.items():
-        for SingleDose in DOSE_list:
-            """for every dose volume a new Simulation"""
-
-            if NameOfModel in AffectedModelFromStimulus:
-
-                """all the time points for the simulation"""
-                time_points.extend(dict_of_EXSTDTC[TRT])
-
-                """if there are multiple stimuli events at one time point"""
-                time_points = list(set(time_points))
-                time_points.sort()
-
-                switchboard = [1,1,1,1,1]
-
-                time_of_simulations_test = [np.linspace(i, j, (j-i)/time_steps)
-                                    for i,j in zip(time_points[0::],time_points[1::])
-                                    ]
-
-            else:
-                switchboard = [1,0,0,0,1]
-                time_of_simulations_test = [t]
-            
-            dict_running_chit = {'name' : NameOfModel,
-                                'EXTRT': TRT,
-                                'EXDOSE': SingleDose,
-                                'EXSTDTC_list': dict_of_EXSTDTC[TRT],
-                                'results': time_of_simulations_test,
-                                }
-                                
-            liste_compress = list(itertools.compress(dict_running_chit,switchboard))
-
-            dict_running_chit = {i : dict_running_chit[i] for i in liste_compress}
-
-            """append to the rest of the toodo simulation"""
-            running_chit.append(dict_running_chit)
-
-            
-            if NameOfModel not in AffectedModelFromStimulus:
-                break
-        if NameOfModel not in AffectedModelFromStimulus:
-            break
 
     print(NameOfModel)
     for ijj in running_chit:
@@ -631,7 +638,7 @@ if __name__ == "__main__":
         SEQ = SEQ_old + 1
 
 
-        if NameOfModel not in AffectedModelFromStimulus:
+        if AffectedModelFromStimulus == False:
             EXTRT = 0
             EXDOSE = 0
             EXSTDTC_list = [0]
@@ -716,7 +723,7 @@ if __name__ == "__main__":
             """
           
             if i[0] in EXSTDTC_list\
-            and NameOfModel in AffectedModelFromStimulus:
+            and AffectedModelFromStimulus == True:
 
                 for TESTCDAffectedByStimulus in dict_stimulus.get(EXTRT)[2]:
 
@@ -732,7 +739,7 @@ if __name__ == "__main__":
                                                 )
 
             elif i[0] == Glucose_impuls_start\
-            and NameOfModel in AffectedModelFromStimulus:
+            and AffectedModelFromStimulus == True:
 
                 # glucose_switch= [True]
                 # note: i exclueded the glucose stimulus 

@@ -507,6 +507,10 @@ class SimulationPreparation:
                 break
         return running_chit
 
+class Simulation():
+    def __init__(self):
+        pass
+
 
 if __name__ == "__main__":
 
@@ -610,16 +614,15 @@ if __name__ == "__main__":
     UsedStimulusWithConcentration = z.StimulusRules(
         StimulusDict=dict_stimulus, StimulusTimePoints=dict_unique_EXSTDTC)
 
-   
+    """time points for not external stimulated models"""
+    running_chit = z.SimulationTimePoints()
+
+
 
     """simulation
 
     the actual simulation begins
     """
-    """time points for not external stimulated models"""
-    running_chit = z.SimulationTimePoints()
-
-
     print(NameOfModel)
     for ijj in running_chit:
 

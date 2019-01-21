@@ -14,7 +14,7 @@ class DataExtraction:
     def __init__(self):
         pass
 
-    def solveTheODEs(initialValues, time):
+    def solveTheODEs(initialValues, t):
 
         resultsDictPlaceholder = {}
         resultsOfTheTerms = ()
@@ -28,7 +28,7 @@ class DataExtraction:
                 exec('{}={}'.format(columnNames[i], initialValues[i]))
 
             except:
-                print(columnNames[i], initialValues[i], 'time:', time)
+                print(columnNames[i], initialValues[i], 'time:', t)
 
         """get the model system from the json file"""
         with open('Single_Models/json_files/{0}_system.json'.format(
@@ -100,7 +100,7 @@ class DataExtraction:
             for i in resultsOfTheTerms:
                 dictWithTerms[i] = eval(i)
 
-            df = pd.DataFrame(dictWithTerms, index=[time])
+            df = pd.DataFrame(dictWithTerms, index=[t])
 
             df.to_sql(csv_fingerprint, con=engine, schema='{}_terms'.format(
                 nameOfModel), if_exists='append')

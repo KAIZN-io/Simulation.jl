@@ -32,7 +32,7 @@ class DataExtraction:
 
         """get the model system from the json file"""
         with open('Single_Models/json_files/{0}_system.json'.format(
-                NAME_OF_MODEL)) as jsonData:
+                nameOfModel)) as jsonData:
             dataFromJson = json.load(jsonData)
 
         """activate the model system"""
@@ -103,7 +103,7 @@ class DataExtraction:
             df = pd.DataFrame(dictWithTerms, index=[time])
 
             df.to_sql(csv_fingerprint, con=engine, schema='{}_terms'.format(
-                NAME_OF_MODEL), if_exists='append')
+                nameOfModel), if_exists='append')
 
         return odeResultsForSolver
 
@@ -180,7 +180,7 @@ class DataVisualization:
         """x axis is shared and the ticks are rotated"""
         fig.autofmt_xdate(bottom=0.2,
                             rotation=30)
-        fig.suptitle(t='{}_Model'.format(NAME_OF_MODEL.title()),
+        fig.suptitle(t='{}_Model'.format(nameOfModel.title()),
                         fontsize=fontSize)
 
         # fig.suptitle(t='Volume',
@@ -212,7 +212,7 @@ class DataVisualization:
 
                     for i in substance:
 
-                        if NAME_OF_MODEL == 'combined_models' and i == 'Hog1PPn':
+                        if nameOfModel == 'combined_models' and i == 'Hog1PPn':
                             exec(
                                 "ax{}.plot(timeSeriesData[i],label='Hog1PPn (*1E7)')".format(axis_index))
 
@@ -237,7 +237,7 @@ class DataVisualization:
 
             """"save the plot"""
 
-            pictureName = '{0}_{1}.png'.format(NAME_OF_MODEL, SEQ)
+            pictureName = '{0}_{1}.png'.format(nameOfModel, SEQ)
             plt.savefig('SimulationPictures/{0}'.format(pictureName),
                         dpi=360,
                         format='png',
@@ -247,14 +247,14 @@ class DataVisualization:
             # """pre check if picture is already saved in database"""
             # cur.execute(sql.SQL("""
             #         Select max(seq) from {0}.analysis
-            #         """).format(sql.Identifier(NAME_OF_MODEL)))
+            #         """).format(sql.Identifier(nameOfModel)))
 
             # if cur.fetchone()[0] != SEQ:
             #     cur.execute(sql.SQL("""
             #             INSERT INTO {0}.analysis(
             #                 seq, namepicture)
             #                 VALUES(%s, %s);
-            #             """).format(sql.Identifier(NAME_OF_MODEL)), [SEQ, pictureName])
+            #             """).format(sql.Identifier(nameOfModel)), [SEQ, pictureName])
 
             #     conn.commit()
 
@@ -326,8 +326,8 @@ class DataVisualization:
 
 # NOTE : class will be replace with ORM wrapper
 class ModelFromDatabase:
-    def __init__(self, NAME_OF_MODEL):
-        self.NAME_OF_MODEL = NAME_OF_MODEL
+    def __init__(self, nameOfModel):
+        self.nameOfModel = nameOfModel
         self.specificModelVersionSEQ = None
         self.specificInitValuesVersionSEQ = None
 
@@ -341,7 +341,7 @@ class ModelFromDatabase:
             cur.execute(sql.SQL("""
                 SELECT MAX(seq)
                 FROM {}.json;
-                """).format(sql.Identifier(self.NAME_OF_MODEL)))
+                """).format(sql.Identifier(self.nameOfModel)))
 
             self.specificModelVersionSEQ = cur.fetchone()[0]
 
@@ -357,7 +357,7 @@ class ModelFromDatabase:
             cur.execute(sql.SQL("""
                 SELECT MAX(seq)
                 FROM {}.init_values;
-                """).format(sql.Identifier(self.NAME_OF_MODEL)))
+                """).format(sql.Identifier(self.nameOfModel)))
 
             self.specificInitValuesVersionSEQ = cur.fetchone()[0]
 
@@ -373,7 +373,7 @@ class ModelFromDatabase:
             cur.execute(sql.SQL("""
                 SELECT MAX(seq)
                 FROM {}.parameter;
-                """).format(sql.Identifier(self.NAME_OF_MODEL)))
+                """).format(sql.Identifier(self.nameOfModel)))
 
             specificParameterVersionSEQ = cur.fetchone()[0]
 
@@ -385,14 +385,14 @@ class ModelFromDatabase:
             SELECT model_version
             FROM {}.json
             WHERE seq = %s;
-            """).format(sql.Identifier(self.NAME_OF_MODEL)), [self.specificModelVersionSEQ])
+            """).format(sql.Identifier(self.nameOfModel)), [self.specificModelVersionSEQ])
 
         ModelVersionFromDatabase = cur.fetchone()[0]
 
         """create json format"""
 
         s = json.dumps(ModelVersionFromDatabase, indent=4)
-        with open('Single_Models/json_files/{0}_system.json'.format(self.NAME_OF_MODEL), "w") as f:
+        with open('Single_Models/json_files/{0}_system.json'.format(self.nameOfModel), "w") as f:
             f.write(s)
 
     def getODENames(self):
@@ -401,7 +401,7 @@ class ModelFromDatabase:
                 SELECT testcd
                 FROM {}.init_values
                 WHERE seq = %s
-                """).format(sql.Identifier(self.NAME_OF_MODEL)), [self.specificInitValuesVersionSEQ])
+                """).format(sql.Identifier(self.nameOfModel)), [self.specificInitValuesVersionSEQ])
 
         modelOdeVariables = cur.fetchall()
         modelOdeVariables = [x[0] for x in modelOdeVariables]
@@ -410,8 +410,8 @@ class ModelFromDatabase:
 
 
 class SimulationPreparation:
-    def __init__(self, NAME_OF_MODEL):
-        self.NAME_OF_MODEL = NAME_OF_MODEL
+    def __init__(self, nameOfModel):
+        self.nameOfModel = nameOfModel
         self.usedStimulusWithConcentration = None
         self.stimulusTimePoints = None
 
@@ -460,7 +460,7 @@ class SimulationPreparation:
         simulationTimePoints = [start, stop]
 
         # TEMP : bad way
-        if self.NAME_OF_MODEL in ['combined_models', 'ion']:
+        if self.nameOfModel in ['combined_models', 'ion']:
             simulationTimePoints.append(Glucose_impuls_start)
 
         running_chit = []
@@ -487,7 +487,7 @@ class SimulationPreparation:
                                             for i, j in zip(simulationTimePoints[0::], simulationTimePoints[1::])
                                             ]
 
-                dict_running_chit = {'name': self.NAME_OF_MODEL,
+                dict_running_chit = {'name': self.nameOfModel,
                                      'EXTRT': TRT,
                                      'EXDOSE': singleDose,
                                      'EXSTDTC_list': self.stimulusTimePoints[TRT],
@@ -572,14 +572,14 @@ if __name__ == "__main__":
     cur = conn.cursor()
 
     """get the used model name"""
-    NAME_OF_MODEL = [i for i, j in dict_model_switch.items() if j == True][0]
+    nameOfModel = [i for i, j in dict_model_switch.items() if j == True][0]
 
     """get the model
     
     name of model, initial values for the ODEs, parameterization, model, 
     and names of the ODEs
     """
-    modelFromDatabase = ModelFromDatabase(NAME_OF_MODEL)
+    modelFromDatabase = ModelFromDatabase(nameOfModel)
 
     specificModelVersionSEQ = modelFromDatabase.getModelVersion(
         dict_system_switch.get('specificModelVersionSEQ'))
@@ -602,7 +602,7 @@ if __name__ == "__main__":
     activated_stimuli = [stimulus_name for stimulus_name, items
                          in dict_stimulus.items() if items[-1] == True]
 
-    simulationPreparation = SimulationPreparation(NAME_OF_MODEL)
+    simulationPreparation = SimulationPreparation(nameOfModel)
 
     """find out how and if the model is affected from the activated stimulus"""
     affectedModelFromStimulus = simulationPreparation.isModelAffected(
@@ -619,7 +619,7 @@ if __name__ == "__main__":
 
     the actual simulation begins
     """
-    print(NAME_OF_MODEL)
+    print(nameOfModel)
     for ijj in running_chit:
 
         """initialize an empty DataFrame for each time value"""
@@ -627,7 +627,7 @@ if __name__ == "__main__":
 
         """check, how many SEQ number already exists"""
         cur.execute(sql.SQL("SELECT MAX(EXSEQ) FROM {}.ex;").format(
-                    sql.Identifier(NAME_OF_MODEL)))
+                    sql.Identifier(nameOfModel)))
 
         SEQ_old = cur.fetchone()[0]
         if SEQ_old == None:
@@ -649,7 +649,7 @@ if __name__ == "__main__":
         EX_dict = {
             "studyid": STUDYID,
             "domain": "ex",
-            "usubjid": NAME_OF_MODEL,
+            "usubjid": nameOfModel,
             "exseq": SEQ,
             "excat": EXCAT,
             "extrt": EXTRT,
@@ -675,7 +675,7 @@ if __name__ == "__main__":
             SELECT testcd, orres
             FROM {}.parameter 
             WHERE seq=%s;
-            """).format(sql.Identifier(NAME_OF_MODEL)), [specificParameterVersionSEQ])
+            """).format(sql.Identifier(nameOfModel)), [specificParameterVersionSEQ])
 
         TESTCD_ORRESU_tuple = cur.fetchall()
 
@@ -691,7 +691,7 @@ if __name__ == "__main__":
             SELECT testcd, orres, orresu
             FROM {}.init_values 
             WHERE seq=%s;
-            """).format(sql.Identifier(NAME_OF_MODEL)), [specificInitValuesVersionSEQ])
+            """).format(sql.Identifier(nameOfModel)), [specificInitValuesVersionSEQ])
 
         TESTCD_ORRESU_tuple = cur.fetchall()
 
@@ -756,7 +756,7 @@ if __name__ == "__main__":
         ODE_RESULTS_raw = ijj['results']
 
         ODE_RESULTS, PDORRESU_grouped = DataVisualization.prepareVisualization(
-            sql_USUBJID=NAME_OF_MODEL, ODE_RESULTS=ODE_RESULTS_raw, PDORRESU_x=ijj['units'])
+            sql_USUBJID=nameOfModel, ODE_RESULTS=ODE_RESULTS_raw, PDORRESU_x=ijj['units'])
 
         """plot the results, save the plot and return the pictureName"""
         pictureName = DataVisualization.plotTimeSeries(timeSeriesData=ODE_RESULTS,
@@ -764,7 +764,7 @@ if __name__ == "__main__":
 
         EX_dict['namepicture'] = pictureName
 
-        print(SEQ, "NAME_OF_MODEL", NAME_OF_MODEL)
+        print(SEQ, "nameOfModel", nameOfModel)
 
         """last step before pushing results to database
         
@@ -781,7 +781,7 @@ if __name__ == "__main__":
         DfAsMatrix = ijj['results'].values
         ColumnsOfDataframe = ijj['results'].columns.tolist()
 
-        if NAME_OF_MODEL != 'volume':
+        if nameOfModel != 'volume':
             def truncate(n, decimals=0):
                 multiplier = 10 ** decimals
                 return int(n * multiplier) / multiplier
@@ -825,7 +825,7 @@ if __name__ == "__main__":
 
             """dict to sql database"""
             insert_statement = 'insert into {}.ex (%s) values %s'.format(
-                NAME_OF_MODEL)
+                nameOfModel)
             cur.execute(cur.mogrify(insert_statement,
                                     (AsIs(','.join(keys_db)), tuple(values_db))))
 
@@ -842,7 +842,7 @@ if __name__ == "__main__":
                     dict_test = {}
                     dict_test['studyid'] = STUDYID
                     dict_test['domain'] = 'pd'
-                    dict_test['usubjid'] = NAME_OF_MODEL
+                    dict_test['usubjid'] = nameOfModel
                     dict_test['pdseq'] = SEQ
                     dict_test['pdtestcd'] = substance
                     dict_test['pdtest'] = None
@@ -858,7 +858,7 @@ if __name__ == "__main__":
                     """dict to sql database"""
 
                     insert_statement = 'insert into {}.pd (%s) values %s'.format(
-                        NAME_OF_MODEL)
+                        nameOfModel)
                     cur.execute(cur.mogrify(insert_statement,
                                             (AsIs(','.join(keys_db)), tuple(values_db))))
 

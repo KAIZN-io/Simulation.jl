@@ -518,7 +518,7 @@ class Simulation():
 
 if __name__ == "__main__":
 
-    exec(open("createDatabaseStructure.py").read())
+    exec(open("db/db.py").read())
     exec(open("initializeModel.py").read())
 
     dict_visualisation = {

@@ -8,10 +8,11 @@ import uuid
 from decimal import Decimal
 from sqlalchemy import func
 
-from db import Ex, Pd, Model, Parameters, InitialValues, sessionScope, Session
+from db import Ex, Pd, Parameters, InitialValues, sessionScope, Session
 from initializeModel import initializeDb
 from values import SimulationTypes
 from DataExtraction import DataExtraction
+from Model import Model
 
 """import the standard used packages"""
 exec(open("SYSTEM/py_packages.py").read())
@@ -73,7 +74,7 @@ class DataVisualization:
         """x axis is shared and the ticks are rotated"""
         fig.autofmt_xdate(bottom=0.2,
                             rotation=30)
-        fig.suptitle(t='{}_Model'.format(nameOfModel.title()),
+        fig.suptitle(t='{}_Model'.format(model.getTypeAsString().title()),
                         fontsize=fontSize)
 
         # fig.suptitle(t='Volume',
@@ -105,7 +106,7 @@ class DataVisualization:
 
                     for i in substance:
 
-                        if nameOfModel == 'combined_models' and i == 'Hog1PPn':
+                        if model.isOfType('combined_models') and i == 'Hog1PPn':
                             exec(
                                 "ax{}.plot(timeSeriesData[i],label='Hog1PPn (*1E7)')".format(axis_index))
 
@@ -130,7 +131,7 @@ class DataVisualization:
 
             """"save the plot"""
 
-            pictureName = '{0}_{1}.png'.format(nameOfModel, SEQ)
+            pictureName = '{0}_{1}.png'.format(model.getTypeAsString(), SEQ)
             plt.savefig('SimulationPictures/{0}'.format(pictureName),
                         dpi=360,
                         format='png',
@@ -140,14 +141,14 @@ class DataVisualization:
             # """pre check if picture is already saved in database"""
             # cur.execute(sql.SQL("""
             #         Select max(seq) from {0}.analysis
-            #         """).format(sql.Identifier(nameOfModel)))
+            #         """).format(sql.Identifier(model.getName())))
 
             # if cur.fetchone()[0] != SEQ:
             #     cur.execute(sql.SQL("""
             #             INSERT INTO {0}.analysis(
             #                 seq, namepicture)
             #                 VALUES(%s, %s);
-            #             """).format(sql.Identifier(nameOfModel)), [SEQ, pictureName])
+            #             """).format(sql.Identifier(model.getName())), [SEQ, pictureName])
 
             #     conn.commit()
 
@@ -217,91 +218,13 @@ class DataVisualization:
 
         return ODE_RESULTS, groupedPDORRESU
 
-# NOTE : class will be replace with ORM wrapper
-class ModelFromDatabase:
-    def __init__(self, type):
-        self.type = type
-        self.specificModelVersionSEQ = None
-        self.specificInitValuesVersionSEQ = None
-
-    def getModelVersion(self, requestedModelVersion=[]):
-        """gets the wanted ModelVersion"""
-        if len(requestedModelVersion) > 0:
-            self.specificModelVersionSEQ = requestedModelVersion[0]
-
-        else:
-            """get the MAX(seq) value from the database"""
-            with sessionScope() as session:
-                q = session.query(func.max(Model.version)) \
-                        .filter(Model.type == self.type)
-
-            if q.scalar():
-                self.specificModelVersionSEQ = q.scalar()
-            else:
-                self.specificModelVersionSEQ = 1
-
-        return self.specificModelVersionSEQ
-
-    def getInitValuesVersion(self, requestedInitValueVersion=[]):
-        """gets the wanted InitValuesVersion"""
-        if len(requestedInitValueVersion) > 0:
-            self.specificInitValuesVersionSEQ = requestedInitValueVersion[0]
-
-        else:
-            """get the MAX(seq) value from the database"""
-            with sessionScope() as session:
-                q = session.query(func.max(InitialValues.version)) \
-                        .filter(InitialValues.type == self.type)
-
-            self.specificInitValuesVersionSEQ = q.scalar()
-
-        return self.specificInitValuesVersionSEQ
-
-    def getParameterVersion(self, requestedParameterVersion=[]):
-        """gets the wanted ParameterValuesVersion"""
-        if len(requestedParameterVersion) > 0:
-            specificParameterVersionSEQ = requestedParameterVersion[0]
-
-        else:
-            """get the MAX(seq) value from the database"""
-            with sessionScope() as session:
-                q = session.query(func.max(Parameters.version)) \
-                        .filter(Parameters.type == self.type)
-
-            specificParameterVersionSEQ = q.scalar()
-
-        return specificParameterVersionSEQ
-
-    def updateLocalJsonModel(self):
-        """update the local safed json file for the model"""
-        with sessionScope() as session:
-            q = session.query(Model.json) \
-                    .filter(Model.version == self.specificModelVersionSEQ) \
-                    .filter(Model.type == self.type)
-
-        with open('Single_Models/json_files/{0}_system.json'.format(self.type.value), "w") as f:
-            f.write(q.one()[0])
-
-    def getODENames(self):
-        """list of the names of the ODE in the model"""
-        with sessionScope() as session:
-            q = session.query(InitialValues.testcd) \
-                    .filter(InitialValues.version == specificInitValuesVersionSEQ) \
-                    .filter(InitialValues.type == self.type)
-
-        modelOdeVariables = q.all()
-        modelOdeVariables = [x[0] for x in modelOdeVariables]
-
-        return modelOdeVariables
-
-
 class SimulationPreparation:
-    def __init__(self, nameOfModel):
-        self.nameOfModel = nameOfModel
+    def __init__(self, model):
+        self.model = model
         self.usedStimulusWithConcentration = None
         self.stimulusTimePoints = None
 
-    def isModelAffected(self, activatedStimulus=[], modelOdeVariables=[]):
+    def isModelAffected(self, activatedStimulus=[]):
         affectedModelFromStimulus = False
 
         """iterating over all activated stimuli"""
@@ -311,7 +234,7 @@ class SimulationPreparation:
             target = stimulusDict.get(i)[2]
 
             """if the targets are in the specific model"""
-            if set(target).issubset(modelOdeVariables) == True:
+            if set(target).issubset(self.model.getODENames()) == True:
                 affectedModelFromStimulus = True
 
         return affectedModelFromStimulus
@@ -346,7 +269,7 @@ class SimulationPreparation:
         simulationTimePoints = [start, stop]
 
         # TEMP : bad way
-        if self.nameOfModel in ['combined_models', 'ion']:
+        if self.model.isAnyOf(['combined_models', 'ion']):
             simulationTimePoints.append(Glucose_impuls_start)
 
         runningChit = []
@@ -373,7 +296,7 @@ class SimulationPreparation:
                                             for i, j in zip(simulationTimePoints[0::], simulationTimePoints[1::])
                                             ]
 
-                dict_runningChit = {'name': self.nameOfModel,
+                dict_runningChit = {'name': self.model.getTypeAsString(),
                                      'EXTRT': TRT,
                                      'EXDOSE': singleDose,
                                      'EXSTDTC': self.stimulusTimePoints[TRT],
@@ -457,30 +380,14 @@ if __name__ == "__main__":
     """open a cursor to perform database operations"""
     cur = conn.cursor()
 
-    """get the used model name"""
-    # TODO: will be replaced with enum
-    nameOfModel = [i for i, j in dict_model_switch.items() if j == True][0]
+    model = Model.getModelFromDb(
+        typeAsString = [i for i, j in dict_model_switch.items() if j == True][0],
+        version = args['dict_system_switch']['specificModelVersionSEQ'][0],
+        initialValueVersion = args['dict_system_switch']['specificInitValuesVersionSEQ'][0],
+        parameterVersion = args['dict_system_switch']['specificParameterVersionSEQ'][0]
+    )
 
-    """get the model
-    
-    name of model, initial values for the ODEs, parameterization, model, 
-    and names of the ODEs
-    """
-    modelFromDatabase = ModelFromDatabase(SimulationTypes(nameOfModel))
-
-    specificModelVersionSEQ = modelFromDatabase.getModelVersion(
-        systemSwitchDict.get('specificModelVersionSEQ'))
-
-    specificInitValuesVersionSEQ = modelFromDatabase.getInitValuesVersion(
-        systemSwitchDict.get('specificInitValuesVersionSEQ'))
-
-    specificParameterVersionSEQ = modelFromDatabase.getParameterVersion(
-        systemSwitchDict.get('specificParameterVersionSEQ'))
-
-    modelFromDatabase.updateLocalJsonModel()
-
-    """get the ODE Names"""
-    modelOdeVariables = modelFromDatabase.getODENames()
+    model.updateLocalJsonModel()
 
     """activated stimuli
 
@@ -489,11 +396,11 @@ if __name__ == "__main__":
     activated_stimuli = [stimulus_name for stimulus_name, items
                          in stimulusDict.items() if items[-1] == True]
 
-    simulationPreparation = SimulationPreparation(nameOfModel)
+    simulationPreparation = SimulationPreparation(model)
 
     """find out how and if the model is affected from the activated stimulus"""
     affectedModelFromStimulus = simulationPreparation.isModelAffected(
-        activatedStimulus=activated_stimuli, modelOdeVariables=modelOdeVariables)
+        activatedStimulus=activated_stimuli)
 
     """"if the model is effected from the stimulus --> get the stimulus settings"""
     usedStimulusWithConcentration = simulationPreparation.rulesForStimulus(
@@ -506,7 +413,7 @@ if __name__ == "__main__":
 
     the actual simulation begins
     """
-    print(nameOfModel)
+    print(model.getTypeAsString())
     for simulationSettingsForTimeRange in runningChit:
 
         """initialize an empty DataFrame for each time value"""
@@ -534,7 +441,7 @@ if __name__ == "__main__":
             "id": SEQ,
             "studyid": STUDYID,
             "domain": "ex",
-            "usubjid": nameOfModel,
+            "usubjid": model.getTypeAsString(),
             "excat": EXCAT,
             "extrt": EXTRT,
             "exdose": EXDOSE,
@@ -543,18 +450,18 @@ if __name__ == "__main__":
             "simulation_start": start,
             "simulation_stop": stop,
             "co": "exstdtc in Sekunden",
-            "model_id": specificModelVersionSEQ,
-            "initial_values_version": specificInitValuesVersionSEQ,
-            "parameters_version": specificParameterVersionSEQ
+            "model_id": model.getVersion(),
+            "initial_values_version": model.getInitialValueVersion(),
+            "parameters_version": model.getParameterVersion()
         }
 
-        modelFingerprint = str(SEQ) + '_' + nameOfModel
+        modelFingerprint = str(SEQ) + '_' + model.getTypeAsString()
 
         """get the parameter from the database"""
         with sessionScope() as session:
             q = session.query(Parameters.testcd, Parameters.orres) \
-                    .filter(Parameters.type == SimulationTypes(nameOfModel)) \
-                    .filter(Parameters.version == specificParameterVersionSEQ)
+                    .filter(Parameters.type == model.getType()) \
+                    .filter(Parameters.version == model.getParameterVersion())
 
         TESTCD_ORRESU_tuple = q.all()
 
@@ -568,8 +475,8 @@ if __name__ == "__main__":
 
         with sessionScope() as session:
             q = session.query(InitialValues.testcd, InitialValues.orres, InitialValues.orresu) \
-                    .filter(InitialValues.type == SimulationTypes(nameOfModel)) \
-                    .filter(InitialValues.version == specificInitValuesVersionSEQ)
+                    .filter(InitialValues.type == model.getType()) \
+                    .filter(InitialValues.version == model.getInitialValueVersion())
 
         TESTCD_ORRESU_tuple = q.all()
 
@@ -613,7 +520,7 @@ if __name__ == "__main__":
                 glucose_switch = [False]
 
             simulationFrame = DataExtraction.callSimulation(
-                nameOfModel = nameOfModel,
+                nameOfModel = model.getTypeAsString(),
                 Glucose_impuls_start = Glucose_impuls_start,
                 Glucose_impuls_end = Glucose_impuls_end,
                 glucose_switch = glucose_switch,
@@ -633,7 +540,7 @@ if __name__ == "__main__":
         rawOdeResults = simulationSettingsForTimeRange['results']
 
         resultsForOdes, groupedPDORRESU = DataVisualization.prepareVisualization(
-            sql_USUBJID=nameOfModel, ODE_RESULTS=rawOdeResults, PDORRESU_x=simulationSettingsForTimeRange['units'])
+            sql_USUBJID=model.getTypeAsString(), ODE_RESULTS=rawOdeResults, PDORRESU_x=simulationSettingsForTimeRange['units'])
 
         """plot the results, save the plot and return the pictureName"""
         pictureName = DataVisualization.plotTimeSeries(timeSeriesData=resultsForOdes,
@@ -641,7 +548,7 @@ if __name__ == "__main__":
 
         EX_dict['image_path'] = pictureName
 
-        print(SEQ, "nameOfModel", nameOfModel)
+        print(SEQ, "model.getTypeAsString()", model.getTypeAsString())
 
         """last step before pushing results to database
         
@@ -658,7 +565,7 @@ if __name__ == "__main__":
         dataframeAsMatrix = simulationSettingsForTimeRange['results'].values
         columnsOfDataframe = simulationSettingsForTimeRange['results'].columns.tolist()
 
-        if nameOfModel != 'volume':
+        if not model.isOfType('volume'):
             def truncate(n, decimals=0):
                 multiplier = 10 ** decimals
                 return int(n * multiplier) / multiplier
@@ -714,7 +621,7 @@ if __name__ == "__main__":
                             ex_id = ex.id,
                             studyid = STUDYID,
                             domain = 'pd',
-                            usubjid = nameOfModel,
+                            usubjid = model.getTypeAsString(),
                             pdtestcd = substance,
                             pdtest = None,
                             pdorres = value,

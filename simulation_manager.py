@@ -41,15 +41,19 @@ class SimulationManager:
         return len(self.get_running_simulations()) > 0
 
     def get_new_seq_number(self, model):
-        cur.execute(
-            sql.SQL("SELECT MAX(EXSEQ) FROM {}.ex;").format(sql.Identifier(model))
-        )
+        try:
+            cur.execute(
+                sql.SQL("SELECT MAX(EXSEQ) FROM {}.ex;").format(sql.Identifier(model))
+            )
 
-        SEQ_old = cur.fetchone()[0]
-        if SEQ_old == None:
-            SEQ_old = 0
+            SEQ_old = cur.fetchone()[0]
 
-        return SEQ_old + 1
+            if SEQ_old == None:
+                SEQ_old = 0
+
+            return SEQ_old + 1
+        except:
+            return 0
 
 class SimulationProcess(multiprocessing.Process):
     def __init__(self, dicts):
@@ -142,9 +146,9 @@ class SimulationData:
         return {
             'export_data_to_sql': True,
             'export_terms_data_to_sql': False,
-            'SpecificInitValuesVersionSEQ': [1],
-            'SpecificModelVersionSEQ': [1],
-            'SpecificParameterVersionSEQ': [1]
+            'specificInitValuesVersionSEQ': [1],
+            'specificModelVersionSEQ': [1],
+            'specificParameterVersionSEQ': [1]
         }
 
     def generate_dicts(self):

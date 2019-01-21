@@ -7,6 +7,8 @@ import sys
 import uuid
 from decimal import Decimal
 
+import db
+
 """import the standard used packages"""
 exec(open("SYSTEM/py_packages.py").read())
 
@@ -518,7 +520,6 @@ class Simulation():
 
 if __name__ == "__main__":
 
-    exec(open("db/db.py").read())
     exec(open("initializeModel.py").read())
 
     dict_visualisation = {

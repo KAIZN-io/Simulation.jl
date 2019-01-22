@@ -6,6 +6,7 @@ __license__ = 'private'
 import sys
 import uuid
 from decimal import Decimal
+
 """import the standard used packages"""
 exec(open("SYSTEM/py_packages.py").read())
 
@@ -540,6 +541,7 @@ if __name__ == "__main__":
     json_args = sys.argv[1]
     args = json.loads(json_args)
 
+    print(sys.argv)
     timeDict = {
         'start': float(args['dict_time']['start']),
         'stop': float(args['dict_time']['stop']),
@@ -551,8 +553,7 @@ if __name__ == "__main__":
     }
     # TODO: will be replaced with enum
     dict_model_switch = args['dict_model_switch']
-
-    uniqueEXSTDTC = args['uniqueEXSTDTC']
+    uniqueEXSTDTC = args['dict_unique_EXSTDTC']
     stimulusDict = args['dict_stimulus']
     systemSwitchDict = args['dict_system_switch']
 

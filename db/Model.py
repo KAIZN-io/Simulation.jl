@@ -6,9 +6,8 @@ from db.base import base
 from values import SimulationModel
 
 
-#TODO: find a more meaningful name for this table, what does this json do?
-class JSON(base):
-    __tablename__ = 'json'
+class Model(base):
+    __tablename__ = 'model'
 
     seq = Column(Integer, primary_key=True)
     uuid = Column(UUID(as_uuid=True), unique=True, nullable=False)

@@ -3,163 +3,278 @@ __email__ = 'jan.piotraschke@mail.de'
 __version__ = 'bachelor_thesis'
 __license__ = 'private'
 
+import sys
+import uuid
+from decimal import Decimal
 """import the standard used packages"""
 exec(open("SYSTEM/py_packages.py").read())
-from decimal import Decimal
-import uuid
-import sys
 
-class netzwerk_daten_gewinnung:
+
+class DataExtraction:
     def __init__(self):
         pass
 
+    def solveTheODEs(initialValues, t):
 
-    def plotTimeSeries(TimeSeriesData_df=pd.DataFrame(),
-                    SubplotLogic={},
-                    Terms=False):
-            """ def description
+        resultsDictPlaceholder = {}
+        resultsOfTheTerms = ()
 
-            this function only needs the ODE results and the ORRESU_dict to
-            visualise the time-series
+        """get the Names of the ODEs"""
+        columnNames = simulationFrame.columns.tolist()
 
-            SubplotLogic = {ylabel_str : correspondingSubstance_list}
-            """
-            
-            if len(SubplotLogic.keys()) == 0:
-                SubplotLogic[1] = 'a'
-                GeneralizePlot = True
+        """assing the initial values to their ODEs"""
+        for i in range(len(initialValues)):
+            try:
+                exec('{}={}'.format(columnNames[i], initialValues[i]))
+
+            except:
+                print(columnNames[i], initialValues[i], 'time:', t)
+
+        """get the model system from the json file"""
+        with open('Single_Models/json_files/{0}_system.json'.format(
+                nameOfModel)) as jsonData:
+            dataFromJson = json.load(jsonData)
+
+        """activate the model system"""
+        for typeOfEquation, modelSpecies in dataFromJson.items():
+            if typeOfEquation == 'copa':
+                for copaName, copaTerm in modelSpecies.items():
+
+                    exec('{}={}'.format(copaName, copaTerm))
+
             else:
-                GeneralizePlot = False
+                """iterate over the content for the species"""
+                for speciesName, speciesContent in modelSpecies.items():
+                    if 'condition' in speciesContent:
 
-            sns.set_style(style='whitegrid')
-            # context : dict, None, or one of {paper, notebook, talk, poster}
-            sns.set_context(context='talk')
-            fig = plt.figure(figsize=(10, 7.5))
+                        for patialTerm, term in speciesContent['component'].items():
 
-            """fontSize 16 is a good size for the thesis"""
-            fontSize = 16
+                            """activate the term under its condition"""
+                            exec('{}={} {}'.format(patialTerm, term,
+                                                   speciesContent['condition']))
 
-            """create the subplots"""
-            iter_num = 1
+                            """add patialTerm to a set / list for database"""
+                            resultsOfTheTerms = resultsOfTheTerms + \
+                                (patialTerm,)
 
-            """pre define the subplots structures"""
-            for ORRESU, j in SubplotLogic.items():
-                exec('ax{0} = fig.add_subplot({1}, 1, {0})'.format(iter_num,
-                                                                len(SubplotLogic)))
-                exec('ax{}.spines["top"].set_visible(False)'.format(iter_num))
-                exec('ax{}.spines["right"].set_visible(False)'.format(iter_num))
-                exec(
-                    'ax{}.set_xlabel("time [s]",fontsize=fontSize)'.format(iter_num))
+                    else:
+                        for patialTerm, term in speciesContent['component'].items():
 
-                """fix the y-axis lim for pictures for latex / publication"""
-                # exec('ax{}.set_ylim(bottom=-20000, top=50000)'.format(iter_num))
+                            exec('{}={}'.format(patialTerm, term))
+                            resultsOfTheTerms = resultsOfTheTerms + \
+                                (patialTerm,)
 
-                if GeneralizePlot == True:
-                    exec("ax{}.set_ylabel('no unit',fontsize=fontSize)".format(iter_num))
-                else:
-                    exec('ax{}.set_ylabel(ORRESU,fontsize=fontSize)'.format(iter_num))
+                    """rejoin the terms to their equation"""
+                    list_values = list(speciesContent['component'].keys())
 
-                iter_num += 1
+                    """
+                    prepare to calculate the sum of the terms of a substance
+                    """
+                    equationTermsSum = '+'.join(list_values)
 
-            """x axis is shared and the ticks are rotated"""
-            fig.autofmt_xdate(bottom=0.2,
+                    keysPlaceholder = speciesName
+                    exec('{}={}'.format(keysPlaceholder, equationTermsSum))
+
+                    if typeOfEquation == 'ODE':
+                        resultsDictPlaceholder[speciesName] = eval(speciesName)
+
+        """sort the odeResultsForSolverPlaceholder
+
+        this must be done because the json file is not sorted!
+        """
+        resultsDictPlaceholder = OrderedDict(
+            sorted(resultsDictPlaceholder.items()))
+
+        """ODE results for the next simulation step of the ODE solver"""
+        odeResultsForSolver = [j for i, j in resultsDictPlaceholder.items()]
+
+        """export the individuel terms to the database"""
+        if systemSwitchDict.get('export_data_to_sql') == True\
+                and systemSwitchDict.get('export_terms_data_to_sql') == True:
+
+            """sql connection"""
+            engine = create_engine(
+                'postgres://postgres:@db_postgres:5432/simulation_results')
+
+            dictWithTerms = {}
+            for i in resultsOfTheTerms:
+                dictWithTerms[i] = eval(i)
+
+            df = pd.DataFrame(dictWithTerms, index=[t])
+
+            df.to_sql(modelFingerprint, con=engine, schema='{}_terms'.format(
+                nameOfModel), if_exists='append')
+
+        return odeResultsForSolver
+
+    def callSimulation(dataForSimulation=pd.DataFrame(), i=[]):
+        initialValues = dataForSimulation.tail(1).values.tolist()[0]
+
+        """solves the ode and algebraic equations"""
+        states = odeint(DataExtraction.solveTheODEs, initialValues, i)
+
+        """ruft die entsprechenden Columns Namen auf"""
+        columnNames = dataForSimulation.columns.values.tolist()
+
+        """uebergibt dem placeholderDataframe die Ergebnisse der Berechnung"""
+        placeholderDataframe = pd.DataFrame(states, columns=columnNames, index=i)
+
+        """haengt das placeholderDataframe dem simulationFrame an"""
+        simulationFrame = pd.concat([dataForSimulation, placeholderDataframe])
+
+        return simulationFrame
+
+# TODO: this class should be removed from SDTM.py
+class DataVisualization:
+    def __init__(self):
+        pass
+
+    def plotTimeSeries(timeSeriesData=pd.DataFrame(),
+                       subplotLogic={},
+                       terms=False):
+        """ def description
+
+        this function only needs the ODE results and the ORRESU_dict to
+        visualise the time-series
+
+        subplotLogic = {ylabel_str : correspondingSubstance_list}
+        """
+
+        if len(subplotLogic.keys()) == 0:
+            subplotLogic[1] = 'a'
+            generalizePlot = True
+        else:
+            generalizePlot = False
+
+        sns.set_style(style='whitegrid')
+        # context : dict, None, or one of {paper, notebook, talk, poster}
+        sns.set_context(context='talk')
+        fig = plt.figure(figsize=(10, 7.5))
+
+        """fontSize 16 is a good size for the thesis"""
+        fontSize = 16
+
+        """create the subplots"""
+        iterNum = 1
+
+        """pre define the subplots structures"""
+        for ORRESU, j in subplotLogic.items():
+            exec('ax{0} = fig.add_subplot({1}, 1, {0})'.format(iterNum,
+                                                                len(subplotLogic)))
+            exec('ax{}.spines["top"].set_visible(False)'.format(iterNum))
+            exec(
+                'ax{}.spines["right"].set_visible(False)'.format(iterNum))
+            exec(
+                'ax{}.set_xlabel("time [s]",fontsize=fontSize)'.format(iterNum))
+
+            """fix the y-axis lim for pictures for latex / publication"""
+            # exec('ax{}.set_ylim(bottom=-20000, top=50000)'.format(iterNum))
+
+            if generalizePlot == True:
+                exec("ax{}.set_ylabel('no unit',fontsize=fontSize)".format(iterNum))
+            else:
+                exec('ax{}.set_ylabel(ORRESU,fontsize=fontSize)'.format(iterNum))
+
+            iterNum += 1
+
+        """x axis is shared and the ticks are rotated"""
+        fig.autofmt_xdate(bottom=0.2,
                             rotation=30)
-            fig.suptitle(t='{}_Model'.format(model_name.title()),
-                         fontsize=fontSize)
+        fig.suptitle(t='{}_Model'.format(nameOfModel.title()),
+                        fontsize=fontSize)
 
-            # fig.suptitle(t='Volume',
-            #             fontsize=fontSize)
+        # fig.suptitle(t='Volume',
+        #             fontsize=fontSize)
 
-            with sns.color_palette('cubehelix', len(TimeSeriesData_df.columns.tolist())):
+        with sns.color_palette('cubehelix', len(timeSeriesData.columns.tolist())):
 
-                """make the fig more fittet"""
-                # fig.tight_layout(pad = 3,
-                #                 rect = [0,0,0.85,1]
-                #                 )
+            """make the fig more fittet"""
+            # fig.tight_layout(pad = 3,
+            #                 rect = [0,0,0.85,1]
+            #                 )
 
-                # """show the version of the plot"""
-                # fig.text(0.99, 0.01,
-                #          s='{} - {}'.format(current_date,
-                #                             sql_USUBJID.title()),
-                #          fontstyle='italic',
-                #          color='#999999',
-                #          ha='right',
-                #          va='bottom',
-                #          fontsize='x-small'
-                #         )
+            # """show the version of the plot"""
+            # fig.text(0.99, 0.01,
+            #          s='{} - {}'.format(current_date,
+            #                             sql_USUBJID.title()),
+            #          fontstyle='italic',
+            #          color='#999999',
+            #          ha='right',
+            #          va='bottom',
+            #          fontsize='x-small'
+            #         )
 
-                """assign each TESTCD to their right subplot"""
-                if GeneralizePlot == False:
-                    for ORRESU_tuple, axis_index in zip(SubplotLogic.items(),
-                                                        range(1, len(SubplotLogic)+1)):
-                        parameter, substance = ORRESU_tuple
+            """assign each TESTCD to their right subplot"""
+            if generalizePlot == False:
+                for ORRESU_tuple, axis_index in zip(subplotLogic.items(),
+                                                    range(1, len(subplotLogic)+1)):
+                    parameter, substance = ORRESU_tuple
 
-                        for i in substance:
+                    for i in substance:
 
-                            if model_name == 'combined_models' and i == 'Hog1PPn':
-                                exec(
-                                    "ax{}.plot(TimeSeriesData_df[i],label='Hog1PPn (*1E7)')".format(axis_index))
+                        if nameOfModel == 'combined_models' and i == 'Hog1PPn':
+                            exec(
+                                "ax{}.plot(timeSeriesData[i],label='Hog1PPn (*1E7)')".format(axis_index))
+
+                        else:
+                            if terms == True:
+                                exec("ax{0}.plot(timeSeriesData[i],label=EquationTerms_dict[i])".format(
+                                    axis_index))
 
                             else:
-                                if Terms == True:
-                                    exec("ax{0}.plot(TimeSeriesData_df[i],label=EquationTerms_dict[i])".format(
-                                        axis_index))
+                                exec('ax{0}.plot(timeSeriesData[i],label=i)'.format(
+                                    axis_index))
 
-                                else:
-                                    exec('ax{0}.plot(TimeSeriesData_df[i],label=i)'.format(
-                                        axis_index))
+                        exec('ax{0}.legend(ncol=1,borderaxespad = 0,bbox_to_anchor=(1.01, 0.5), \
+                            frameon = True,loc={1!r},fontsize=fontSize)'.format(axis_index, 'center left'))
 
-                            exec('ax{0}.legend(ncol=1,borderaxespad = 0,bbox_to_anchor=(1.01, 0.5), \
-                                frameon = True,loc={1!r},fontsize=fontSize)'.format(axis_index, 'center left'))
+            else:
+                plotLabels = timeSeriesData.columns.tolist()
+                for i in plotLabels:
+                    exec('ax1.plot(timeSeriesData[i],label=i)')
+                    exec("ax1.legend(ncol=1,borderaxespad = 0,bbox_to_anchor=(1.01, 0.5), \
+                                frameon = True,loc='center left',fontsize=fontSize)")
 
-                else:
-                    PlotLabels = TimeSeriesData_df.columns.tolist()
-                    for i in PlotLabels:
-                        exec('ax1.plot(TimeSeriesData_df[i],label=i)')
-                        exec("ax1.legend(ncol=1,borderaxespad = 0,bbox_to_anchor=(1.01, 0.5), \
-                                    frameon = True,loc='center left',fontsize=fontSize)")
+            """"save the plot"""
 
-                """"save the plot"""
-                
-                PictureName = '{0}_{1}.png'.format(model_name, SEQ)
-                plt.savefig('SimulationPictures/{0}'.format(PictureName),
-                    dpi=360,
-                    format='png',
-                    bbox_inches='tight'
-                )
+            pictureName = '{0}_{1}.png'.format(nameOfModel, SEQ)
+            plt.savefig('SimulationPictures/{0}'.format(pictureName),
+                        dpi=360,
+                        format='png',
+                        bbox_inches='tight'
+                        )
 
-                # """pre check if picture is already saved in database"""
-                # cur.execute(sql.SQL("""
-                #         Select max(seq) from {0}.analysis 
-                #         """).format(sql.Identifier(model_name)))
-                
-                # if cur.fetchone()[0] != SEQ:
-                #     cur.execute(sql.SQL("""
-                #             INSERT INTO {0}.analysis(
-                #                 seq, namepicture)
-                #                 VALUES(%s, %s);
-                #             """).format(sql.Identifier(model_name)), [SEQ, PictureName])
+            # """pre check if picture is already saved in database"""
+            # cur.execute(sql.SQL("""
+            #         Select max(seq) from {0}.analysis
+            #         """).format(sql.Identifier(nameOfModel)))
 
-                #     conn.commit()
-                
-                return PictureName
-                   
-                
-    def prepareVisualization(sql_USUBJID='', ODE_RESULTS = pd.DataFrame(), PDORRESU_x = {}):
+            # if cur.fetchone()[0] != SEQ:
+            #     cur.execute(sql.SQL("""
+            #             INSERT INTO {0}.analysis(
+            #                 seq, namepicture)
+            #                 VALUES(%s, %s);
+            #             """).format(sql.Identifier(nameOfModel)), [SEQ, pictureName])
+
+            #     conn.commit()
+
+            return pictureName
+
+    def prepareVisualization(sql_USUBJID='', ODE_RESULTS=pd.DataFrame(), PDORRESU_x={}):
         """conversion r to V
 
         convert the radius to the volume unit for better understandung of the
         cell system
         """
 
-        # TEMP: temporary solution; PDORRESU = PDORRESU_x because otherwise it 
-        # overwrites the ijj['units'] dict --> local/global variable problem?
+        # TEMP: temporary solution; PDORRESU = PDORRESU_x because otherwise it
+        # overwrites the simulationSettingsForTimeRange['units'] dict --> local/global variable problem?
         if sql_USUBJID == 'combined_models':
             NotToVisualize = dict_visualisation.get('not_to_visualize')
-            ColumnsOfDataframe = ODE_RESULTS.columns.tolist()
+            columnsOfDataframe = ODE_RESULTS.columns.tolist()
 
             ColumnsToVisualize = list(
-                set(ColumnsOfDataframe) - set(NotToVisualize))
+                set(columnsOfDataframe) - set(NotToVisualize))
 
             for i in NotToVisualize:
                 ODE_RESULTS = ODE_RESULTS.drop(columns=[i])
@@ -172,7 +287,7 @@ class netzwerk_daten_gewinnung:
                 # ODE_RESULTS['Cl_in'] = ODE_RESULTS['Cl_in'] / 10
             except:
                 pass
-        else: 
+        else:
             PDORRESU = PDORRESU_x
 
         convert_r_to_V = ['r', 'r_os', 'r_b', 'R_ref']
@@ -190,140 +305,214 @@ class netzwerk_daten_gewinnung:
                 """
                 new_column_name = 'V' + column_name[1:]
                 ODE_RESULTS.rename(columns={column_name: new_column_name},
-                                    inplace=True
-                                    )
+                                   inplace=True
+                                   )
                 """adapt the PDORRESU dict to the new units"""
                 if column_name in PDORRESU:
                     PDORRESU[new_column_name] = PDORRESU.pop(column_name)
                     PDORRESU[new_column_name] = 'fL'
 
-     
         """group the keys by their units"""
-        PDORRESU_grouped = {}
+        groupedPDORRESU = {}
         for key, value in sorted(PDORRESU.items()):
-            PDORRESU_grouped.setdefault(value, []).append(key)
+            groupedPDORRESU.setdefault(value, []).append(key)
 
         """some design condition for the bachelor plots"""
         if sql_USUBJID == 'volume':
             ODE_RESULTS = pd.DataFrame(ODE_RESULTS['V'])
-            PDORRESU_grouped = {'total volume [fL]': ['V']}
+            groupedPDORRESU = {'total volume [fL]': ['V']}
 
-        return ODE_RESULTS, PDORRESU_grouped
+        return ODE_RESULTS, groupedPDORRESU
 
+# NOTE : class will be replace with ORM wrapper
+class ModelFromDatabase:
+    def __init__(self, nameOfModel):
+        self.nameOfModel = nameOfModel
+        self.specificModelVersionSEQ = None
+        self.specificInitValuesVersionSEQ = None
 
-    def ODE_solver(InitialValues, t):
+    def getModelVersion(self, requestedModelVersion=[]):
+        """gets the wanted ModelVersion"""
+        if len(requestedModelVersion) > 0:
+            self.specificModelVersionSEQ = requestedModelVersion[0]
 
-        ResultsDict = {}
-        TermResultsDict = {}
-        OdeResultsForSolver = []
-        t_ODE_comp = ()
-        
-        """get the Names of the ODEs"""
-        ColumnNames = simulation_frame.columns.tolist()
+        else:
+            """get the MAX(seq) value from the database"""
+            cur.execute(sql.SQL("""
+                SELECT MAX(seq)
+                FROM {}.json;
+                """).format(sql.Identifier(self.nameOfModel)))
 
-        """assing the initial values to their ODEs"""
-        for i in range(len(InitialValues)):
-            try:               
-                exec('{}={}'.format(ColumnNames[i], InitialValues[i]))
+            self.specificModelVersionSEQ = cur.fetchone()[0]
 
-            except:
-                print(ColumnNames[i], InitialValues[i], 'time:', t)
+        return self.specificModelVersionSEQ
 
-        """get the model system from the json file"""
-        with open('Single_Models/json_files/{0}_system.json'.format(
-            model_name)) as json_data:
-            data_from_json = json.load(json_data)
+    def getInitValuesVersion(self, requestedInitValueVersion=[]):
+        """gets the wanted InitValuesVersion"""
+        if len(requestedInitValueVersion) > 0:
+            self.specificInitValuesVersionSEQ = requestedInitValueVersion[0]
 
-        """activate the model system"""
-        for EquationType, ModelSpecies in data_from_json.items():
-            if EquationType == 'copa':
-                for CopaName, CopaTerm in ModelSpecies.items():
+        else:
+            """get the MAX(seq) value from the database"""
+            cur.execute(sql.SQL("""
+                SELECT MAX(seq)
+                FROM {}.init_values;
+                """).format(sql.Identifier(self.nameOfModel)))
 
-                    exec('{}={}'.format(CopaName,CopaTerm))
+            self.specificInitValuesVersionSEQ = cur.fetchone()[0]
 
-            else:
-                """iterate over the content for the species"""
-                for SpeciesName,SpeciesContent in ModelSpecies.items():
-                    if 'condition' in SpeciesContent:
-                    
-                        for TermPat,Term in SpeciesContent['component'].items():
-                  
-                            """activate the term under its condition"""
-                            exec('{}={} {}'.format(TermPat, Term,
-                                                   SpeciesContent['condition']))
+        return self.specificInitValuesVersionSEQ
 
-                            """add TermPat to a set / list for database"""
-                            t_ODE_comp = t_ODE_comp + (TermPat,)
+    def getParameterVersion(self, requestedParameterVersion=[]):
+        """gets the wanted ParameterValuesVersion"""
+        if len(requestedParameterVersion) > 0:
+            specificParameterVersionSEQ = requestedParameterVersion[0]
 
-                    else:
-                        for TermPat,Term in SpeciesContent['component'].items():
+        else:
+            """get the MAX(seq) value from the database"""
+            cur.execute(sql.SQL("""
+                SELECT MAX(seq)
+                FROM {}.parameter;
+                """).format(sql.Identifier(self.nameOfModel)))
 
-                            exec('{}={}'.format(TermPat,Term))
-                            t_ODE_comp = t_ODE_comp + (TermPat,)
+            specificParameterVersionSEQ = cur.fetchone()[0]
 
-                    """rejoin the terms to their equation"""
-                    list_values = list(SpeciesContent['component'].keys())
+        return specificParameterVersionSEQ
 
-                    """
-                    prepare to calculate the sum of the terms of a substance
-                    """
-                    EquationTerms = '+'.join(list_values)
+    def updateLocalJsonModel(self):
+        """update the local safed json file for the model"""
+        cur.execute(sql.SQL("""
+            SELECT model_version
+            FROM {}.json
+            WHERE seq = %s;
+            """).format(sql.Identifier(self.nameOfModel)), [self.specificModelVersionSEQ])
 
-                    KeysPlaceholder = SpeciesName
-                    exec('{}={}'.format(KeysPlaceholder,EquationTerms))
+        ModelVersionFromDatabase = cur.fetchone()[0]
 
-                    if EquationType == 'ODE':
-                        ResultsDict[SpeciesName] = eval(SpeciesName)
+        """create json format"""
 
-        """sort the OdeResultsForSolverPlaceholder
+        s = json.dumps(ModelVersionFromDatabase, indent=4)
+        with open('Single_Models/json_files/{0}_system.json'.format(self.nameOfModel), "w") as f:
+            f.write(s)
 
-        this must be done because the json file is not sorted!
-        """
-        ResultsDict = OrderedDict(sorted(ResultsDict.items()))
+    def getODENames(self):
+        """list of the names of the ODE in the model"""
+        cur.execute(sql.SQL("""
+                SELECT testcd
+                FROM {}.init_values
+                WHERE seq = %s
+                """).format(sql.Identifier(self.nameOfModel)), [self.specificInitValuesVersionSEQ])
 
-        """ODE results for the next simulation step of the ODE solver"""
-        OdeResultsForSolver = [j for i, j in ResultsDict.items()]
+        modelOdeVariables = cur.fetchall()
+        modelOdeVariables = [x[0] for x in modelOdeVariables]
 
-        """export the individuel terms to the database"""
-        if dict_system_switch.get('export_data_to_sql') == True\
-        and dict_system_switch.get('export_terms_data_to_sql') == True:
-
-            """sql connection"""
-            engine = create_engine(
-                'postgres://postgres:@db_postgres:5432/simulation_results')
-
-            df_dict_term = {}
-            for i in t_ODE_comp:
-                df_dict_term[i] = eval(i)
-
-            df = pd.DataFrame(df_dict_term, index=[t])
-
-            df.to_sql(csv_fingerprint, con=engine, schema='{}_terms'.format(model_name), if_exists='append')
-
-        return OdeResultsForSolver
+        return modelOdeVariables
 
 
-    def simulation(DataForSimulation=pd.DataFrame(), i=[]):
-        init_cond_from_frame = DataForSimulation.tail(1).values.tolist()[0]
+class SimulationPreparation:
+    def __init__(self, nameOfModel):
+        self.nameOfModel = nameOfModel
+        self.usedStimulusWithConcentration = None
+        self.stimulusTimePoints = None
 
-        """solves the ode and algebraic equations"""
-        states = odeint(x.ODE_solver, init_cond_from_frame, i)
+    def isModelAffected(self, activatedStimulus=[], modelOdeVariables=[]):
+        affectedModelFromStimulus = False
+
+        """iterating over all activated stimuli"""
+        for i in activatedStimulus:
+
+            """get me the target of the specific stimuli"""
+            target = stimulusDict.get(i)[2]
+
+            """if the targets are in the specific model"""
+            if set(target).issubset(modelOdeVariables) == True:
+                affectedModelFromStimulus = True
+
+        return affectedModelFromStimulus
+
+    def rulesForStimulus(self, stimulusDict={}, stimulusTimePoints={}):
+        self.stimulusTimePoints = {}
+        stimulusConcentrations = []
+        stimulusNames = []
+
+        """iterate over all available stimulus"""
+        for key, values in stimulusDict.items():
+            if values[-1] == True:
+                """get the concentrations"""
+                # TEMP: bad way, because this only allows one kind of concentrations
+                stimulusConcentrations.append(values[0])
+
+                """get the stimulus name"""
+                stimulusNames.append(key)
+
+                """get all the stimulus time points"""
+                if key in stimulusTimePoints.keys():
+
+                    self.stimulusTimePoints[key] = stimulusTimePoints[key]
+
+        self.usedStimulusWithConcentration = dict(
+            zip(stimulusNames, stimulusConcentrations))
+
+        return self.usedStimulusWithConcentration
+
+    def simulationTimePoints(self):
+        """the 'universal' time list"""
+        simulationTimePoints = [start, stop]
+
+        # TEMP : bad way
+        if self.nameOfModel in ['combined_models', 'ion']:
+            simulationTimePoints.append(Glucose_impuls_start)
+
+        runningChit = []
+
+        for TRT, DOSE_list in self.usedStimulusWithConcentration.items():
+            for singleDose in DOSE_list:
+                """for every dose volume a new Simulation"""
+
+                if affectedModelFromStimulus == True:
+
+                    """all the time points for this stimulus"""
+                    simulationTimePoints.extend(self.stimulusTimePoints[TRT])
+
+                    """if there are multiple stimuli events at one time point"""
+                    simulationTimePoints = list(set(simulationTimePoints))
+                    simulationTimePoints.sort()
+
+                    switchboard = [1, 1, 1, 1, 1]
+
+                else:
+                    switchboard = [1, 0, 0, 0, 1]
+
+                simulationTimePointsMatrix = [np.linspace(i, j, (j-i)/time_steps)
+                                            for i, j in zip(simulationTimePoints[0::], simulationTimePoints[1::])
+                                            ]
+
+                dict_runningChit = {'name': self.nameOfModel,
+                                     'EXTRT': TRT,
+                                     'EXDOSE': singleDose,
+                                     'EXSTDTC': self.stimulusTimePoints[TRT],
+                                     'results': simulationTimePointsMatrix,
+                                     }
+
+                liste_compress = list(itertools.compress(
+                    dict_runningChit, switchboard))
+
+                dict_runningChit = {
+                    i: dict_runningChit[i] for i in liste_compress}
+
+                """append to the rest of the toodo simulation"""
+                runningChit.append(dict_runningChit)
+
+                if affectedModelFromStimulus == False:
+                    break
+            if affectedModelFromStimulus == False:
+                break
+        return runningChit
 
 
-
-        """ruft die entsprechenden Columns Namen auf"""
-        columns_order = DataForSimulation.columns.values.tolist()
-
-        """uebergibt dem working_frame die Ergebnisse der Berechnung"""
-        working_frame = pd.DataFrame(states, columns=columns_order, index=i)
-        # working_frame = pd.DataFrame(matrix,
-        #                             columns=columns_order,
-        #                             index=states.t)
-
-        """haengt das working_frame dem simulation_frame an"""
-        simulation_frame = pd.concat([DataForSimulation, working_frame])
-
-        return simulation_frame
+class Simulation():
+    def __init__(self):
+        pass
 
 
 if __name__ == "__main__":
@@ -337,20 +526,13 @@ if __name__ == "__main__":
                              'Na_in', 'Na_out', 'K_out', 'K_in',
                              'Cl_out', 'H_in', 'H_out', 'ATP', 'Hog1PPc',
                              'Hog1c', 'Hog1n', 'Pbs2', 'Pbs2PP', 'R_ref', 'r_os', 'r_b', 'c_i', 'Sorbitol_out'],
-        # 'exp_rel_var': ['Hog1PPn', 'r', 'Glyc_in', 'pi_t', 'Deltaphi', 'Cl_in'],
-        # # type the name of the ODE substance you are interested in
-        # # if empty --> normal plots
-        # 'special_interest': [],
+    }
 
-        # 'each_single_model': False,
-        }
     """momentanes arbeitsverzeichnis = cwd"""
     cwd = os.getcwd()
 
     if not os.path.isdir('SimulationPictures'):
         os.mkdir('SimulationPictures')
-
-    x = netzwerk_daten_gewinnung
 
     STUDYID = 'Yeast_BSc'
     EXCAT = 'Salz'
@@ -358,52 +540,27 @@ if __name__ == "__main__":
     json_args = sys.argv[1]
     args = json.loads(json_args)
 
-    dict_time = {
-            'start': float(args['dict_time']['start']),
-            'stop': float(args['dict_time']['stop']),
-            'time_steps': float(args['dict_time']['time_steps']),
-            'Glucose_impuls_start': float(args['dict_time']['Glucose_impuls_start']),
-            'Glucose_impuls_end': float(args['dict_time']['Glucose_impuls_end']),
-            'NaCl_impuls_start': float(args['dict_time']['NaCl_impuls_start']),
-            'NaCl_impuls_firststop': float(args['dict_time']['NaCl_impuls_firststop']),
-        }
-    
+    timeDict = {
+        'start': float(args['dict_time']['start']),
+        'stop': float(args['dict_time']['stop']),
+        'time_steps': float(args['dict_time']['time_steps']),
+        'Glucose_impuls_start': float(args['dict_time']['Glucose_impuls_start']),
+        'Glucose_impuls_end': float(args['dict_time']['Glucose_impuls_end']),
+        'NaCl_impuls_start': float(args['dict_time']['NaCl_impuls_start']),
+        'NaCl_impuls_firststop': float(args['dict_time']['NaCl_impuls_firststop']),
+    }
+    # TODO: will be replaced with enum
     dict_model_switch = args['dict_model_switch']
-    dict_unique_EXSTDTC = args['dict_unique_EXSTDTC']
-    dict_stimulus = args['dict_stimulus']
-    dict_system_switch = args['dict_system_switch']
+
+    uniqueEXSTDTC = args['uniqueEXSTDTC']
+    stimulusDict = args['dict_stimulus']
+    systemSwitchDict = args['dict_system_switch']
 
     """make the dict keys as new variables"""
-    locals().update(dict_time)
+    locals().update(timeDict)
 
-
-    """implementation rules
-
-    Stimulus = [[value(s)], unit, [target(s)], boolean]
-    """
-    """only for the hog model
-
-    signal_type :
-        1: one steady impulse
-        2: single pulse of NaCl
-        3: square pulses of NaCl
-        4: up-staircase change of NaCl
-    """
-    # dict_stimulus = {
-    #                 'KCl' : [[200], 'mM', ['K_out','Cl_out'], True],
-    #                 'NaCl': [[800], 'mM', ['Na_out', 'Cl_out'], False],
-    #                 'Sorbitol': [[1600], 'mM', ['Sorbitol_out'], False],
-
-    #                 'NaCl_impuls' : [200, 'mM'],
-    #                 'signal_type' : [2],
-    #                 }
-
-    signal_type = dict_stimulus.get('signal_type')[0]
-    NaCl_impuls = dict_stimulus.get('NaCl_impuls')[0]
-
-    """database management system"""
-    # NOTE : Ion Model --> Model Version 3 hat eine vebesserte ATP Berechnung --> macht aber keine Auswirkung
-
+    signal_type = stimulusDict.get('signal_type')[0]
+    NaCl_impuls = stimulusDict.get('NaCl_impuls')[0]
 
     """host name taken from docker-compose.yml"""
     conn = psycopg2.connect(
@@ -415,342 +572,197 @@ if __name__ == "__main__":
     """open a cursor to perform database operations"""
     cur = conn.cursor()
 
+    """get the used model name"""
+    # TODO: will be replaced with enum
+    nameOfModel = [i for i, j in dict_model_switch.items() if j == True][0]
+
+    """get the model
+    
+    name of model, initial values for the ODEs, parameterization, model, 
+    and names of the ODEs
+    """
+    modelFromDatabase = ModelFromDatabase(nameOfModel)
+
+    specificModelVersionSEQ = modelFromDatabase.getModelVersion(
+        systemSwitchDict.get('specificModelVersionSEQ'))
+
+    specificInitValuesVersionSEQ = modelFromDatabase.getInitValuesVersion(
+        systemSwitchDict.get('specificInitValuesVersionSEQ'))
+
+    specificParameterVersionSEQ = modelFromDatabase.getParameterVersion(
+        systemSwitchDict.get('specificParameterVersionSEQ'))
+
+    modelFromDatabase.updateLocalJsonModel()
+
+    """get the ODE Names"""
+    modelOdeVariables = modelFromDatabase.getODENames()
+
     """activated stimuli
 
     find out which stimulus pipeline is opened for the experiment series
     """
     activated_stimuli = [stimulus_name for stimulus_name, items
-                        in dict_stimulus.items() if items[-1] == True]
+                         in stimulusDict.items() if items[-1] == True]
 
+    simulationPreparation = SimulationPreparation(nameOfModel)
 
-    """ affected models
+    """find out how and if the model is affected from the activated stimulus"""
+    affectedModelFromStimulus = simulationPreparation.isModelAffected(
+        activatedStimulus=activated_stimuli, modelOdeVariables=modelOdeVariables)
 
-    find out the from stimuli affected models
-    """
-    models_ext_stimulus = []
-    list_of_model_names = []
+    """"if the model is effected from the stimulus --> get the stimulus settings"""
+    usedStimulusWithConcentration = simulationPreparation.rulesForStimulus(
+        stimulusDict=stimulusDict, stimulusTimePoints=uniqueEXSTDTC)
 
-    for NameOfModel, boolean in dict_model_switch.items():
-        if boolean == True:
-            list_of_model_names.append(NameOfModel)
+    """time points for not external stimulated models"""
+    runningChit = simulationPreparation.simulationTimePoints()
 
-            # TODO: notloesung: definiere folgendes als funktion um
-            """gets the wanted ModelVersion"""
-            if len(dict_system_switch.get('SpecificModelVersionSEQ')) > 0:
-                SpecificModelVersionSEQ = dict_system_switch.get(
-                    'SpecificModelVersionSEQ')[0]
-            else:
-                """get the MAX(seq) value from the database"""
-                cur.execute(sql.SQL("""
-                    SELECT MAX(seq)
-                    FROM {}.json;
-                    """).format(sql.Identifier(NameOfModel)))
-
-                SpecificModelVersionSEQ = cur.fetchone()[0]
-
-            """gets the wanted InitValuesVersion"""
-            if len(dict_system_switch.get('SpecificInitValuesVersionSEQ')) > 0:
-                SpecificInitValuesVersionSEQ = dict_system_switch.get(
-                    'SpecificInitValuesVersionSEQ')[0]
-
-            else:
-                """get the MAX(seq) value from the database"""
-                cur.execute(sql.SQL("""
-                    SELECT MAX(seq)
-                    FROM {}.init_values;
-                    """).format(sql.Identifier(NameOfModel)))
-
-                SpecificInitValuesVersionSEQ = cur.fetchone()[0]
-            
-            """gets the wanted ParameterValuesVersion"""
-            if len(dict_system_switch.get('SpecificParameterVersionSEQ')) > 0:
-                SpecificParameterVersionSEQ = dict_system_switch.get(
-                    'SpecificParameterVersionSEQ')[0]
-
-            else:
-                """get the MAX(seq) value from the database"""
-                cur.execute(sql.SQL("""
-                    SELECT MAX(seq)
-                    FROM {}.parameter;
-                    """).format(sql.Identifier(NameOfModel)))
-
-                SpecificParameterVersionSEQ = cur.fetchone()[0]
-
-            """update the local safed json file for the model"""
-            cur.execute(sql.SQL("""
-                SELECT model_version
-                FROM {}.json
-                WHERE seq = %s;
-                """).format(sql.Identifier(NameOfModel)), [SpecificModelVersionSEQ])
-
-            ModelVersionFromDatabase = cur.fetchone()[0]
-
-            """create json format"""
-
-            s = json.dumps(ModelVersionFromDatabase, indent=4)
-            with open('Single_Models/json_files/{0}_system.json'.format(NameOfModel), "w") as f:
-                f.write(s)
-       
-            """list of the names of the ODE in the model"""
-            cur.execute(sql.SQL("""
-                    SELECT testcd
-                    FROM {}.init_values
-                    WHERE seq = %s
-                    """).format(sql.Identifier(NameOfModel)), [SpecificInitValuesVersionSEQ])
-
-            ModelOdeVariable = cur.fetchall()
-            ModelOdeVariable = [x[0] for x in ModelOdeVariable]
-
-
-            """iterating over all activated stimuli"""
-            for i in activated_stimuli:
-
-                """get me the target of the specific stimuli"""
-                target = dict_stimulus.get(i)[2]
-
-                """if the targets are in the specific model"""
-                if set(target).issubset(ModelOdeVariable) == True:
-                    models_ext_stimulus.append('{}'.format(NameOfModel))
-
-    """deletes multiple listings"""
-
-    models_ext_stimulus = list(set(models_ext_stimulus))
-
-    """preparation for simulation"""
-    list_of_stimuli_conc = []
-    list_of_stimuli_name = []
-    dict_of_EXSTDTC = {}
-
-    for key,values in dict_stimulus.items():
-        if values[-1] == True:
-            list_of_stimuli_conc.append(values[0])
-            list_of_stimuli_name.append(key)
-
-            """find the right stimuli-simulation-time-list for this impuls
-            
-            creates a sub dict of the possible stimilus
-            """
-            if key in dict_unique_EXSTDTC.keys():
-
-                dict_of_EXSTDTC[key] = dict_unique_EXSTDTC[key]
-
-    dict_stimuli = dict(zip(list_of_stimuli_name, list_of_stimuli_conc))
-   
     """simulation
 
     the actual simulation begins
     """
-
-    """time points for not external stimulated models"""
-    t = np.linspace(start, stop, (stop-start)/time_steps)
-
-    """the 'universal' time list"""
-    time_points = [start, stop, Glucose_impuls_start]
-
-    list_of_model_names = [k for k,l in dict_model_switch.items() if l == True]
-
-    running_chit = []
-    for NameOfModel in list_of_model_names:
-
-        for TRT,DOSE_list in dict_stimuli.items():
-            for SingleDose in DOSE_list:
-                """for every dose volume a new Simulation"""
-
-                if NameOfModel in models_ext_stimulus:
-
-                    """all the time points for the simulation"""
-                    time_points.extend(dict_of_EXSTDTC[TRT])
-
-                    """if there are multiple stimuli events at one time point"""
-                    time_points = list(set(time_points))
-                    time_points.sort()
-
-                    switchboard = [1,1,1,1,1]
-
-                    time_of_simulations_test = [np.linspace(i, j, (j-i)/time_steps)
-                                        for i,j in zip(time_points[0::],time_points[1::])
-                                        ]
-
-                else:
-                    switchboard = [1,0,0,0,1]
-                    time_of_simulations_test = [t]
-                
-                dict_running_chit = {'name' : NameOfModel,
-                                    'EXTRT': TRT,
-                                    'EXDOSE': SingleDose,
-                                    'EXSTDTC_list': dict_of_EXSTDTC[TRT],
-                                    'results': time_of_simulations_test,
-                                    }
-                                    
-                liste_compress = list(itertools.compress(dict_running_chit,switchboard))
-
-                dict_running_chit = {i : dict_running_chit[i] for i in liste_compress}
-
-                """append to the rest of the toodo simulation"""
-                running_chit.append(dict_running_chit)
-
-               
-                if NameOfModel not in models_ext_stimulus:
-                    break
-            if NameOfModel not in models_ext_stimulus:
-                break
-
-
-    for ijj in running_chit:
+    print(nameOfModel)
+    for simulationSettingsForTimeRange in runningChit:
 
         """initialize an empty DataFrame for each time value"""
-        simulation_frame = pd.DataFrame()
-        model_name = ijj['name']
-
-        # SEQ = str(uuid.uuid4())
+        simulationFrame = pd.DataFrame()
 
         """check, how many SEQ number already exists"""
-        cur.execute(sql.SQL("SELECT MAX(EXSEQ) FROM {}.ex;").format(\
-                    sql.Identifier(model_name)))
+        cur.execute(sql.SQL("SELECT MAX(EXSEQ) FROM {}.ex;").format(
+                    sql.Identifier(nameOfModel)))
 
-        SEQ_old = cur.fetchone()[0]
-        if SEQ_old == None:
-            SEQ_old = 0
+        oldSeq = cur.fetchone()[0]
+        if oldSeq == None:
+            oldSeq = 0
 
         """SEQ for new simulation"""
-        SEQ = SEQ_old + 1
+        SEQ = oldSeq + 1
 
-
-        if model_name not in models_ext_stimulus:
+        if affectedModelFromStimulus == False:
             EXTRT = 0
             EXDOSE = 0
-            EXSTDTC_list = [0]
+            EXSTDTC = [0]
 
         else:
-            EXTRT = ijj['EXTRT']
-            EXDOSE = ijj['EXDOSE']
-            EXSTDTC_list = ijj['EXSTDTC_list']
+            EXTRT = simulationSettingsForTimeRange['EXTRT']
+            EXDOSE = simulationSettingsForTimeRange['EXDOSE']
+            EXSTDTC = simulationSettingsForTimeRange['EXSTDTC']
 
         EX_dict = {
-                    "studyid" : STUDYID,
-                    "domain" : "ex",
-                    "usubjid" : model_name,
-                    "exseq" : SEQ,
-                    "excat" : EXCAT,
-                    "extrt" : EXTRT,
-                    "exdose" : EXDOSE,
-                    "exdosu" : "mM",
-                    "exstdtc_array" : EXSTDTC_list,
-                    "simulation_start": start,
-                    "simulation_stop": stop,
-                    "co" : "exstdtc in Sekunden",
-                    "modelversion": SpecificModelVersionSEQ,
-                    "initvaluesversion": SpecificInitValuesVersionSEQ,
-                    "parameterversion": SpecificParameterVersionSEQ
-                    }
+            "studyid": STUDYID,
+            "domain": "ex",
+            "usubjid": nameOfModel,
+            "exseq": SEQ,
+            "excat": EXCAT,
+            "extrt": EXTRT,
+            "exdose": EXDOSE,
+            "exdosu": "mM",
+            "exstdtc_array": EXSTDTC,
+            "simulation_start": start,
+            "simulation_stop": stop,
+            "co": "exstdtc in Sekunden",
+            "modelversion": specificModelVersionSEQ,
+            "initvaluesversion": specificInitValuesVersionSEQ,
+            "parameterversion": specificParameterVersionSEQ
+        }
 
-
-        csv_fingerprint = str(SEQ)
-
-        init_cond = []
-        init_cond_string = []
-        init_cond_unit = []
+        modelFingerprint = str(SEQ) + '_' + nameOfModel
 
         """get the parameter from the database"""
         cur.execute(sql.SQL("""
             SELECT testcd, orres
             FROM {}.parameter 
             WHERE seq=%s;
-            """).format(sql.Identifier(model_name)), [SpecificParameterVersionSEQ])
+            """).format(sql.Identifier(nameOfModel)), [specificParameterVersionSEQ])
 
         TESTCD_ORRESU_tuple = cur.fetchall()
 
-        """init_dict creation"""
-        parameter_dict = {}
+        """initialValues creation"""
+        parameterAsLocalVariables = {}
         for i in TESTCD_ORRESU_tuple:
-            parameter_dict[i[0]] = i[1]
-        
+            parameterAsLocalVariables[i[0]] = i[1]
+
         """make the dict keys as new variables"""
-        locals().update(parameter_dict)
+        locals().update(parameterAsLocalVariables)
 
         cur.execute(sql.SQL("""
             SELECT testcd, orres, orresu
             FROM {}.init_values 
             WHERE seq=%s;
-            """).format(sql.Identifier(model_name)), [SpecificInitValuesVersionSEQ])
+            """).format(sql.Identifier(nameOfModel)), [specificInitValuesVersionSEQ])
 
         TESTCD_ORRESU_tuple = cur.fetchall()
 
-        """init_dict creation"""
-        init_dict = {}
-        unit_dict = {}
+        """initialValues creation"""
+        initialValues = {}
+        unitsForOdes = {}
         for i in TESTCD_ORRESU_tuple:
-            init_dict[i[0]] = i[1]
-            unit_dict[i[0]] = i[2]
-        
+            initialValues[i[0]] = i[1]
+            unitsForOdes[i[0]] = i[2]
+
         """DataFrame initialisieren"""
-               
-        ijj['units'] = unit_dict
 
-        simulation_frame = pd.DataFrame([init_dict])
+        simulationSettingsForTimeRange['units'] = unitsForOdes
 
+        simulationFrame = pd.DataFrame([initialValues])
 
-        for i in ijj['results']:
-            
-            working_frame = []
+        for i in simulationSettingsForTimeRange['results']:
+
+            placeholderDataframe = []
 
             """ logic behind the simulation
 
             if the time has come ... and a stimulus is activated ...
             and a compartible model is choosen ...
             """
-          
-            if i[0] in EXSTDTC_list\
-            and model_name in models_ext_stimulus:
 
-                for TESTCDAffectedByStimulus in dict_stimulus.get(EXTRT)[2]:
+            if i[0] in EXSTDTC\
+                    and affectedModelFromStimulus == True:
+
+                for TESTCDAffectedByStimulus in stimulusDict.get(EXTRT)[2]:
 
                     """adds the right value to the right ODE"""
-                    simulation_frame.loc[i[0],
-                                         TESTCDAffectedByStimulus] += EXDOSE
+                    simulationFrame.loc[i[0],
+                                        TESTCDAffectedByStimulus] += EXDOSE
 
                 """switch for glucose adding"""
-                glucose_switch= [False]
+                glucose_switch = [False]
 
-                simulation_frame = x.simulation(DataForSimulation=simulation_frame,
-                                                i=i
-                                                )
+                simulationFrame = DataExtraction.callSimulation(dataForSimulation=simulationFrame,
+                                                            i=i
+                                                            )
 
             elif i[0] == Glucose_impuls_start\
-            and model_name in models_ext_stimulus:
+                    and affectedModelFromStimulus == True:
 
-                # glucose_switch= [True]
-                # note: i exclueded the glucose stimulus 
-                glucose_switch= [True]
-                simulation_frame = x.simulation(DataForSimulation=simulation_frame,
-                                                i=i 
-                                                )
+                glucose_switch = [True]
+                simulationFrame = DataExtraction.callSimulation(dataForSimulation=simulationFrame,
+                                                            i=i
+                                                            )
 
             else:
 
-                glucose_switch= [False]
-                simulation_frame = x.simulation(DataForSimulation=simulation_frame,
-                                                i=i
-                                                )
+                glucose_switch = [False]
+                simulationFrame = DataExtraction.callSimulation(dataForSimulation=simulationFrame,
+                                                            i=i
+                                                            )
 
-            
         """replace the time array with the simulation results"""
-        ijj['results'] = simulation_frame
-
+        simulationSettingsForTimeRange['results'] = simulationFrame
 
         """create a copy for the design of the plot"""
-        ODE_RESULTS_raw = ijj['results']
+        rawOdeResults = simulationSettingsForTimeRange['results']
 
-        ODE_RESULTS, PDORRESU_grouped = x.prepareVisualization(
-            sql_USUBJID=model_name, ODE_RESULTS=ODE_RESULTS_raw, PDORRESU_x=ijj['units'])
+        resultsForOdes, groupedPDORRESU = DataVisualization.prepareVisualization(
+            sql_USUBJID=nameOfModel, ODE_RESULTS=rawOdeResults, PDORRESU_x=simulationSettingsForTimeRange['units'])
 
-        """plot the results, save the plot and return the PictureName"""
-        PictureName = x.plotTimeSeries(TimeSeriesData_df=ODE_RESULTS,
-                                           SubplotLogic=PDORRESU_grouped)
+        """plot the results, save the plot and return the pictureName"""
+        pictureName = DataVisualization.plotTimeSeries(timeSeriesData=resultsForOdes,
+                                                       subplotLogic=groupedPDORRESU)
 
-        EX_dict['namepicture'] = PictureName
+        EX_dict['namepicture'] = pictureName
 
-        print(SEQ, "model_name", model_name)
+        print(SEQ, "nameOfModel", nameOfModel)
 
         """last step before pushing results to database
         
@@ -758,92 +770,95 @@ if __name__ == "__main__":
         """
 
         """round the time points"""
-        RoundByUsedTimeSteps = abs(Decimal(str(time_steps)).as_tuple().exponent)
+        roundByUsedTimeStepsgroupedPDORRESU = abs(
+            Decimal(str(time_steps)).as_tuple().exponent)
 
-        OldTimeIndex = list(ijj['results'].index)
-        NewTimeIndex = np.round(OldTimeIndex, decimals = RoundByUsedTimeSteps)
+        oldTimeIndex = list(simulationSettingsForTimeRange['results'].index)
+        newTimeIndex = np.round(oldTimeIndex, decimals=roundByUsedTimeStepsgroupedPDORRESU)
 
-        DfAsMatrix = ijj['results'].values
-        ColumnsOfDataframe = ijj['results'].columns.tolist()
-        
-        if list_of_model_names[0] != 'volume':
+        dataframeAsMatrix = simulationSettingsForTimeRange['results'].values
+        columnsOfDataframe = simulationSettingsForTimeRange['results'].columns.tolist()
+
+        if nameOfModel != 'volume':
             def truncate(n, decimals=0):
                 multiplier = 10 ** decimals
                 return int(n * multiplier) / multiplier
 
-            RoundAfterDigitsCound = 5
-            NumbersWithoutZero = list(range(1, 10))
-            NumbersWithoutZero = [str(x) for x in NumbersWithoutZero]
+            ROUND_AFTER_DIGITS_COUND = 5
+            numbersWithoutZero = list(range(1, 10))
+            numbersWithoutZero = [str(x) for x in numbersWithoutZero]
 
-            for (x, y), UnroundedValue in np.ndenumerate(DfAsMatrix):
+            for (x, y), unroundedValue in np.ndenumerate(dataframeAsMatrix):
 
-                GetDecimalPointPosition = str(UnroundedValue).find('.')
-                for index, i in enumerate(str(UnroundedValue)):
-                    if i in NumbersWithoutZero:
-                        FirstOccurenceNaturalNumber = index
-                        if index > GetDecimalPointPosition:
-                            FirstOccurenceNaturalNumber -= 1
+                getDecimalPointPosition = str(unroundedValue).find('.')
+                for index, i in enumerate(str(unroundedValue)):
+                    if i in numbersWithoutZero:
+                        firstOccurenceOfNaturalNumber = index
+                        if index > getDecimalPointPosition:
+                            firstOccurenceOfNaturalNumber -= 1
                         break
 
-                TruncateIndex = FirstOccurenceNaturalNumber + RoundAfterDigitsCound - GetDecimalPointPosition
+                truncateIndex = firstOccurenceOfNaturalNumber + \
+                    ROUND_AFTER_DIGITS_COUND - getDecimalPointPosition
 
-                RoundedValue = truncate(UnroundedValue, decimals=TruncateIndex)
+                roundedValue = truncate(unroundedValue, decimals=truncateIndex)
 
-                DfAsMatrix[x, y] = RoundedValue
+                dataframeAsMatrix[x, y] = roundedValue
 
-
-        ijj['results'] = pd.DataFrame(DfAsMatrix, 
-            columns=ColumnsOfDataframe,
-            index=NewTimeIndex)
+        simulationSettingsForTimeRange['results'] = pd.DataFrame(dataframeAsMatrix,
+                                      columns=columnsOfDataframe,
+                                      index=newTimeIndex)
 
         """get less data 
         
         only get each (1/time_steps) simulation results
         """
-        ijj['results'] = ijj['results'].loc[::int(1/time_steps)]
+        simulationSettingsForTimeRange['results'] = simulationSettingsForTimeRange['results'].loc[::int(1/time_steps)]
 
         """export the EX dict to the database"""
-        if dict_system_switch.get('export_data_to_sql') == True:
+        if systemSwitchDict.get('export_data_to_sql') == True:
 
-            keys_db = tuple(EX_dict.keys())
-            values_db = tuple(EX_dict.values())
+            keysDb = tuple(EX_dict.keys())
+            valuesDb = tuple(EX_dict.values())
 
             """dict to sql database"""
-            insert_statement = 'insert into {}.ex (%s) values %s'.format(
-                model_name)
-            cur.execute(cur.mogrify(insert_statement,
-                                    (AsIs(','.join(keys_db)), tuple(values_db))))
+            sqlInsertStatement = 'insert into {}.ex (%s) values %s'.format(
+                nameOfModel)
+            cur.execute(cur.mogrify(sqlInsertStatement,
+                                    (AsIs(','.join(keysDb)), tuple(valuesDb))))
 
             conn.commit()
 
             """make the dict keys as new variables"""
-            locals().update(ijj)
+            locals().update(simulationSettingsForTimeRange)
 
-            pd_to_dict = ijj['results'].to_dict('index')
+            dataframeAsDict = simulationSettingsForTimeRange['results'].to_dict('index')
+   
+            for DTC, innerDict in dataframeAsDict.items():
+                for substance, value in innerDict.items():
 
-            for DTC,inner_dict in pd_to_dict.items():
-                for substance,value in inner_dict.items():
+                    dictToDatabase = {}
+                    dictToDatabase['studyid'] = STUDYID
+                    dictToDatabase['domain'] = 'pd'
+                    dictToDatabase['usubjid'] = nameOfModel
+                    dictToDatabase['pdseq'] = SEQ
+                    dictToDatabase['pdtestcd'] = substance
+                    dictToDatabase['pdtest'] = None
+                    dictToDatabase['pdorres'] = value
+                    dictToDatabase['pdorresu'] = simulationSettingsForTimeRange['units']['{}'.format(
+                        substance)]
+                    dictToDatabase['pddtc'] = DTC
+                    dictToDatabase['co'] = "pddtc in Sekunden"
 
-                    dict_test = {}
-                    dict_test['studyid'] = STUDYID
-                    dict_test['domain'] = 'pd'
-                    dict_test['usubjid'] = model_name
-                    dict_test['pdseq'] = SEQ
-                    dict_test['pdtestcd'] = substance
-                    dict_test['pdtest'] = None
-                    dict_test['pdorres'] = value
-                    dict_test['pdorresu'] = ijj['units']['{}'.format(substance)]
-                    dict_test['pddtc'] = DTC
-                    dict_test['co'] = "pddtc in Sekunden"
-
-                    keys_db = tuple(dict_test.keys())
-                    values_db = tuple(dict_test.values())
+                    keysDb = tuple(dictToDatabase.keys())
+                    valuesDb = tuple(dictToDatabase.values())
 
                     """dict to sql database"""
 
-                    insert_statement = 'insert into {}.pd (%s) values %s'.format(model_name)
-                    cur.execute(cur.mogrify(insert_statement, (AsIs(','.join(keys_db)), tuple(values_db))))
-
+                    sqlInsertStatement = 'insert into {}.pd (%s) values %s'.format(
+                        nameOfModel)
+                    cur.execute(cur.mogrify(sqlInsertStatement,
+                                            (AsIs(','.join(keysDb)), tuple(valuesDb))))
 
                     conn.commit()
 
@@ -853,4 +868,3 @@ if __name__ == "__main__":
 
     cur.close()
     conn.close()
-

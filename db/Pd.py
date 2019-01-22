@@ -5,12 +5,12 @@ import datetime
 from db.base import base
 from values import SimulationModel
 
-#TODO: more meaningful name
+# Pd = PharmacoDynamics
 class Pd(base):
     __tablename__ = 'pd'
 
     id = Column(Integer, primary_key=True)
-    uuid = Column(UUID(as_uuid=True), unique=True, nullable=False)
+    # uuid = Column(UUID(as_uuid=True), unique=True, nullable=False)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     model = Column(Enum(SimulationModel))
     studyid = Column(String)

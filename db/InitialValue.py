@@ -9,8 +9,8 @@ from values import SimulationModel
 class InitialValue(base):
     __tablename__ = 'initial_values'
 
-    seq = Column(Integer, primary_key=True)
-    uuid = Column(UUID(as_uuid=True), unique=True, nullable=False)
+    id = Column(Integer, primary_key=True)
+    # uuid = Column(UUID(as_uuid=True), unique=True, nullable=False)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     model = Column(Enum(SimulationModel))
     testcd = Column(String, unique=True)

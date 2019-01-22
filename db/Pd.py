@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, DateTime, Integer, Enum, ForeignKey
+from sqlalchemy import Column, String, DateTime, Integer, Enum, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID, DOUBLE_PRECISION
 import datetime
@@ -19,11 +19,15 @@ class Pd(base):
 
     studyid = Column(String)
     domain = Column(String)
-    usubjid = Column(String, unique=True)
-    pdtestcd = Column(String, unique=True, nullable=False)
+    usubjid = Column(String)
+    pdtestcd = Column(String, nullable=False)
     pdtest = Column(String)
     pdorres = Column(DOUBLE_PRECISION)
     pdorresu = Column(String)
-    pddtc = Column(DOUBLE_PRECISION, unique=True)
+    pddtc = Column(DOUBLE_PRECISION)
     co = Column(String)
+
+    __table_args__ = (
+        UniqueConstraint('ex_id', 'usubjid', 'pdtestcd', 'pddtc',  name='Pd_uc'),
+    )
 

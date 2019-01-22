@@ -11,12 +11,14 @@ class OrresuEquations(base):
     id = Column(Integer, primary_key=True)
     # uuid = Column(UUID(as_uuid=True), unique=True, nullable=False)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
     type = Column(Enum(SimulationTypes))
+    version = Column(Integer)
     testcd = Column(String, nullable=False)
     test = Column(String)
     orresu = Column(String)
 
     __table_args__ = (
-        UniqueConstraint('type', 'testcd', name='OrresuEquiations_testcd_unique_per_type'),
+        UniqueConstraint('type', 'version', 'testcd', name='OrresuEquiations_testcd_unique_per_type_and_version'),
     )
 

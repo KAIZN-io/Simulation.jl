@@ -24,15 +24,17 @@ def createJsonModel(modelType):
     with sessionScope() as session:
         q = session \
                 .query(OrresuEquations.testcd, OrresuEquations.orresu) \
-                .filter(OrresuEquations.type == modelType)
+                .filter(OrresuEquations.type == modelType) \
+                .filter(OrresuEquations.version == 1)
 
     ORRESU_column_names = [desc['name'] for desc in q.column_descriptions]
 
     """the values from the sql database in a dict"""
     ORRESU_dict = {}
     for i in q.all():
-        ORRESU_dict[i[ORRESU_column_names.index(
-            'testcd')]] = i[ORRESU_column_names.index('orresu')]
+        ORRESU_dict[
+            i[ORRESU_column_names.index('testcd')]
+        ] = i[ORRESU_column_names.index('orresu')]
 
     for system in system_comp:
         """opens the .txt file"""
@@ -193,6 +195,7 @@ def initializeDb():
                     parameters.append(
                         Parameters(
                             type = modelType,
+                            version = 1,
                             testcd = i,
                             orres = j[0],
                             orresu = j[1]
@@ -207,6 +210,7 @@ def initializeDb():
                     initialValues.append(
                         InitialValues(
                             type = modelType,
+                            version = 1,
                             testcd = i[1],
                             orres = i[0],
                             orresu = i[2]
@@ -225,6 +229,7 @@ def initializeDb():
                     orresuEquations.append(
                         OrresuEquations(
                             type = modelType,
+                            version = 1,
                             testcd = i[0],
                             orresu = i[1]
                         )
@@ -237,6 +242,7 @@ def initializeDb():
 
                 model = Model(
                     type = modelType,
+                    version = 1,
                     json = modelInJsonFormat
                 )
                 session.add(model)

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, DateTime, Integer, Enum, ForeignKey
+from sqlalchemy import Column, String, DateTime, Integer, Enum, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID, JSON
 import datetime
@@ -25,8 +25,13 @@ class Model(base):
     description = Column(String)
     type = Column(Enum(SimulationTypes))
     display_version = Column(String)
+    version = Column(Integer, nullable=False)
 
     json = Column(JSON)
     json_added = Column(JSON)
     json_deleted = Column(JSON)
+
+    __table_args__ = (
+        UniqueConstraint('type', 'version',  name='Model_version_unique_per_type'),
+    )
 

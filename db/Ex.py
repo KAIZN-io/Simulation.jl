@@ -21,16 +21,12 @@ class Ex(base):
     finished_at = Column(DateTime)
 
     # every ex has exactly one model
-    model_id = Column(Integer, ForeignKey('model.id'))
+    model_id = Column(Integer, ForeignKey('model.id'), nullable=False)
     model = relationship('Model', back_populates='exs')
 
-    # every ex has exactly one set of initial_values
-    initial_values_id = Column(Integer, ForeignKey('initial_values.id'))
-    initial_values = relationship('InitialValues', back_populates='exs')
+    initial_values_version = Column(Integer, nullable=False)
 
-    # every ex has exactly one set of parameters
-    parameters_id = Column(Integer, ForeignKey('parameters.id'))
-    parameters = relationship('Parameters', back_populates='exs')
+    parameters_version = Column(Integer, nullable=False)
 
     # every ex has multiple results in the pd table
     pd = relationship('Pd', back_populates='exs')

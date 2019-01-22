@@ -8,6 +8,7 @@ import uuid
 from decimal import Decimal
 
 import db
+from initializeModel import initializeDb
 
 """import the standard used packages"""
 exec(open("SYSTEM/py_packages.py").read())
@@ -520,7 +521,7 @@ class Simulation():
 
 if __name__ == "__main__":
 
-    exec(open("initializeModel.py").read())
+    initializeDb()
 
     dict_visualisation = {
 

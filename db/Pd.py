@@ -3,7 +3,7 @@ from sqlalchemy.dialects.postgresql import UUID, DOUBLE_PRECISION
 import datetime
 
 from db.base import base
-from values import SimulationModel
+from values import SimulationTypes
 
 # Pd = PharmacoDynamics
 class Pd(base):
@@ -12,7 +12,7 @@ class Pd(base):
     id = Column(Integer, primary_key=True)
     # uuid = Column(UUID(as_uuid=True), unique=True, nullable=False)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    model = Column(Enum(SimulationModel))
+    type = Column(Enum(SimulationTypes))
     studyid = Column(String)
     domain = Column(String)
     usubjid = Column(String, unique=True)

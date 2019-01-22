@@ -2,9 +2,9 @@ from db.base import db, base
 from db.Ex import Ex
 from db.Pd import Pd
 from db.Model import Model
-from db.InitialValue import InitialValue
-from db.Parameter import Parameter
-from db.OrresuEquation import OrresuEquation
+from db.InitialValues import InitialValues
+from db.Parameters import Parameters
+from db.OrresuEquations import OrresuEquations
 
 
 # Create tables if they do not yet exist.

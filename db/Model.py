@@ -3,7 +3,7 @@ from sqlalchemy.dialects.postgresql import UUID, JSON
 import datetime
 
 from db.base import base
-from values import SimulationModel
+from values import SimulationTypes
 
 
 class Model(base):
@@ -12,8 +12,13 @@ class Model(base):
     id = Column(Integer, primary_key=True)
     # uuid = Column(UUID(as_uuid=True), unique=True, nullable=False)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    model = Column(Enum(SimulationModel))
-    model_version = Column(JSON)
-    adding_changes = Column(JSON)
-    deleting_changes = Column(JSON)
+
+    name = Column(String)
+    description = Column(String)
+    type = Column(Enum(SimulationTypes))
+    display_version = Column(String)
+
+    json = Column(JSON)
+    json_added = Column(JSON)
+    json_deleted = Column(JSON)
 

@@ -3,17 +3,17 @@ from sqlalchemy.dialects.postgresql import UUID, DOUBLE_PRECISION
 import datetime
 
 from db.base import base
-from values import SimulationModel
+from values import SimulationTypes
 
 
-class Parameter(base):
-    __tablename__ = 'parameters'
+class InitialValues(base):
+    __tablename__ = 'initial_values'
 
     id = Column(Integer, primary_key=True)
     # uuid = Column(UUID(as_uuid=True), unique=True, nullable=False)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    model = Column(Enum(SimulationModel))
-    testcd = Column(String, unique=True, nullable=False)
+    type = Column(Enum(SimulationTypes))
+    testcd = Column(String, unique=True)
     test = Column(String)
     orres = Column(DOUBLE_PRECISION)
     orresu = Column(String)

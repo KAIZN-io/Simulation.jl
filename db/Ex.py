@@ -3,7 +3,7 @@ from sqlalchemy.dialects.postgresql import UUID, ARRAY, REAL, DOUBLE_PRECISION
 import datetime
 
 from db.base import base
-from values import SimulationModel
+from values import SimulationTypes
 
 
 # Ex stands for 'Exposure' of an organism with a substance
@@ -13,7 +13,13 @@ class Ex(base):
     id = Column(Integer, primary_key=True)
     # uuid = Column(UUID(as_uuid=True), unique=True, nullable=False)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    model = Column(Enum(SimulationModel))
+    type = Column(Enum(SimulationTypes))
+
+    name = Column(String)
+    image_path = Column(String)
+    started_at = Column(DateTime)
+    finished_at = Column(DateTime)
+
     studyid = Column(String)
     domain = Column(String)
     usubjid = Column(String)
@@ -29,5 +35,4 @@ class Ex(base):
     model_version = Column(Integer)
     initvalues_version = Column(Integer)
     parameter_version = Column(String)
-    namepicture = Column(String)
 

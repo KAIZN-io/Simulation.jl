@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, DateTime, Integer, Enum
+from sqlalchemy import Column, String, DateTime, Integer, Enum, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID, DOUBLE_PRECISION
 import datetime
@@ -18,9 +18,13 @@ class InitialValues(base):
     exs = relationship('Ex', back_populates='initial_values')
 
     type = Column(Enum(SimulationTypes))
-    testcd = Column(String, unique=True)
+    testcd = Column(String, nullable=False)
     test = Column(String)
     orres = Column(DOUBLE_PRECISION)
     orresu = Column(String)
     co = Column(String)
+
+    __table_args__ = (
+        UniqueConstraint('type', 'testcd', name='InitialValues_testcd_unique_per_type'),
+    )
 

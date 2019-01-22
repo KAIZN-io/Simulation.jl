@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, DateTime, Integer, Enum
+from sqlalchemy import Column, String, DateTime, Integer, Enum, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID, DOUBLE_PRECISION
 import datetime
@@ -18,9 +18,13 @@ class Parameters(base):
     exs = relationship('Ex', back_populates='parameters')
 
     type = Column(Enum(SimulationTypes))
-    testcd = Column(String, unique=True, nullable=False)
+    testcd = Column(String, nullable=False)
     test = Column(String)
     orres = Column(DOUBLE_PRECISION)
     orresu = Column(String)
     co = Column(String)
+
+    __table_args__ = (
+        UniqueConstraint('type', 'testcd', name='Parameters_testcd_unique_per_type'),
+    )
 

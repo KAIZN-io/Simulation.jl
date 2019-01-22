@@ -9,7 +9,7 @@ class OrresuEquations(base):
     __tablename__ = 'orresu_equations'
 
     id = Column(Integer, primary_key=True)
-    uuid = Column(UUID(as_uuid=True), unique=True, nullable=False)
+    # uuid = Column(UUID(as_uuid=True), unique=True, nullable=False)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     type = Column(Enum(SimulationTypes))
     testcd = Column(String, nullable=False, unique=True)

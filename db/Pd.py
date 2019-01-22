@@ -1,4 +1,5 @@
-from sqlalchemy import Column, String, DateTime, Integer, Enum
+from sqlalchemy import Column, String, DateTime, Integer, Enum, ForeignKey
+from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID, DOUBLE_PRECISION
 import datetime
 
@@ -12,11 +13,13 @@ class Pd(base):
     id = Column(Integer, primary_key=True)
     # uuid = Column(UUID(as_uuid=True), unique=True, nullable=False)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    type = Column(Enum(SimulationTypes))
+
+    ex_id = Column(Integer, ForeignKey('ex.id'))
+    exs = relationship('Ex', back_populates='pd')
+
     studyid = Column(String)
     domain = Column(String)
     usubjid = Column(String, unique=True)
-    pdseq = Column(Integer, unique=True, nullable=False)
     pdtestcd = Column(String, unique=True, nullable=False)
     pdtest = Column(String)
     pdorres = Column(DOUBLE_PRECISION)

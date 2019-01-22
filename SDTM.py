@@ -89,8 +89,8 @@ class DataExtraction:
         odeResultsForSolver = [j for i, j in resultsDictPlaceholder.items()]
 
         """export the individuel terms to the database"""
-        if dict_system_switch.get('export_data_to_sql') == True\
-                and dict_system_switch.get('export_terms_data_to_sql') == True:
+        if systemSwitchDict.get('export_data_to_sql') == True\
+                and systemSwitchDict.get('export_terms_data_to_sql') == True:
 
             """sql connection"""
             engine = create_engine(
@@ -102,7 +102,7 @@ class DataExtraction:
 
             df = pd.DataFrame(dictWithTerms, index=[t])
 
-            df.to_sql(csv_fingerprint, con=engine, schema='{}_terms'.format(
+            df.to_sql(modelFingerprint, con=engine, schema='{}_terms'.format(
                 nameOfModel), if_exists='append')
 
         return odeResultsForSolver
@@ -268,13 +268,13 @@ class DataVisualization:
         """
 
         # TEMP: temporary solution; PDORRESU = PDORRESU_x because otherwise it
-        # overwrites the ijj['units'] dict --> local/global variable problem?
+        # overwrites the simulationSettingsForTimeRange['units'] dict --> local/global variable problem?
         if sql_USUBJID == 'combined_models':
             NotToVisualize = dict_visualisation.get('not_to_visualize')
-            ColumnsOfDataframe = ODE_RESULTS.columns.tolist()
+            columnsOfDataframe = ODE_RESULTS.columns.tolist()
 
             ColumnsToVisualize = list(
-                set(ColumnsOfDataframe) - set(NotToVisualize))
+                set(columnsOfDataframe) - set(NotToVisualize))
 
             for i in NotToVisualize:
                 ODE_RESULTS = ODE_RESULTS.drop(columns=[i])
@@ -313,16 +313,16 @@ class DataVisualization:
                     PDORRESU[new_column_name] = 'fL'
 
         """group the keys by their units"""
-        PDORRESU_grouped = {}
+        groupedPDORRESU = {}
         for key, value in sorted(PDORRESU.items()):
-            PDORRESU_grouped.setdefault(value, []).append(key)
+            groupedPDORRESU.setdefault(value, []).append(key)
 
         """some design condition for the bachelor plots"""
         if sql_USUBJID == 'volume':
             ODE_RESULTS = pd.DataFrame(ODE_RESULTS['V'])
-            PDORRESU_grouped = {'total volume [fL]': ['V']}
+            groupedPDORRESU = {'total volume [fL]': ['V']}
 
-        return ODE_RESULTS, PDORRESU_grouped
+        return ODE_RESULTS, groupedPDORRESU
 
 # NOTE : class will be replace with ORM wrapper
 class ModelFromDatabase:
@@ -422,7 +422,7 @@ class SimulationPreparation:
         for i in activatedStimulus:
 
             """get me the target of the specific stimuli"""
-            target = dict_stimulus.get(i)[2]
+            target = stimulusDict.get(i)[2]
 
             """if the targets are in the specific model"""
             if set(target).issubset(modelOdeVariables) == True:
@@ -463,7 +463,7 @@ class SimulationPreparation:
         if self.nameOfModel in ['combined_models', 'ion']:
             simulationTimePoints.append(Glucose_impuls_start)
 
-        running_chit = []
+        runningChit = []
 
         for TRT, DOSE_list in self.usedStimulusWithConcentration.items():
             for singleDose in DOSE_list:
@@ -487,27 +487,27 @@ class SimulationPreparation:
                                             for i, j in zip(simulationTimePoints[0::], simulationTimePoints[1::])
                                             ]
 
-                dict_running_chit = {'name': self.nameOfModel,
+                dict_runningChit = {'name': self.nameOfModel,
                                      'EXTRT': TRT,
                                      'EXDOSE': singleDose,
-                                     'EXSTDTC_list': self.stimulusTimePoints[TRT],
+                                     'EXSTDTC': self.stimulusTimePoints[TRT],
                                      'results': simulationTimePointsMatrix,
                                      }
 
                 liste_compress = list(itertools.compress(
-                    dict_running_chit, switchboard))
+                    dict_runningChit, switchboard))
 
-                dict_running_chit = {
-                    i: dict_running_chit[i] for i in liste_compress}
+                dict_runningChit = {
+                    i: dict_runningChit[i] for i in liste_compress}
 
                 """append to the rest of the toodo simulation"""
-                running_chit.append(dict_running_chit)
+                runningChit.append(dict_runningChit)
 
                 if affectedModelFromStimulus == False:
                     break
             if affectedModelFromStimulus == False:
                 break
-        return running_chit
+        return runningChit
 
 
 class Simulation():
@@ -540,7 +540,7 @@ if __name__ == "__main__":
     json_args = sys.argv[1]
     args = json.loads(json_args)
 
-    dict_time = {
+    timeDict = {
         'start': float(args['dict_time']['start']),
         'stop': float(args['dict_time']['stop']),
         'time_steps': float(args['dict_time']['time_steps']),
@@ -549,17 +549,18 @@ if __name__ == "__main__":
         'NaCl_impuls_start': float(args['dict_time']['NaCl_impuls_start']),
         'NaCl_impuls_firststop': float(args['dict_time']['NaCl_impuls_firststop']),
     }
-
+    # TODO: will be replaced with enum
     dict_model_switch = args['dict_model_switch']
-    dict_unique_EXSTDTC = args['dict_unique_EXSTDTC']
-    dict_stimulus = args['dict_stimulus']
-    dict_system_switch = args['dict_system_switch']
+
+    uniqueEXSTDTC = args['uniqueEXSTDTC']
+    stimulusDict = args['dict_stimulus']
+    systemSwitchDict = args['dict_system_switch']
 
     """make the dict keys as new variables"""
-    locals().update(dict_time)
+    locals().update(timeDict)
 
-    signal_type = dict_stimulus.get('signal_type')[0]
-    NaCl_impuls = dict_stimulus.get('NaCl_impuls')[0]
+    signal_type = stimulusDict.get('signal_type')[0]
+    NaCl_impuls = stimulusDict.get('NaCl_impuls')[0]
 
     """host name taken from docker-compose.yml"""
     conn = psycopg2.connect(
@@ -572,6 +573,7 @@ if __name__ == "__main__":
     cur = conn.cursor()
 
     """get the used model name"""
+    # TODO: will be replaced with enum
     nameOfModel = [i for i, j in dict_model_switch.items() if j == True][0]
 
     """get the model
@@ -582,13 +584,13 @@ if __name__ == "__main__":
     modelFromDatabase = ModelFromDatabase(nameOfModel)
 
     specificModelVersionSEQ = modelFromDatabase.getModelVersion(
-        dict_system_switch.get('specificModelVersionSEQ'))
+        systemSwitchDict.get('specificModelVersionSEQ'))
 
     specificInitValuesVersionSEQ = modelFromDatabase.getInitValuesVersion(
-        dict_system_switch.get('specificInitValuesVersionSEQ'))
+        systemSwitchDict.get('specificInitValuesVersionSEQ'))
 
     specificParameterVersionSEQ = modelFromDatabase.getParameterVersion(
-        dict_system_switch.get('specificParameterVersionSEQ'))
+        systemSwitchDict.get('specificParameterVersionSEQ'))
 
     modelFromDatabase.updateLocalJsonModel()
 
@@ -600,7 +602,7 @@ if __name__ == "__main__":
     find out which stimulus pipeline is opened for the experiment series
     """
     activated_stimuli = [stimulus_name for stimulus_name, items
-                         in dict_stimulus.items() if items[-1] == True]
+                         in stimulusDict.items() if items[-1] == True]
 
     simulationPreparation = SimulationPreparation(nameOfModel)
 
@@ -610,17 +612,17 @@ if __name__ == "__main__":
 
     """"if the model is effected from the stimulus --> get the stimulus settings"""
     usedStimulusWithConcentration = simulationPreparation.rulesForStimulus(
-        stimulusDict=dict_stimulus, stimulusTimePoints=dict_unique_EXSTDTC)
+        stimulusDict=stimulusDict, stimulusTimePoints=uniqueEXSTDTC)
 
     """time points for not external stimulated models"""
-    running_chit = simulationPreparation.simulationTimePoints()
+    runningChit = simulationPreparation.simulationTimePoints()
 
     """simulation
 
     the actual simulation begins
     """
     print(nameOfModel)
-    for ijj in running_chit:
+    for simulationSettingsForTimeRange in runningChit:
 
         """initialize an empty DataFrame for each time value"""
         simulationFrame = pd.DataFrame()
@@ -629,22 +631,22 @@ if __name__ == "__main__":
         cur.execute(sql.SQL("SELECT MAX(EXSEQ) FROM {}.ex;").format(
                     sql.Identifier(nameOfModel)))
 
-        SEQ_old = cur.fetchone()[0]
-        if SEQ_old == None:
-            SEQ_old = 0
+        oldSeq = cur.fetchone()[0]
+        if oldSeq == None:
+            oldSeq = 0
 
         """SEQ for new simulation"""
-        SEQ = SEQ_old + 1
+        SEQ = oldSeq + 1
 
         if affectedModelFromStimulus == False:
             EXTRT = 0
             EXDOSE = 0
-            EXSTDTC_list = [0]
+            EXSTDTC = [0]
 
         else:
-            EXTRT = ijj['EXTRT']
-            EXDOSE = ijj['EXDOSE']
-            EXSTDTC_list = ijj['EXSTDTC_list']
+            EXTRT = simulationSettingsForTimeRange['EXTRT']
+            EXDOSE = simulationSettingsForTimeRange['EXDOSE']
+            EXSTDTC = simulationSettingsForTimeRange['EXSTDTC']
 
         EX_dict = {
             "studyid": STUDYID,
@@ -655,7 +657,7 @@ if __name__ == "__main__":
             "extrt": EXTRT,
             "exdose": EXDOSE,
             "exdosu": "mM",
-            "exstdtc_array": EXSTDTC_list,
+            "exstdtc_array": EXSTDTC,
             "simulation_start": start,
             "simulation_stop": stop,
             "co": "exstdtc in Sekunden",
@@ -664,11 +666,7 @@ if __name__ == "__main__":
             "parameterversion": specificParameterVersionSEQ
         }
 
-        csv_fingerprint = str(SEQ)
-
-        init_cond = []
-        init_cond_string = []
-        init_cond_unit = []
+        modelFingerprint = str(SEQ) + '_' + nameOfModel
 
         """get the parameter from the database"""
         cur.execute(sql.SQL("""
@@ -679,13 +677,13 @@ if __name__ == "__main__":
 
         TESTCD_ORRESU_tuple = cur.fetchall()
 
-        """init_dict creation"""
-        parameter_dict = {}
+        """initialValues creation"""
+        parameterAsLocalVariables = {}
         for i in TESTCD_ORRESU_tuple:
-            parameter_dict[i[0]] = i[1]
+            parameterAsLocalVariables[i[0]] = i[1]
 
         """make the dict keys as new variables"""
-        locals().update(parameter_dict)
+        locals().update(parameterAsLocalVariables)
 
         cur.execute(sql.SQL("""
             SELECT testcd, orres, orresu
@@ -695,20 +693,20 @@ if __name__ == "__main__":
 
         TESTCD_ORRESU_tuple = cur.fetchall()
 
-        """init_dict creation"""
-        init_dict = {}
-        unit_dict = {}
+        """initialValues creation"""
+        initialValues = {}
+        unitsForOdes = {}
         for i in TESTCD_ORRESU_tuple:
-            init_dict[i[0]] = i[1]
-            unit_dict[i[0]] = i[2]
+            initialValues[i[0]] = i[1]
+            unitsForOdes[i[0]] = i[2]
 
         """DataFrame initialisieren"""
 
-        ijj['units'] = unit_dict
+        simulationSettingsForTimeRange['units'] = unitsForOdes
 
-        simulationFrame = pd.DataFrame([init_dict])
+        simulationFrame = pd.DataFrame([initialValues])
 
-        for i in ijj['results']:
+        for i in simulationSettingsForTimeRange['results']:
 
             placeholderDataframe = []
 
@@ -718,10 +716,10 @@ if __name__ == "__main__":
             and a compartible model is choosen ...
             """
 
-            if i[0] in EXSTDTC_list\
+            if i[0] in EXSTDTC\
                     and affectedModelFromStimulus == True:
 
-                for TESTCDAffectedByStimulus in dict_stimulus.get(EXTRT)[2]:
+                for TESTCDAffectedByStimulus in stimulusDict.get(EXTRT)[2]:
 
                     """adds the right value to the right ODE"""
                     simulationFrame.loc[i[0],
@@ -750,17 +748,17 @@ if __name__ == "__main__":
                                                             )
 
         """replace the time array with the simulation results"""
-        ijj['results'] = simulationFrame
+        simulationSettingsForTimeRange['results'] = simulationFrame
 
         """create a copy for the design of the plot"""
-        ODE_RESULTS_raw = ijj['results']
+        rawOdeResults = simulationSettingsForTimeRange['results']
 
-        ODE_RESULTS, PDORRESU_grouped = DataVisualization.prepareVisualization(
-            sql_USUBJID=nameOfModel, ODE_RESULTS=ODE_RESULTS_raw, PDORRESU_x=ijj['units'])
+        resultsForOdes, groupedPDORRESU = DataVisualization.prepareVisualization(
+            sql_USUBJID=nameOfModel, ODE_RESULTS=rawOdeResults, PDORRESU_x=simulationSettingsForTimeRange['units'])
 
         """plot the results, save the plot and return the pictureName"""
-        pictureName = DataVisualization.plotTimeSeries(timeSeriesData=ODE_RESULTS,
-                                                       subplotLogic=PDORRESU_grouped)
+        pictureName = DataVisualization.plotTimeSeries(timeSeriesData=resultsForOdes,
+                                                       subplotLogic=groupedPDORRESU)
 
         EX_dict['namepicture'] = pictureName
 
@@ -772,95 +770,95 @@ if __name__ == "__main__":
         """
 
         """round the time points"""
-        RoundByUsedTimeSteps = abs(
+        roundByUsedTimeStepsgroupedPDORRESU = abs(
             Decimal(str(time_steps)).as_tuple().exponent)
 
-        OldTimeIndex = list(ijj['results'].index)
-        NewTimeIndex = np.round(OldTimeIndex, decimals=RoundByUsedTimeSteps)
+        oldTimeIndex = list(simulationSettingsForTimeRange['results'].index)
+        newTimeIndex = np.round(oldTimeIndex, decimals=roundByUsedTimeStepsgroupedPDORRESU)
 
-        DfAsMatrix = ijj['results'].values
-        ColumnsOfDataframe = ijj['results'].columns.tolist()
+        dataframeAsMatrix = simulationSettingsForTimeRange['results'].values
+        columnsOfDataframe = simulationSettingsForTimeRange['results'].columns.tolist()
 
         if nameOfModel != 'volume':
             def truncate(n, decimals=0):
                 multiplier = 10 ** decimals
                 return int(n * multiplier) / multiplier
 
-            RoundAfterDigitsCound = 5
-            NumbersWithoutZero = list(range(1, 10))
-            NumbersWithoutZero = [str(x) for x in NumbersWithoutZero]
+            ROUND_AFTER_DIGITS_COUND = 5
+            numbersWithoutZero = list(range(1, 10))
+            numbersWithoutZero = [str(x) for x in numbersWithoutZero]
 
-            for (x, y), UnroundedValue in np.ndenumerate(DfAsMatrix):
+            for (x, y), unroundedValue in np.ndenumerate(dataframeAsMatrix):
 
-                GetDecimalPointPosition = str(UnroundedValue).find('.')
-                for index, i in enumerate(str(UnroundedValue)):
-                    if i in NumbersWithoutZero:
-                        FirstOccurenceNaturalNumber = index
-                        if index > GetDecimalPointPosition:
-                            FirstOccurenceNaturalNumber -= 1
+                getDecimalPointPosition = str(unroundedValue).find('.')
+                for index, i in enumerate(str(unroundedValue)):
+                    if i in numbersWithoutZero:
+                        firstOccurenceOfNaturalNumber = index
+                        if index > getDecimalPointPosition:
+                            firstOccurenceOfNaturalNumber -= 1
                         break
 
-                TruncateIndex = FirstOccurenceNaturalNumber + \
-                    RoundAfterDigitsCound - GetDecimalPointPosition
+                truncateIndex = firstOccurenceOfNaturalNumber + \
+                    ROUND_AFTER_DIGITS_COUND - getDecimalPointPosition
 
-                RoundedValue = truncate(UnroundedValue, decimals=TruncateIndex)
+                roundedValue = truncate(unroundedValue, decimals=truncateIndex)
 
-                DfAsMatrix[x, y] = RoundedValue
+                dataframeAsMatrix[x, y] = roundedValue
 
-        ijj['results'] = pd.DataFrame(DfAsMatrix,
-                                      columns=ColumnsOfDataframe,
-                                      index=NewTimeIndex)
+        simulationSettingsForTimeRange['results'] = pd.DataFrame(dataframeAsMatrix,
+                                      columns=columnsOfDataframe,
+                                      index=newTimeIndex)
 
         """get less data 
         
         only get each (1/time_steps) simulation results
         """
-        ijj['results'] = ijj['results'].loc[::int(1/time_steps)]
+        simulationSettingsForTimeRange['results'] = simulationSettingsForTimeRange['results'].loc[::int(1/time_steps)]
 
         """export the EX dict to the database"""
-        if dict_system_switch.get('export_data_to_sql') == True:
+        if systemSwitchDict.get('export_data_to_sql') == True:
 
-            keys_db = tuple(EX_dict.keys())
-            values_db = tuple(EX_dict.values())
+            keysDb = tuple(EX_dict.keys())
+            valuesDb = tuple(EX_dict.values())
 
             """dict to sql database"""
-            insert_statement = 'insert into {}.ex (%s) values %s'.format(
+            sqlInsertStatement = 'insert into {}.ex (%s) values %s'.format(
                 nameOfModel)
-            cur.execute(cur.mogrify(insert_statement,
-                                    (AsIs(','.join(keys_db)), tuple(values_db))))
+            cur.execute(cur.mogrify(sqlInsertStatement,
+                                    (AsIs(','.join(keysDb)), tuple(valuesDb))))
 
             conn.commit()
 
             """make the dict keys as new variables"""
-            locals().update(ijj)
+            locals().update(simulationSettingsForTimeRange)
 
-            pd_to_dict = ijj['results'].to_dict('index')
+            dataframeAsDict = simulationSettingsForTimeRange['results'].to_dict('index')
+   
+            for DTC, innerDict in dataframeAsDict.items():
+                for substance, value in innerDict.items():
 
-            for DTC, inner_dict in pd_to_dict.items():
-                for substance, value in inner_dict.items():
-
-                    dict_test = {}
-                    dict_test['studyid'] = STUDYID
-                    dict_test['domain'] = 'pd'
-                    dict_test['usubjid'] = nameOfModel
-                    dict_test['pdseq'] = SEQ
-                    dict_test['pdtestcd'] = substance
-                    dict_test['pdtest'] = None
-                    dict_test['pdorres'] = value
-                    dict_test['pdorresu'] = ijj['units']['{}'.format(
+                    dictToDatabase = {}
+                    dictToDatabase['studyid'] = STUDYID
+                    dictToDatabase['domain'] = 'pd'
+                    dictToDatabase['usubjid'] = nameOfModel
+                    dictToDatabase['pdseq'] = SEQ
+                    dictToDatabase['pdtestcd'] = substance
+                    dictToDatabase['pdtest'] = None
+                    dictToDatabase['pdorres'] = value
+                    dictToDatabase['pdorresu'] = simulationSettingsForTimeRange['units']['{}'.format(
                         substance)]
-                    dict_test['pddtc'] = DTC
-                    dict_test['co'] = "pddtc in Sekunden"
+                    dictToDatabase['pddtc'] = DTC
+                    dictToDatabase['co'] = "pddtc in Sekunden"
 
-                    keys_db = tuple(dict_test.keys())
-                    values_db = tuple(dict_test.values())
+                    keysDb = tuple(dictToDatabase.keys())
+                    valuesDb = tuple(dictToDatabase.values())
 
                     """dict to sql database"""
 
-                    insert_statement = 'insert into {}.pd (%s) values %s'.format(
+                    sqlInsertStatement = 'insert into {}.pd (%s) values %s'.format(
                         nameOfModel)
-                    cur.execute(cur.mogrify(insert_statement,
-                                            (AsIs(','.join(keys_db)), tuple(values_db))))
+                    cur.execute(cur.mogrify(sqlInsertStatement,
+                                            (AsIs(','.join(keysDb)), tuple(valuesDb))))
 
                     conn.commit()
 

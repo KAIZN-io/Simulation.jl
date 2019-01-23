@@ -35,8 +35,7 @@ class Ex(base):
     domain = Column(String)
     usubjid = Column(String)
     excat = Column(String)
-    # TODO: Why is this unique?
-    extrt = Column(String, unique=True, nullable=False)
+    extrt = Column(String, nullable=False)
     exdose = Column(REAL)
     exdosu = Column(String)
     exstdtc_array = Column(ARRAY(DOUBLE_PRECISION))

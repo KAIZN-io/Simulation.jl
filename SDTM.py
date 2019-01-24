@@ -666,7 +666,7 @@ if __name__ == "__main__":
         """get the parameter from the database"""
         with sessionScope() as session:
             q = session.query(Parameters.testcd, Parameters.orres) \
-                    .filter(Parameters.type == nameOfModel) \
+                    .filter(Parameters.type == SimulationTypes(nameOfModel)) \
                     .filter(Parameters.version == specificParameterVersionSEQ)
 
         TESTCD_ORRESU_tuple = q.all()
@@ -681,7 +681,7 @@ if __name__ == "__main__":
 
         with sessionScope() as session:
             q = session.query(InitialValues.testcd, InitialValues.orres, InitialValues.orresu) \
-                    .filter(InitialValues.type == nameOfModel) \
+                    .filter(InitialValues.type == SimulationTypes(nameOfModel)) \
                     .filter(InitialValues.version == specificInitValuesVersionSEQ)
 
         TESTCD_ORRESU_tuple = q.all()

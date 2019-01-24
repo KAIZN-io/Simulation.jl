@@ -4,19 +4,11 @@ import multiprocessing
 import time
 import datetime
 import uuid
-import psycopg2
-from psycopg2 import sql
+from sqlalchemy import func
 
 from web_interface.simulation_form import simulation_models
+from db import Ex, sessionScope
 
-
-conn = psycopg2.connect(
-    host='db_postgres',
-    user='postgres',
-    dbname='simulation_results'
-)
-
-cur = conn.cursor()
 
 class SimulationManager:
     def __init__( self ):
@@ -41,19 +33,13 @@ class SimulationManager:
         return len(self.get_running_simulations()) > 0
 
     def get_new_seq_number(self, model):
-        try:
-            cur.execute(
-                sql.SQL("SELECT MAX(EXSEQ) FROM {}.ex;").format(sql.Identifier(model))
-            )
+        with sessionScope() as session:
+            q = session.query(func.max(Ex.id))
 
-            SEQ_old = cur.fetchone()[0]
-
-            if SEQ_old == None:
-                SEQ_old = 0
-
-            return SEQ_old + 1
-        except:
-            return 0
+        if q.scalar():
+            return q.scalar()
+        else:
+            return 1
 
 class SimulationProcess(multiprocessing.Process):
     def __init__(self, dicts):

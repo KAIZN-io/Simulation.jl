@@ -1,9 +1,13 @@
-"""this script initialize a model in the database"""
+from sqlalchemy import func
+import os
+import sys
+import json
 
-exec(open("SYSTEM/py_packages.py").read())
+from db import sessionScope, Parameters, InitialValues, Model, OrresuEquations
+from values import SimulationTypes
 
 
-def createJsonModel(NameOfModel=''):
+def createJsonModel(modelType):
 
     system_comp = ['copa', 'equation', 'ODE']
     dict_system = {}
@@ -12,27 +16,29 @@ def createJsonModel(NameOfModel=''):
 
     """pre-check whether the system_comp exists for the specific model"""
     for system in system_comp:
-        if os.path.isfile('Single_Models/{0}/{0}_{1}.txt'.format(NameOfModel, system)) == False:
+        if os.path.isfile('Single_Models/{0}/{0}_{1}.txt'.format(modelType.value, system)) == False:
             system_comp_remove.append(system)
     for i in system_comp_remove:
         system_comp.remove(i)
 
-    cur.execute(sql.SQL("""
-        SELECT testcd, orresu 
-        FROM {0}.orresu_equations;
-        """).format(sql.Identifier(NameOfModel)))
+    with sessionScope() as session:
+        q = session \
+                .query(OrresuEquations.testcd, OrresuEquations.orresu) \
+                .filter(OrresuEquations.type == modelType) \
+                .filter(OrresuEquations.version == 1)
 
-    ORRESU_column_names = [desc[0] for desc in cur.description]
+    ORRESU_column_names = [desc['name'] for desc in q.column_descriptions]
 
     """the values from the sql database in a dict"""
     ORRESU_dict = {}
-    for i in cur.fetchall():
-        ORRESU_dict[i[ORRESU_column_names.index(
-            'testcd')]] = i[ORRESU_column_names.index('orresu')]
+    for i in q.all():
+        ORRESU_dict[
+            i[ORRESU_column_names.index('testcd')]
+        ] = i[ORRESU_column_names.index('orresu')]
 
     for system in system_comp:
         """opens the .txt file"""
-        f = open('Single_Models/{0}/{0}_{1}.txt'.format(NameOfModel, system))
+        f = open('Single_Models/{0}/{0}_{1}.txt'.format(modelType.value, system))
 
         string_list = [line for line in f]
 
@@ -142,7 +148,7 @@ def createJsonModel(NameOfModel=''):
                 for remove_key in keys_to_delete:
                     dict_spec[key]['component'].pop(remove_key, None)
 
-    if NameOfModel == 'hog':
+    if modelType.value == 'hog':
 
         hog_stimulus = {}
         hog_stimulus['copa'] = dict_system['copa']
@@ -162,80 +168,82 @@ def createJsonModel(NameOfModel=''):
 
     return JsonModel
 
+def isTypeInitialized(modelType):
+    count = 0
+    with sessionScope() as session:
+        count = session \
+                .query(func.count(InitialValues.id)) \
+                .filter(InitialValues.type == modelType) \
+                .scalar()
 
-conn = psycopg2.connect(
-    host='db_postgres',
-    user='postgres',
-    dbname='simulation_results'
-)
+    return count > 0
 
-cur = conn.cursor()
+def initializeDb():
+    for modelType in SimulationTypes:
+        if not isTypeInitialized(modelType):
+            with sessionScope() as session:
+                """read the model file"""
+                exec(open(
+                    'Single_Models/{0}/{0}.py'.format(modelType.value),
+                    encoding="utf-8"
+                ).read())
 
-allModels_list = ['ion', 'hog', 'volume', 'combined_models']
+                """parameter to database"""
+                parameters = []
+                Parameter_dict = eval('{}_parameter'.format(modelType.value))
+                for i, j in Parameter_dict.items():
+                    parameters.append(
+                        Parameters(
+                            type = modelType,
+                            version = 1,
+                            testcd = i,
+                            orres = j[0],
+                            orresu = j[1]
+                        )
+                    )
+                session.bulk_save_objects(parameters)
 
-for NameOfModel in allModels_list:
+                """initial values to database"""
+                initialValues = []
+                ODEVar_dict = eval('{}_init_values'.format(modelType.value))
+                for i in ODEVar_dict.values():
+                    initialValues.append(
+                        InitialValues(
+                            type = modelType,
+                            version = 1,
+                            testcd = i[1],
+                            orres = i[0],
+                            orresu = i[2]
+                        )
+                    )
+                session.bulk_save_objects(initialValues)
 
-    """check if the model is already initialize"""
-    cur.execute("Select max(seq) From {0}.init_values".format(NameOfModel))
+                """get the units of the equations"""
+                exec(open(
+                    'Single_Models/{0}/{0}_orresu_dict.py'.format(modelType.value),
+                    encoding="utf-8"
+                ).read())
+                ORRESU_dict = eval('{}_orresu_dict'.format(modelType.value))
+                orresuEquations = []
+                for i in ORRESU_dict.values():
+                    orresuEquations.append(
+                        OrresuEquations(
+                            type = modelType,
+                            version = 1,
+                            testcd = i[0],
+                            orresu = i[1]
+                        )
+                    )
+                session.bulk_save_objects(orresuEquations)
 
-    if cur.fetchone()[0] == None:
-        """read the model file"""
-        exec(
-            open('Single_Models/{0}/{0}.py'.format(NameOfModel), encoding="utf-8").read())
-        ODEVar_dict = eval('{}_init_values'.format(NameOfModel))
-        Parameter_dict = eval('{}_parameter'.format(NameOfModel))
+            with sessionScope() as session:
+                """create the JSON model and push it into the database"""
+                modelInJsonFormat = createJsonModel(modelType)
 
-        """initialize seq"""
-        SEQ = 1
+                model = Model(
+                    type = modelType,
+                    version = 1,
+                    json = modelInJsonFormat
+                )
+                session.add(model)
 
-        """parameter to database"""
-        for i, j in Parameter_dict.items():
-
-            cur.execute(sql.SQL("""
-                    INSERT INTO {0}.parameter(
-            	        seq, testcd, orres, orresu)
-                        VALUES(%s, %s, %s, %s);
-                    """).format(sql.Identifier(NameOfModel)), [SEQ, i, j[0], j[1]])
-
-            conn.commit()
-
-        """initial values to database"""
-        for i in ODEVar_dict.values():
-
-            cur.execute(sql.SQL("""
-                    INSERT INTO {0}.init_values(
-            	        seq, testcd, orres, orresu)
-                        VALUES(%s, %s, %s, %s);
-                    """).format(sql.Identifier(NameOfModel)), [SEQ, i[1], i[0], i[2]])
-
-            conn.commit()
-
-        """get the units of the equations"""
-        exec(open(
-            'Single_Models/{0}/{0}_orresu_dict.py'.format(NameOfModel), encoding="utf-8").read())
-        ORRESU_dict = eval('{}_orresu_dict'.format(NameOfModel))
-
-        for i in ORRESU_dict.values():
-
-            cur.execute(sql.SQL("""
-                    INSERT INTO {}.orresu_equations(
-                        testcd, orresu)
-                        VALUES (%s, %s);
-                    """).format(sql.Identifier(NameOfModel)), [i[0], i[1]])
-
-            conn.commit()
-
-        """create the JSON model and push it into the database"""
-        ModelInJsonFormat = createJsonModel(NameOfModel=NameOfModel)
-
-        cur.execute(sql.SQL("""
-                INSERT INTO {}.json(
-                    seq, model_version)
-	                VALUES(%s, %s);
-                """).format(sql.Identifier(NameOfModel)), [SEQ, ModelInJsonFormat])
-
-        conn.commit()
-
-
-cur.close()
-conn.close()

@@ -6,6 +6,11 @@ __license__ = 'private'
 import sys
 import uuid
 from decimal import Decimal
+from sqlalchemy import func
+
+from db import Ex, Pd, Model, Parameters, InitialValues, sessionScope, Session
+from initializeModel import initializeDb
+from values import SimulationTypes
 
 """import the standard used packages"""
 exec(open("SYSTEM/py_packages.py").read())
@@ -327,8 +332,8 @@ class DataVisualization:
 
 # NOTE : class will be replace with ORM wrapper
 class ModelFromDatabase:
-    def __init__(self, nameOfModel):
-        self.nameOfModel = nameOfModel
+    def __init__(self, type):
+        self.type = type
         self.specificModelVersionSEQ = None
         self.specificInitValuesVersionSEQ = None
 
@@ -339,12 +344,14 @@ class ModelFromDatabase:
 
         else:
             """get the MAX(seq) value from the database"""
-            cur.execute(sql.SQL("""
-                SELECT MAX(seq)
-                FROM {}.json;
-                """).format(sql.Identifier(self.nameOfModel)))
+            with sessionScope() as session:
+                q = session.query(func.max(Model.version)) \
+                        .filter(Model.type == self.type)
 
-            self.specificModelVersionSEQ = cur.fetchone()[0]
+            if q.scalar():
+                self.specificModelVersionSEQ = q.scalar()
+            else:
+                self.specificModelVersionSEQ = 1
 
         return self.specificModelVersionSEQ
 
@@ -355,12 +362,11 @@ class ModelFromDatabase:
 
         else:
             """get the MAX(seq) value from the database"""
-            cur.execute(sql.SQL("""
-                SELECT MAX(seq)
-                FROM {}.init_values;
-                """).format(sql.Identifier(self.nameOfModel)))
+            with sessionScope() as session:
+                q = session.query(func.max(InitialValues.version)) \
+                        .filter(InitialValues.type == self.type)
 
-            self.specificInitValuesVersionSEQ = cur.fetchone()[0]
+            self.specificInitValuesVersionSEQ = q.scalar()
 
         return self.specificInitValuesVersionSEQ
 
@@ -371,40 +377,32 @@ class ModelFromDatabase:
 
         else:
             """get the MAX(seq) value from the database"""
-            cur.execute(sql.SQL("""
-                SELECT MAX(seq)
-                FROM {}.parameter;
-                """).format(sql.Identifier(self.nameOfModel)))
+            with sessionScope() as session:
+                q = session.query(func.max(Parameters.version)) \
+                        .filter(Parameters.type == self.type)
 
-            specificParameterVersionSEQ = cur.fetchone()[0]
+            specificParameterVersionSEQ = q.scalar()
 
         return specificParameterVersionSEQ
 
     def updateLocalJsonModel(self):
         """update the local safed json file for the model"""
-        cur.execute(sql.SQL("""
-            SELECT model_version
-            FROM {}.json
-            WHERE seq = %s;
-            """).format(sql.Identifier(self.nameOfModel)), [self.specificModelVersionSEQ])
+        with sessionScope() as session:
+            q = session.query(Model.json) \
+                    .filter(Model.version == self.specificModelVersionSEQ) \
+                    .filter(Model.type == self.type)
 
-        ModelVersionFromDatabase = cur.fetchone()[0]
-
-        """create json format"""
-
-        s = json.dumps(ModelVersionFromDatabase, indent=4)
-        with open('Single_Models/json_files/{0}_system.json'.format(self.nameOfModel), "w") as f:
-            f.write(s)
+        with open('Single_Models/json_files/{0}_system.json'.format(self.type.value), "w") as f:
+            f.write(q.one()[0])
 
     def getODENames(self):
         """list of the names of the ODE in the model"""
-        cur.execute(sql.SQL("""
-                SELECT testcd
-                FROM {}.init_values
-                WHERE seq = %s
-                """).format(sql.Identifier(self.nameOfModel)), [self.specificInitValuesVersionSEQ])
+        with sessionScope() as session:
+            q = session.query(InitialValues.testcd) \
+                    .filter(InitialValues.version == specificInitValuesVersionSEQ) \
+                    .filter(InitialValues.type == self.type)
 
-        modelOdeVariables = cur.fetchall()
+        modelOdeVariables = q.all()
         modelOdeVariables = [x[0] for x in modelOdeVariables]
 
         return modelOdeVariables
@@ -518,8 +516,7 @@ class Simulation():
 
 if __name__ == "__main__":
 
-    exec(open("createDatabaseStructure.py").read())
-    exec(open("initializeModel.py").read())
+    initializeDb()
 
     dict_visualisation = {
 
@@ -582,7 +579,7 @@ if __name__ == "__main__":
     name of model, initial values for the ODEs, parameterization, model, 
     and names of the ODEs
     """
-    modelFromDatabase = ModelFromDatabase(nameOfModel)
+    modelFromDatabase = ModelFromDatabase(SimulationTypes(nameOfModel))
 
     specificModelVersionSEQ = modelFromDatabase.getModelVersion(
         systemSwitchDict.get('specificModelVersionSEQ'))
@@ -628,16 +625,13 @@ if __name__ == "__main__":
         """initialize an empty DataFrame for each time value"""
         simulationFrame = pd.DataFrame()
 
-        """check, how many SEQ number already exists"""
-        cur.execute(sql.SQL("SELECT MAX(EXSEQ) FROM {}.ex;").format(
-                    sql.Identifier(nameOfModel)))
+        with sessionScope() as session:
+            q = session.query(func.max(Ex.id))
 
-        oldSeq = cur.fetchone()[0]
-        if oldSeq == None:
-            oldSeq = 0
-
-        """SEQ for new simulation"""
-        SEQ = oldSeq + 1
+        if q.scalar():
+            SEQ = q.scalar() + 1
+        else:
+            SEQ = 1
 
         if affectedModelFromStimulus == False:
             EXTRT = 0
@@ -650,10 +644,10 @@ if __name__ == "__main__":
             EXSTDTC = simulationSettingsForTimeRange['EXSTDTC']
 
         EX_dict = {
+            "id": SEQ,
             "studyid": STUDYID,
             "domain": "ex",
             "usubjid": nameOfModel,
-            "exseq": SEQ,
             "excat": EXCAT,
             "extrt": EXTRT,
             "exdose": EXDOSE,
@@ -662,21 +656,20 @@ if __name__ == "__main__":
             "simulation_start": start,
             "simulation_stop": stop,
             "co": "exstdtc in Sekunden",
-            "modelversion": specificModelVersionSEQ,
-            "initvaluesversion": specificInitValuesVersionSEQ,
-            "parameterversion": specificParameterVersionSEQ
+            "model_id": specificModelVersionSEQ,
+            "initial_values_version": specificInitValuesVersionSEQ,
+            "parameters_version": specificParameterVersionSEQ
         }
 
         modelFingerprint = str(SEQ) + '_' + nameOfModel
 
         """get the parameter from the database"""
-        cur.execute(sql.SQL("""
-            SELECT testcd, orres
-            FROM {}.parameter 
-            WHERE seq=%s;
-            """).format(sql.Identifier(nameOfModel)), [specificParameterVersionSEQ])
+        with sessionScope() as session:
+            q = session.query(Parameters.testcd, Parameters.orres) \
+                    .filter(Parameters.type == SimulationTypes(nameOfModel)) \
+                    .filter(Parameters.version == specificParameterVersionSEQ)
 
-        TESTCD_ORRESU_tuple = cur.fetchall()
+        TESTCD_ORRESU_tuple = q.all()
 
         """initialValues creation"""
         parameterAsLocalVariables = {}
@@ -686,13 +679,12 @@ if __name__ == "__main__":
         """make the dict keys as new variables"""
         locals().update(parameterAsLocalVariables)
 
-        cur.execute(sql.SQL("""
-            SELECT testcd, orres, orresu
-            FROM {}.init_values 
-            WHERE seq=%s;
-            """).format(sql.Identifier(nameOfModel)), [specificInitValuesVersionSEQ])
+        with sessionScope() as session:
+            q = session.query(InitialValues.testcd, InitialValues.orres, InitialValues.orresu) \
+                    .filter(InitialValues.type == SimulationTypes(nameOfModel)) \
+                    .filter(InitialValues.version == specificInitValuesVersionSEQ)
 
-        TESTCD_ORRESU_tuple = cur.fetchall()
+        TESTCD_ORRESU_tuple = q.all()
 
         """initialValues creation"""
         initialValues = {}
@@ -761,7 +753,7 @@ if __name__ == "__main__":
         pictureName = DataVisualization.plotTimeSeries(timeSeriesData=resultsForOdes,
                                                        subplotLogic=groupedPDORRESU)
 
-        EX_dict['namepicture'] = pictureName
+        EX_dict['image_path'] = pictureName
 
         print(SEQ, "nameOfModel", nameOfModel)
 
@@ -818,50 +810,33 @@ if __name__ == "__main__":
 
         """export the EX dict to the database"""
         if systemSwitchDict.get('export_data_to_sql') == True:
+            with sessionScope() as session:
+                """dict to sql database"""
+                ex = Ex(**EX_dict)
+                session.add(ex)
+                session.commit()
 
-            keysDb = tuple(EX_dict.keys())
-            valuesDb = tuple(EX_dict.values())
+                """make the dict keys as new variables"""
+                locals().update(simulationSettingsForTimeRange)
 
-            """dict to sql database"""
-            sqlInsertStatement = 'insert into {}.ex (%s) values %s'.format(
-                nameOfModel)
-            cur.execute(cur.mogrify(sqlInsertStatement,
-                                    (AsIs(','.join(keysDb)), tuple(valuesDb))))
+                dataframeAsDict = simulationSettingsForTimeRange['results'].to_dict('index')
 
-            conn.commit()
-
-            """make the dict keys as new variables"""
-            locals().update(simulationSettingsForTimeRange)
-
-            dataframeAsDict = simulationSettingsForTimeRange['results'].to_dict('index')
-   
-            for DTC, innerDict in dataframeAsDict.items():
-                for substance, value in innerDict.items():
-
-                    dictToDatabase = {}
-                    dictToDatabase['studyid'] = STUDYID
-                    dictToDatabase['domain'] = 'pd'
-                    dictToDatabase['usubjid'] = nameOfModel
-                    dictToDatabase['pdseq'] = SEQ
-                    dictToDatabase['pdtestcd'] = substance
-                    dictToDatabase['pdtest'] = None
-                    dictToDatabase['pdorres'] = value
-                    dictToDatabase['pdorresu'] = simulationSettingsForTimeRange['units']['{}'.format(
-                        substance)]
-                    dictToDatabase['pddtc'] = DTC
-                    dictToDatabase['co'] = "pddtc in Sekunden"
-
-                    keysDb = tuple(dictToDatabase.keys())
-                    valuesDb = tuple(dictToDatabase.values())
-
-                    """dict to sql database"""
-
-                    sqlInsertStatement = 'insert into {}.pd (%s) values %s'.format(
-                        nameOfModel)
-                    cur.execute(cur.mogrify(sqlInsertStatement,
-                                            (AsIs(','.join(keysDb)), tuple(valuesDb))))
-
-                    conn.commit()
+                pds = []
+                for DTC, innerDict in dataframeAsDict.items():
+                    for substance, value in innerDict.items():
+                        pds.append(Pd(
+                            ex_id = ex.id,
+                            studyid = STUDYID,
+                            domain = 'pd',
+                            usubjid = nameOfModel,
+                            pdtestcd = substance,
+                            pdtest = None,
+                            pdorres = value,
+                            pdorresu = simulationSettingsForTimeRange['units'][substance],
+                            pddtc = DTC,
+                            co = "pddtc in Sekunden",
+                        ))
+                session.bulk_save_objects(pds)
 
             print("Daten hochgeladen")
 

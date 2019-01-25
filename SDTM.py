@@ -11,6 +11,7 @@ from sqlalchemy import func
 from db import Ex, Pd, Model, Parameters, InitialValues, sessionScope, Session
 from initializeModel import initializeDb
 from values import SimulationTypes
+from DataExtraction import DataExtraction
 
 """import the standard used packages"""
 exec(open("SYSTEM/py_packages.py").read())
@@ -599,32 +600,31 @@ if __name__ == "__main__":
                     and affectedModelFromStimulus == True:
 
                 for TESTCDAffectedByStimulus in stimulusDict.get(EXTRT)[2]:
-
                     """adds the right value to the right ODE"""
                     simulationFrame.loc[i[0],
                                         TESTCDAffectedByStimulus] += EXDOSE
 
                 """switch for glucose adding"""
                 glucose_switch = [False]
-
-                simulationFrame = DataExtraction.callSimulation(dataForSimulation=simulationFrame,
-                                                            i=i
-                                                            )
-
             elif i[0] == Glucose_impuls_start\
                     and affectedModelFromStimulus == True:
-
                 glucose_switch = [True]
-                simulationFrame = DataExtraction.callSimulation(dataForSimulation=simulationFrame,
-                                                            i=i
-                                                            )
-
             else:
-
                 glucose_switch = [False]
-                simulationFrame = DataExtraction.callSimulation(dataForSimulation=simulationFrame,
-                                                            i=i
-                                                            )
+
+            simulationFrame = DataExtraction.callSimulation(
+                nameOfModel = nameOfModel,
+                Glucose_impuls_start = Glucose_impuls_start,
+                Glucose_impuls_end = Glucose_impuls_end,
+                glucose_switch = glucose_switch,
+                systemSwitchDict = systemSwitchDict,
+                signal_type = signal_type,
+                NaCl_impuls = NaCl_impuls,
+                NaCl_impuls_start = NaCl_impuls_start,
+                NaCl_impuls_firststop = NaCl_impuls_firststop,
+                dataForSimulation=simulationFrame,
+                i=i
+            )
 
         """replace the time array with the simulation results"""
         simulationSettingsForTimeRange['results'] = simulationFrame

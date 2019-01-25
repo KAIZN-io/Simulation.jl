@@ -1,16 +1,40 @@
+import pandas as pd
+import numpy as np
+from scipy.integrate import odeint
+from collections import OrderedDict
+import json
 
 
 class DataExtraction:
     def __init__(self):
         pass
 
-    def solveTheODEs(initialValues, t):
+    def solveTheODEs(
+        initialValues,
+        t,
+        dataForSimulation,
+        nameOfModel,
+        Glucose_impuls_start,
+        Glucose_impuls_end,
+        glucose_switch,
+        systemSwitchDict,
+        signal_type,
+        NaCl_impuls,
+        NaCl_impuls_start,
+        NaCl_impuls_firststop,
+    ):
 
         resultsDictPlaceholder = {}
         resultsOfTheTerms = ()
 
+        """read the model file"""
+        exec(open(
+            'Single_Models/{0}/{0}.py'.format(nameOfModel),
+            encoding="utf-8"
+        ).read())
+
         """get the Names of the ODEs"""
-        columnNames = simulationFrame.columns.tolist()
+        columnNames = dataForSimulation.columns.tolist()
 
         """assing the initial values to their ODEs"""
         for i in range(len(initialValues)):
@@ -97,11 +121,38 @@ class DataExtraction:
 
         return odeResultsForSolver
 
-    def callSimulation(dataForSimulation=pd.DataFrame(), i=[]):
-        initialValues = dataForSimulation.tail(1).values.tolist()[0]
+    def callSimulation(
+        nameOfModel,
+        Glucose_impuls_start,
+        Glucose_impuls_end,
+        glucose_switch,
+        systemSwitchDict,
+        signal_type,
+        NaCl_impuls,
+        NaCl_impuls_start,
+        NaCl_impuls_firststop,
+        dataForSimulation=pd.DataFrame(),
+        i=[],
+    ):
 
         """solves the ode and algebraic equations"""
-        states = odeint(DataExtraction.solveTheODEs, initialValues, i)
+        states = odeint(
+            func = DataExtraction.solveTheODEs,
+            y0 = dataForSimulation.tail(1).values.tolist()[0],
+            t = i,
+            args = (
+                dataForSimulation,
+                nameOfModel,
+                Glucose_impuls_start,
+                Glucose_impuls_end,
+                glucose_switch,
+                systemSwitchDict,
+                signal_type,
+                NaCl_impuls,
+                NaCl_impuls_start,
+                NaCl_impuls_firststop,
+            )
+        )
 
         """ruft die entsprechenden Columns Namen auf"""
         columnNames = dataForSimulation.columns.values.tolist()
@@ -110,7 +161,7 @@ class DataExtraction:
         placeholderDataframe = pd.DataFrame(states, columns=columnNames, index=i)
 
         """haengt das placeholderDataframe dem simulationFrame an"""
-        simulationFrame = pd.concat([dataForSimulation, placeholderDataframe])
+        dataForSimulation = pd.concat([dataForSimulation, placeholderDataframe])
 
-        return simulationFrame
+        return dataForSimulation
 

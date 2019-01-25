@@ -16,10 +16,7 @@ class SimulationManager:
 
     def start_new_simulation(self, data):
         if not self.has_running_simulation():
-            new_simulation = Simulation(
-                seq = self.get_new_seq_number( data["model"] ),
-                data = data
-            )
+            new_simulation = Simulation(data)
             new_simulation.start()
             self.simulations.append(new_simulation)
 
@@ -32,36 +29,31 @@ class SimulationManager:
     def has_running_simulation(self):
         return len(self.get_running_simulations()) > 0
 
-    def get_new_seq_number(self, model):
-        with sessionScope() as session:
-            q = session.query(func.max(Ex.id))
-
-        if q.scalar():
-            return q.scalar()
-        else:
-            return 1
-
 class SimulationProcess(multiprocessing.Process):
-    def __init__(self, dicts):
+    def __init__(self, uuid, dicts = {}):
         super(SimulationProcess, self).__init__()
+        self.uuid = uuid
         self.dicts = dicts
 
     def run(self):
+        self.dicts['uuid'] = str(self.uuid)
         args = json.dumps(self.dicts)
         subprocess.call(["python", "-u", "SDTM.py", args])
 
 
 class Simulation:
-    def __init__(self, seq, data):
+    def __init__(self, data):
         self.name = data['name']
         self.uuid = uuid.uuid4()
-        self.seq = seq
         self.data = get_simulation_data_from_form(data)
         self.created_at = datetime.datetime.now()
         self.started_at = None
         self.model = data['model']
 
-        self.process = SimulationProcess(dicts=self.data.generate_dicts())
+        self.process = SimulationProcess(
+            uuid=self.uuid,
+            dicts=self.data.generate_dicts()
+        )
 
     def start(self):
         self.process.start()
@@ -71,7 +63,9 @@ class Simulation:
         return self.process.is_alive()
 
     def get_picture_name(self):
-        return '%s_%d.png'%(self.model, self.seq)
+        with sessionScope() as session:
+            q = session.query(Ex.image_path).filter(Ex.uuid == self.uuid)
+        return q.scalar()
 
 class SimulationData:
     def __init__(self, name, model, start, stop, step_size, impulses, stimuli ):
@@ -84,8 +78,6 @@ class SimulationData:
 
         self.impulses = impulses
         self.stimuli = stimuli
-
-        self.uuid = uuid.uuid4()
 
     def get_model_name(self):
         return simulation_models[self.model]

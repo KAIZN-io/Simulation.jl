@@ -12,7 +12,7 @@ class Ex(base):
     __tablename__ = 'ex'
 
     id = Column(Integer, primary_key=True)
-    # uuid = Column(UUID(as_uuid=True), unique=True, nullable=False)
+    uuid = Column(UUID(as_uuid=True), unique=True, nullable=False)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     name = Column(String)

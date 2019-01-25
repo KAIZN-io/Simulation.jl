@@ -439,6 +439,7 @@ if __name__ == "__main__":
 
         EX_dict = {
             "id": SEQ,
+            "uuid": args['uuid'],
             "studyid": STUDYID,
             "domain": "ex",
             "usubjid": model.getTypeAsString(),

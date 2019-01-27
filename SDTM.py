@@ -8,7 +8,7 @@ import uuid
 from decimal import Decimal
 from sqlalchemy import func
 
-from db import Ex, Pd, Parameters, InitialValues, sessionScope, Session
+from db import Ex, Pd, Parameters, InitialValues, sessionScope
 from initializeModel import initializeDb
 from values import SimulationTypes
 from DataExtraction import DataExtraction

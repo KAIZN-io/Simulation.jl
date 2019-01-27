@@ -7,7 +7,8 @@ import uuid
 from sqlalchemy import func
 
 from web_interface.simulation_form import simulation_models
-from db import Ex, sessionScope
+from db import Ex, sessionScope, ThreadScopedSession
+from SDTM import sdtm
 
 
 class SimulationManager:
@@ -36,10 +37,15 @@ class SimulationProcess(multiprocessing.Process):
         self.dicts = dicts
 
     def run(self):
-        self.dicts['uuid'] = str(self.uuid)
-        args = json.dumps(self.dicts)
-        subprocess.call(["python", "-u", "SDTM.py", args])
+        # create a new thread scoped session
+        session = ThreadScopedSession()
 
+        # prepare args and call sdtm
+        self.dicts['uuid'] = str(self.uuid)
+        sdtm(self.dicts)
+
+        # cleaning up
+        session.remove()
 
 class Simulation:
     def __init__(self, data):

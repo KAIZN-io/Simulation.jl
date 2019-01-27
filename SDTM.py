@@ -8,7 +8,7 @@ import uuid
 from decimal import Decimal
 from sqlalchemy import func
 
-from db import Ex, Pd, Parameters, InitialValues, sessionScope, Session
+from db import Ex, Pd, Parameters, InitialValues, sessionScope
 from initializeModel import initializeDb
 from values import SimulationTypes
 from DataExtraction import DataExtraction
@@ -23,9 +23,13 @@ class DataVisualization:
     def __init__(self):
         pass
 
-    def plotTimeSeries(timeSeriesData=pd.DataFrame(),
-                       subplotLogic={},
-                       terms=False):
+    def plotTimeSeries(
+        model,
+        SEQ,
+        timeSeriesData=pd.DataFrame(),
+        subplotLogic={},
+        terms=False
+    ):
         """ def description
 
         this function only needs the ODE results and the ORRESU_dict to
@@ -154,7 +158,12 @@ class DataVisualization:
 
             return pictureName
 
-    def prepareVisualization(sql_USUBJID='', ODE_RESULTS=pd.DataFrame(), PDORRESU_x={}):
+    def prepareVisualization(
+        dict_visualisation,
+        sql_USUBJID='',
+        ODE_RESULTS=pd.DataFrame(),
+        PDORRESU_x={}
+    ):
         """conversion r to V
 
         convert the radius to the volume unit for better understandung of the
@@ -224,7 +233,7 @@ class SimulationPreparation:
         self.usedStimulusWithConcentration = None
         self.stimulusTimePoints = None
 
-    def isModelAffected(self, activatedStimulus=[]):
+    def isModelAffected(self, stimulusDict, activatedStimulus=[]):
         affectedModelFromStimulus = False
 
         """iterating over all activated stimuli"""
@@ -264,7 +273,14 @@ class SimulationPreparation:
 
         return self.usedStimulusWithConcentration
 
-    def simulationTimePoints(self):
+    def simulationTimePoints(
+        self,
+        start,
+        stop,
+        Glucose_impuls_start,
+        affectedModelFromStimulus,
+        time_steps,
+    ):
         """the 'universal' time list"""
         simulationTimePoints = [start, stop]
 
@@ -324,7 +340,7 @@ class Simulation():
         pass
 
 
-if __name__ == "__main__":
+def sdtm(args):
 
     initializeDb()
 
@@ -345,10 +361,7 @@ if __name__ == "__main__":
     STUDYID = 'Yeast_BSc'
     EXCAT = 'Salz'
 
-    json_args = sys.argv[1]
-    args = json.loads(json_args)
-
-    print(sys.argv)
+    print(args)
     timeDict = {
         'start': float(args['dict_time']['start']),
         'stop': float(args['dict_time']['stop']),
@@ -400,14 +413,24 @@ if __name__ == "__main__":
 
     """find out how and if the model is affected from the activated stimulus"""
     affectedModelFromStimulus = simulationPreparation.isModelAffected(
-        activatedStimulus=activated_stimuli)
+        stimulusDict = stimulusDict,
+        activatedStimulus=activated_stimuli,
+    )
 
     """"if the model is effected from the stimulus --> get the stimulus settings"""
     usedStimulusWithConcentration = simulationPreparation.rulesForStimulus(
-        stimulusDict=stimulusDict, stimulusTimePoints=uniqueEXSTDTC)
+        stimulusDict=stimulusDict,
+        stimulusTimePoints=uniqueEXSTDTC
+    )
 
     """time points for not external stimulated models"""
-    runningChit = simulationPreparation.simulationTimePoints()
+    runningChit = simulationPreparation.simulationTimePoints(
+        start = timeDict['start'],
+        stop = timeDict['stop'],
+        Glucose_impuls_start = timeDict['Glucose_impuls_start'],
+        affectedModelFromStimulus = affectedModelFromStimulus,
+        time_steps = timeDict['time_steps'],
+    )
 
     """simulation
 
@@ -448,8 +471,8 @@ if __name__ == "__main__":
             "exdose": EXDOSE,
             "exdosu": "mM",
             "exstdtc_array": EXSTDTC,
-            "simulation_start": start,
-            "simulation_stop": stop,
+            "simulation_start": timeDict['start'],
+            "simulation_stop": timeDict['stop'],
             "co": "exstdtc in Sekunden",
             "model_id": model.getVersion(),
             "initial_values_version": model.getInitialValueVersion(),
@@ -514,7 +537,7 @@ if __name__ == "__main__":
 
                 """switch for glucose adding"""
                 glucose_switch = [False]
-            elif i[0] == Glucose_impuls_start\
+            elif i[0] == timeDict['Glucose_impuls_start'] \
                     and affectedModelFromStimulus == True:
                 glucose_switch = [True]
             else:
@@ -522,14 +545,14 @@ if __name__ == "__main__":
 
             simulationFrame = DataExtraction.callSimulation(
                 nameOfModel = model.getTypeAsString(),
-                Glucose_impuls_start = Glucose_impuls_start,
-                Glucose_impuls_end = Glucose_impuls_end,
+                Glucose_impuls_start = timeDict['Glucose_impuls_start'],
+                Glucose_impuls_end = timeDict['Glucose_impuls_end'],
                 glucose_switch = glucose_switch,
                 systemSwitchDict = systemSwitchDict,
                 signal_type = signal_type,
                 NaCl_impuls = NaCl_impuls,
-                NaCl_impuls_start = NaCl_impuls_start,
-                NaCl_impuls_firststop = NaCl_impuls_firststop,
+                NaCl_impuls_start = timeDict['NaCl_impuls_start'],
+                NaCl_impuls_firststop = timeDict['NaCl_impuls_firststop'],
                 dataForSimulation=simulationFrame,
                 i=i
             )
@@ -541,11 +564,19 @@ if __name__ == "__main__":
         rawOdeResults = simulationSettingsForTimeRange['results']
 
         resultsForOdes, groupedPDORRESU = DataVisualization.prepareVisualization(
-            sql_USUBJID=model.getTypeAsString(), ODE_RESULTS=rawOdeResults, PDORRESU_x=simulationSettingsForTimeRange['units'])
+            dict_visualisation = dict_visualisation,
+            sql_USUBJID=model.getTypeAsString(),
+            ODE_RESULTS=rawOdeResults,
+            PDORRESU_x=simulationSettingsForTimeRange['units']
+        )
 
         """plot the results, save the plot and return the pictureName"""
-        pictureName = DataVisualization.plotTimeSeries(timeSeriesData=resultsForOdes,
-                                                       subplotLogic=groupedPDORRESU)
+        pictureName = DataVisualization.plotTimeSeries(
+            model = model,
+            SEQ = SEQ,
+            timeSeriesData=resultsForOdes,
+            subplotLogic=groupedPDORRESU
+        )
 
         EX_dict['image_path'] = pictureName
 
@@ -558,7 +589,7 @@ if __name__ == "__main__":
 
         """round the time points"""
         roundByUsedTimeStepsgroupedPDORRESU = abs(
-            Decimal(str(time_steps)).as_tuple().exponent)
+            Decimal(str(timeDict['time_steps'])).as_tuple().exponent)
 
         oldTimeIndex = list(simulationSettingsForTimeRange['results'].index)
         newTimeIndex = np.round(oldTimeIndex, decimals=roundByUsedTimeStepsgroupedPDORRESU)
@@ -600,7 +631,7 @@ if __name__ == "__main__":
         
         only get each (1/time_steps) simulation results
         """
-        simulationSettingsForTimeRange['results'] = simulationSettingsForTimeRange['results'].loc[::int(1/time_steps)]
+        simulationSettingsForTimeRange['results'] = simulationSettingsForTimeRange['results'].loc[::int(1/timeDict['time_steps'])]
 
         """export the EX dict to the database"""
         if systemSwitchDict.get('export_data_to_sql') == True:

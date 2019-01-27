@@ -2,8 +2,8 @@ from db.base import base, ThreadScopedSession, sessionScope
 from db.Ex import Ex
 from db.Pd import Pd
 from db.Model import Model
-from db.InitialValues import InitialValues
-from db.Parameters import Parameters
+from db.InitialValueSet import InitialValueSet, InitialValue
+from db.ParameterSet import ParameterSet, Parameter
 from db.OrresuEquations import OrresuEquations
 
 

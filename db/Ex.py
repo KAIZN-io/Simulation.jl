@@ -24,12 +24,16 @@ class Ex(base):
     model_id = Column(Integer, ForeignKey('model.id'), nullable=False)
     model = relationship('Model', back_populates='exs')
 
-    initial_values_version = Column(Integer, nullable=False)
+    # foreign key referencing the initial value set used in the simulation
+    initial_value_set_id = Column(Integer, ForeignKey('initial_value_set.id'), nullable=False)
+    initial_value_set = relationship('InitialValueSet', back_populates='exs')
 
-    parameters_version = Column(Integer, nullable=False)
+    # foreign key referencing the parameter set used in the simulation
+    parameter_set_id = Column(Integer, ForeignKey('parameter_set.id'), nullable=False)
+    parameter_set = relationship('ParameterSet', back_populates='exs')
 
     # every ex has multiple results in the pd table
-    pd = relationship('Pd', back_populates='exs')
+    pds = relationship('Pd', back_populates='exs')
 
     studyid = Column(String)
     domain = Column(String)

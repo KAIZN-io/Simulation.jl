@@ -3,7 +3,7 @@ import os
 import sys
 import json
 
-from db import sessionScope, Parameters, InitialValues, Model, OrresuEquations
+from db import sessionScope, ParameterSet, Parameter, InitialValueSet, InitialValue, Model, OrresuEquations
 from values import SimulationTypes
 
 
@@ -172,8 +172,8 @@ def isTypeInitialized(modelType):
     count = 0
     with sessionScope() as session:
         count = session \
-                .query(func.count(InitialValues.id)) \
-                .filter(InitialValues.type == modelType) \
+                .query(func.count(InitialValueSet.id)) \
+                .filter(InitialValueSet.type == modelType) \
                 .scalar()
 
     return count > 0
@@ -189,34 +189,36 @@ def initializeDb():
                 ).read())
 
                 """parameter to database"""
-                parameters = []
+                parameterSet = ParameterSet(
+                    type = modelType,
+                    version = 1
+                )
                 Parameter_dict = eval('{}_parameter'.format(modelType.value))
                 for i, j in Parameter_dict.items():
-                    parameters.append(
-                        Parameters(
-                            type = modelType,
-                            version = 1,
+                    parameterSet.values.append(
+                        Parameter(
                             testcd = i,
                             orres = j[0],
                             orresu = j[1]
                         )
                     )
-                session.bulk_save_objects(parameters)
+                session.add(parameterSet)
 
                 """initial values to database"""
-                initialValues = []
+                initialValueSet = InitialValueSet(
+                    type = modelType,
+                    version = 1
+                )
                 ODEVar_dict = eval('{}_init_values'.format(modelType.value))
                 for i in ODEVar_dict.values():
-                    initialValues.append(
-                        InitialValues(
-                            type = modelType,
-                            version = 1,
+                    initialValueSet.values.append(
+                        InitialValue(
                             testcd = i[1],
                             orres = i[0],
                             orresu = i[2]
                         )
                     )
-                session.bulk_save_objects(initialValues)
+                session.add(initialValueSet)
 
                 """get the units of the equations"""
                 exec(open(

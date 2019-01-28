@@ -1,60 +1,14 @@
 import json
 
-from db import sessionScope, Model as DBModel, InitialValues
+from db import sessionScope, Model as DBModel, InitialValueSet, ParameterSet
 from values import SimulationTypes
 
 class Model:
 
     @classmethod
-    def _getJsonFromDb(cls, session, type, version):
-        """Queries the databse for the JSON that describes the model.
-
-        This functions retrieves the JSON that describes the calculations
-        done in the model. The model to query is specified by the type of
-        model and a version.
-
-        Keyword arguments:
-            session -- a SQL Alchemy session for accessing the database
-            type -- the simulation type (hog, ion, volume, combined)
-            version -- the version of the model
-        """
-        # Assertions to make sure the arguments are not misused
-        assert isinstance(type, SimulationTypes)
-        assert isinstance(version, int)
-
-        # create the query
-        q = session.query(DBModel.json) \
-                .filter(DBModel.version == version) \
-                .filter(DBModel.type == type)
-
-        # exectue the query and directly retrieve the first result
-        return q.scalar()
-
-    @classmethod
-    def _getODENamesFromDb(cls, session, type, version):
-        """Retrieves the ODE names for a model from the database.
-
-        This functions retrieves the ODE names from the initial values table
-        for the model. The initial values to query are specified by the type of
-        model and the initial value version.
-
-        Keyword arguments:
-            session -- a SQL Alchemy session for accessing the database
-            type -- the simulation type (hog, ion, volume, combined)
-            version -- the version of the initial values
-        """
-        # Assertions to make sure the arguments are not misused
-        assert isinstance(type, SimulationTypes)
-        assert isinstance(version, int)
-
-        # create the query
-        with sessionScope() as session:
-            q = session.query(InitialValues.testcd) \
-                    .filter(InitialValues.version == version) \
-                    .filter(InitialValues.type == type)
-
-        # query all rows and return the first (and only) column from each of them in a list.
-        return [x[0] for x in q.all()]
+    def _getODENamesFromInitialValueSet(cls, initialValueSet):
+        """Retrieves the ODE names for a model from the initial values set."""
+        return [initialValue.testcd for initialValue in initialValueSet.values]
 
     @classmethod
     def getModelFromDb(cls, typeAsString, version, initialValueVersion, parameterVersion):
@@ -69,24 +23,46 @@ class Model:
 
         # create a session and query additional data from the database
         with sessionScope() as session:
-            json = cls._getJsonFromDb(session, type, version)
-            odeNames = cls._getODENamesFromDb(session, type, initialValueVersion)
+            # get the model
+            model = session.query(DBModel) \
+                    .filter(DBModel.version == version) \
+                    .filter(DBModel.type == type) \
+                    .scalar()
+            id = model.id
+            json = model.json
+
+            # get the initial values
+            initialValueSet = session.query(InitialValueSet) \
+                    .filter(InitialValueSet.version == initialValueVersion) \
+                    .filter(InitialValueSet.type == type) \
+                    .scalar()
+            initialValueSetId = initialValueSet.id
+            odeNames = cls._getODENamesFromInitialValueSet(initialValueSet)
+
+            # get the parameters
+            parameterSet = session.query(ParameterSet) \
+                    .filter(ParameterSet.version == parameterVersion) \
+                    .filter(ParameterSet.type == type) \
+                    .scalar()
+            parameterSetId = parameterSet.id
 
         # actaully create and return the new Model instance with the data prepared / queried / given.
-        return Model(type, version, initialValueVersion, parameterVersion, json, odeNames)
+        return Model(type, id, version, initialValueSetId, parameterSetId, json, odeNames)
 
-    def __init__(self, type, version, initialValueVersion, parameterVersion, json, odeNames):
+    def __init__(self, type, id, version, initialValueSetId, parameterSetId, json, odeNames):
         # Assertions to make sure the arguments are not misused
         assert isinstance(type, SimulationTypes)
+        assert isinstance(id, int)
         assert isinstance(version, int)
-        assert isinstance(initialValueVersion, int)
-        assert isinstance(parameterVersion, int)
+        assert isinstance(initialValueSetId, int)
+        assert isinstance(parameterSetId, int)
 
         # assign the given arguments to the instance for later use throughout the instance
         self.type = type
+        self.id = id
         self.version = version
-        self.initialValueVersion = initialValueVersion
-        self.parameterVersion = parameterVersion
+        self.initialValueSetId = initialValueSetId
+        self.parameterSetId = parameterSetId
         self.json = json
         self.odeNames = odeNames
 
@@ -131,14 +107,17 @@ class Model:
     def getTypeAsString(self):
         return self.type.value
 
+    def getId(self):
+        return self.id
+
     def getVersion(self):
         return self.version
 
-    def getInitialValueVersion(self):
-        return self.initialValueVersion
+    def getInitialValueSetId(self):
+        return self.initialValueSetId
 
-    def getParameterVersion(self):
-        return self.parameterVersion
+    def getParameterSetId(self):
+        return self.parameterSetId
 
     def updateLocalJsonModel(self):
         with open('Single_Models/json_files/{0}_system.json'.format(self.getTypeAsString()), "w") as f:

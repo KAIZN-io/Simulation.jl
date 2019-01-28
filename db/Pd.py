@@ -15,7 +15,7 @@ class Pd(base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     ex_id = Column(Integer, ForeignKey('ex.id'))
-    exs = relationship('Ex', back_populates='pd')
+    exs = relationship('Ex', back_populates='pds')
 
     studyid = Column(String)
     domain = Column(String)

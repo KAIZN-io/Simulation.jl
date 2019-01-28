@@ -8,7 +8,7 @@ import uuid
 from decimal import Decimal
 from sqlalchemy import func
 
-from db import Ex, Pd, Parameters, InitialValues, sessionScope
+from db import Ex, Pd, ParameterSet, Parameter, InitialValueSet, InitialValue, sessionScope
 from initializeModel import initializeDb
 from values import SimulationTypes
 from DataExtraction import DataExtraction
@@ -474,18 +474,18 @@ def sdtm(args):
             "simulation_start": timeDict['start'],
             "simulation_stop": timeDict['stop'],
             "co": "exstdtc in Sekunden",
-            "model_id": model.getVersion(),
-            "initial_values_version": model.getInitialValueVersion(),
-            "parameters_version": model.getParameterVersion()
+            "model_id": model.getId(),
+            "initial_value_set_id": model.getInitialValueSetId(),
+            "parameter_set_id": model.getParameterSetId()
         }
 
         modelFingerprint = str(SEQ) + '_' + model.getTypeAsString()
 
         """get the parameter from the database"""
         with sessionScope() as session:
-            q = session.query(Parameters.testcd, Parameters.orres) \
-                    .filter(Parameters.type == model.getType()) \
-                    .filter(Parameters.version == model.getParameterVersion())
+            q = session.query(Parameter.testcd, Parameter.orres) \
+                    .join(ParameterSet) \
+                    .filter(ParameterSet.id == model.getParameterSetId())
 
         TESTCD_ORRESU_tuple = q.all()
 
@@ -498,9 +498,9 @@ def sdtm(args):
         locals().update(parameterAsLocalVariables)
 
         with sessionScope() as session:
-            q = session.query(InitialValues.testcd, InitialValues.orres, InitialValues.orresu) \
-                    .filter(InitialValues.type == model.getType()) \
-                    .filter(InitialValues.version == model.getInitialValueVersion())
+            q = session.query(InitialValue.testcd, InitialValue.orres, InitialValue.orresu) \
+                    .join(InitialValueSet) \
+                    .filter(InitialValueSet.id == model.getInitialValueSetId())
 
         TESTCD_ORRESU_tuple = q.all()
 
@@ -638,19 +638,15 @@ def sdtm(args):
             with sessionScope() as session:
                 """dict to sql database"""
                 ex = Ex(**EX_dict)
-                session.add(ex)
-                session.commit()
 
                 """make the dict keys as new variables"""
                 locals().update(simulationSettingsForTimeRange)
 
                 dataframeAsDict = simulationSettingsForTimeRange['results'].to_dict('index')
 
-                pds = []
                 for DTC, innerDict in dataframeAsDict.items():
                     for substance, value in innerDict.items():
-                        pds.append(Pd(
-                            ex_id = ex.id,
+                        ex.pds.append(Pd(
                             studyid = STUDYID,
                             domain = 'pd',
                             usubjid = model.getTypeAsString(),
@@ -661,7 +657,8 @@ def sdtm(args):
                             pddtc = DTC,
                             co = "pddtc in Sekunden",
                         ))
-                session.bulk_save_objects(pds)
+
+                session.add(ex)
 
             print("Daten hochgeladen")
 

@@ -2,47 +2,58 @@
 # include("/Users/janpiotraschke/GithubRepository/ProjectQ/solver.jl")
 # import Pkg; Pkg.add("DifferentialEquations")
 # import Pkg; Pkg.add("Plots")
+# import Pkg; Pkg.add("ParameterizedFunctions")
 
+
+using ParameterizedFunctions
 using DifferentialEquations
 using Plots; plotly()
 
-# defining our ODE system 
-# function lorenz(du,u,p,t)
-#  du[1] = p[1]*(u[2]-u[1])
-#  du[2] = u[1]*(p[2]-u[3]) - u[2]
-#  du[3] = u[1]*u[2] - p[3]*u[3]
-# end
-function lorenz(du,u,p,t)
- du[1] = 10.0*(u[2]-u[1])
- du[2] = u[1]*(28.0-u[3]) - u[2]
- du[3] = u[1]*u[2] - (8/3)*u[3]
+
+# defining our ODE system as parameterized functions
+function modelSystem(du,u,p,t)
+ du[1] = p[1]*(u[2]-u[1])
+ du[2] = u[1]*(p[2]-u[3]) - u[2]
+ du[3] = u[1]*u[2] - p[3]*u[3]
 end
 
-α=1
-β=1
+# defining our noise as parameterized functions
+function noiseModelSystem(du,u,p,t)
+  du[1] = 3.0
+  du[2] = 3.0
+  du[3] = 3.0
+end
 
-# define the initial Values 
-initialValues=[1.0;0.0;0.0]
+# modelSystem = @ode_def_nohes modelSystem begin
+#   dx = σ*(y-x)
+#   dy = x*(ρ-z) - y
+#   dz = x*y - β*z
+# end σ ρ β
 
-# define the parameters
-p=[10.0,28.0,8/3]
+# noiseModelSystem = @ode_def_nohes noiseModelSystem begin
+#   dx = α
+#   dy = α
+#   dz = α
+# end α
+# α = 3.0
 
+# define the initial Values --> vector 
+initialValues=[1.0,0.0,0.0]
 
-f(u,p,t) = α*u
-g(u,p,t) = β*u
-dt = 1//2^(4)
+# define the parameters --> vector
+parameter=[10.0,28.0,8/3]
 
 # time array (must be a tuple)
 timeRange = (0.0,2.0)
 
-# SDEProblem(function, noise, initial values, time range)
-# prob = SDEProblem(f,g,initialValues,timeRange)
-
-# define the Problem --> it is now a ODEProblem
-problem = ODEProblem(lorenz, initialValues, timeRange)
+# define the Problem 
+problem = SDEProblem(modelSystem, noiseModelSystem, initialValues, timeRange, parameter)
 
 # solve the problem
-sol = solve(problem,EM(),dt=dt)
+sol = solve(problem)
 
 # plot the solution
 plot(sol, linewidth=3,title="Solution of the SDE system")
+# plot(sol,vars=(1,2,3))
+
+

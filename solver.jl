@@ -29,34 +29,42 @@ myArraySize = size(myStringList)[1]
 # matrix for test 
 variableMatrix = ["e"; "d"]
 termMatrix = ["+3*x" "-y"; "+4*y" "-x"]
+# termMatrix = ["+3*2" "-1"; "+4*3" "-1"]
 
-# myStringList = ["e = 3 * x - y", "c = 4 * y - x", "dx = σ*(y-x) * e", "dy = x*(ρ-z) - y *c", "dz = x*y - β*z"]
-
+# TODO: make the neuronal network matrix dynamically
+neuronalNetworkMatrix = [[1 1]; [1 1]]
 
 # create activated term matrix 
 activatedTermMatrix = fill("",size(termMatrix)[1])
 for row = 1:size(termMatrix,2)  
   for column = 1:size(termMatrix,1)
-    # add strings with '*' together 
-    activatedTermMatrix[row] *= termMatrix[row,column]
+    # if the term is allowed
+    if neuronalNetworkMatrix[row,column] == 1
+      # add strings with '*' together  
+      activatedTermMatrix[row] *= termMatrix[row,column]
     end
+  end
 end
 
-# NOTE: Further Work
-# # our matrix for the construction of a neuronal network
-# neuronalNetworkMatrix = [[1 0]; [1 1]]
+# re-unit the variable matrix with their terms and precompile the equations
+expressionMatrix = [Meta.parse(string(variableMatrix[i], "=" ,activatedTermMatrix[i])) for i in 1:myArraySize]
 
-# # Hadamard product .* of matrix 
-# activatedTermMatrix = termMatrix .* neuronalNetworkMatrix
+# empty expression matrix 
+# expressionMatrix = reshape([],2,0)
+# for row = 1:size(activatedTermMatrix)[1]
+#   ex = Meta.parse(activatedTermMatrix[row])
+  
+#   println(ex)
+# end
+
 
 f_lorenz = @ode_def_bare LorenzSDE begin
   # for j = 1:myArraySize
-  #     ex = Meta.parse(myStringList[j])
-  #     eval(ex)
+  #   eval(expressionMatrix[j])
   # end
-
-  dx = σ*(y-x)
-  dy = x*(ρ-z) - y
+  
+  dx = σ*(y-x) * e
+  dy = x*(ρ-z) - y *d 
   dz = x*y - β*z
 end 
 

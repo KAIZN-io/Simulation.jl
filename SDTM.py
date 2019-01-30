@@ -342,8 +342,6 @@ class Simulation():
 
 def sdtm(args):
 
-    initializeDb()
-
     dict_visualisation = {
 
         'not_to_visualize': ['Yt', 'z1', 'z2', 'z3', 'z4', 'L_ArH', 'L_HH',
@@ -354,9 +352,6 @@ def sdtm(args):
 
     """momentanes arbeitsverzeichnis = cwd"""
     cwd = os.getcwd()
-
-    if not os.path.isdir('SimulationPictures'):
-        os.mkdir('SimulationPictures')
 
     STUDYID = 'Yeast_BSc'
     EXCAT = 'Salz'

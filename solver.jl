@@ -28,11 +28,10 @@ myArraySize = size(myStringList)[1]
 
 # matrix for test 
 variableMatrix = ["e"; "d"]
-termMatrix = ["+3*x" "-y"; "+4*y" "-x"]
-# termMatrix = ["+3*2" "-1"; "+4*3" "-1"]
+termMatrix = ["+3*x" "-2*y"; "+4*y" "-x"]
 
 # TODO: make the neuronal network matrix dynamically
-neuronalNetworkMatrix = [[1 1]; [1 1]]
+neuronalNetworkMatrix = [[0 1]; [1 1]]
 
 # create activated term matrix 
 activatedTermMatrix = fill("",size(termMatrix)[1])
@@ -49,25 +48,21 @@ end
 # re-unit the variable matrix with their terms and precompile the equations
 expressionMatrix = [Meta.parse(string(variableMatrix[i], "=" ,activatedTermMatrix[i])) for i in 1:myArraySize]
 
-# empty expression matrix 
-# expressionMatrix = reshape([],2,0)
-# for row = 1:size(activatedTermMatrix)[1]
-#   ex = Meta.parse(activatedTermMatrix[row])
-  
-#   println(ex)
-# end
+# testX = ["dx = σ*(y-x)"; "dy = x*(ρ-z)" ; "dz = x*y - β*z"]
+# expressionMatrixTest = [Meta.parse(testX[i]) for i in 1:3]
 
+function parameterized_lorenz(du,u,p,t)
+  global x,y,z = u
 
-f_lorenz = @ode_def_bare LorenzSDE begin
-  # for j = 1:myArraySize
-  #   eval(expressionMatrix[j])
-  # end
-  
-  dx = σ*(y-x) * e
-  dy = x*(ρ-z) - y *d 
-  dz = x*y - β*z
-end 
+  for j = 1:myArraySize
+    eval(expressionMatrix[j])
+  end
 
+  # for better performance 
+  du[1] = σ*(u[2]-u[1])
+  du[2] = u[1]*(ρ-u[3]) - u[2]
+  du[3] = u[1]*u[2] - β*u[3]
+end
 
 # defining our noise as parameterized functions
 noiseModelSystem(du,u,p,t) = @.(du = 3.0)
@@ -83,7 +78,7 @@ timeRange = (0.0,2.0)
 
 # define the Problem  -->  Gaussian white noise is default
 # set the seed for reproducing the same stochastic simulation
-problem = SDEProblem(f_lorenz, noiseModelSystem, initialValues, timeRange)#, seed=1234)#, noise=choosenNoise)
+problem = SDEProblem(parameterized_lorenz, noiseModelSystem, initialValues, timeRange)#, seed=1234)#, noise=choosenNoise)
 
 # solve the problem
 sol = solve(problem)

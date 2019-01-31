@@ -1,11 +1,14 @@
 from sqlalchemy import func
 import os
+import logging
 import sys
 import json
 
 from db import sessionScope, ParameterSet, Parameter, InitialValueSet, InitialValue, Model, OrresuEquations
 from values import SimulationTypes
 
+
+logger = logging.getLogger(__name__)
 
 def createJsonModel(modelType):
 
@@ -179,8 +182,10 @@ def isTypeInitialized(modelType):
     return count > 0
 
 def initializeDb():
+    logger.info('Initializing database')
     for modelType in SimulationTypes:
         if not isTypeInitialized(modelType):
+            logger.info(modelType.value + '-model not initialized, initializing...')
             with sessionScope() as session:
                 """read the model file"""
                 exec(open(
@@ -248,4 +253,6 @@ def initializeDb():
                     json = modelInJsonFormat
                 )
                 session.add(model)
+
+            logger.info(modelType.value + '-model initialized')
 

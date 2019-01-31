@@ -4,6 +4,7 @@ __version__ = 'bachelor_thesis'
 __license__ = 'private'
 
 import sys
+import logging
 import uuid
 from decimal import Decimal
 from sqlalchemy import func
@@ -17,6 +18,8 @@ from Model import Model
 """import the standard used packages"""
 exec(open("SYSTEM/py_packages.py").read())
 
+
+logger = logging.getLogger(__name__)
 
 # TODO: this class should be removed from SDTM.py
 class DataVisualization:
@@ -341,8 +344,7 @@ class Simulation():
 
 
 def sdtm(args):
-
-    initializeDb()
+    logger.debug(args)
 
     dict_visualisation = {
 
@@ -355,13 +357,9 @@ def sdtm(args):
     """momentanes arbeitsverzeichnis = cwd"""
     cwd = os.getcwd()
 
-    if not os.path.isdir('SimulationPictures'):
-        os.mkdir('SimulationPictures')
-
     STUDYID = 'Yeast_BSc'
     EXCAT = 'Salz'
 
-    print(args)
     timeDict = {
         'start': float(args['dict_time']['start']),
         'stop': float(args['dict_time']['stop']),
@@ -436,7 +434,7 @@ def sdtm(args):
 
     the actual simulation begins
     """
-    print(model.getTypeAsString())
+    logger.info('Simulation Type: ' + model.getTypeAsString())
     for simulationSettingsForTimeRange in runningChit:
 
         """initialize an empty DataFrame for each time value"""
@@ -580,7 +578,7 @@ def sdtm(args):
 
         EX_dict['image_path'] = pictureName
 
-        print(SEQ, "model.getTypeAsString()", model.getTypeAsString())
+        logger.info('Simulation id: ' + str(SEQ))
 
         """last step before pushing results to database
         
@@ -660,9 +658,7 @@ def sdtm(args):
 
                 session.add(ex)
 
-            print("Daten hochgeladen")
-
-    print("simulation finished")
+            logger.info("Simulation results stored in database")
 
     cur.close()
     conn.close()

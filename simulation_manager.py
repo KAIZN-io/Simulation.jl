@@ -1,4 +1,5 @@
 import json
+import logging
 import subprocess
 import multiprocessing
 import time
@@ -10,6 +11,8 @@ from web_interface.simulation_form import simulation_models
 from db import Ex, sessionScope, ThreadScopedSession
 from SDTM import sdtm
 
+
+logger = logging.getLogger(__name__)
 
 class SimulationManager:
     def __init__( self ):
@@ -37,8 +40,11 @@ class SimulationProcess(multiprocessing.Process):
         self.dicts = dicts
 
     def run(self):
+        logger.info('Simulation process started')
+
         # create a new thread scoped session
         session = ThreadScopedSession()
+        logger.debug('session id: ' + str(id(session)))
 
         # prepare args and call sdtm
         self.dicts['uuid'] = str(self.uuid)
@@ -46,6 +52,8 @@ class SimulationProcess(multiprocessing.Process):
 
         # cleaning up
         session.remove()
+
+        logger.info('Simulation process ended')
 
 class Simulation:
     def __init__(self, data):

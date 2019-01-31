@@ -1,24 +1,18 @@
-from flask import Flask, render_template, redirect
+from flask import Blueprint, render_template, redirect
 
 from simulation_manager import SimulationManager
 from simulation_form import SimulationForm
 
 
-app = Flask(
-    'ProjectQ',
-    template_folder='web_interface/templates',
-    static_url_path='/pictures',
-    static_folder='SimulationPictures'
-)
 sm = SimulationManager()
 
+routes = Blueprint('routes', __name__)
 
-@app.route('/',  methods=['GET', 'POST'])
+@routes.route('/',  methods=['GET', 'POST'])
 def home():
     return render_template('home.html')
 
-
-@app.route('/simulation/neu',  methods=['GET', 'POST'])
+@routes.route('/simulation/neu',  methods=['GET', 'POST'])
 def start():
     form = SimulationForm()
     if form.validate_on_submit() and not sm.has_running_simulation():
@@ -28,11 +22,9 @@ def start():
         'simulation/form.html',
         form=form,
         was_validated=True,
-        has_running_simulation=sm.has_running_simulation()
     )
 
-
-@app.route('/simulation')
+@routes.route('/simulation')
 def running():
     running_simulations = sm.get_running_simulations()
     finished_simulations = sm.get_finished_simulations()
@@ -41,3 +33,4 @@ def running():
         running_simulations=running_simulations,
         finished_simulations=finished_simulations
     )
+

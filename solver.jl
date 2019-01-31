@@ -5,10 +5,12 @@
 # import Pkg; Pkg.add("Plots")
 # import Pkg; Pkg.add("ParameterizedFunctions")
 # import Pkg; Pkg.add("BenchmarkTools")
+# import Pkg; Pkg.add("Logging")
 
 using ParameterizedFunctions
 using DifferentialEquations, BenchmarkTools
 using Plots; plotly()
+using Logging
 
 # get the parameter for the model
 myParameterList = ["σ=10.0", "ρ=28.0", "β=8/3"]
@@ -43,14 +45,18 @@ end
 
 # matrix with the variables name
 variableMatrix = ["e"; "d"]
+# variableMatrix = ["e"; "d"; "dx"; "dy"; "dz"]
 # variableMatrix = ["e"; "d"; "du[1]"; "du[2]"; "du[3]"]
+
+
+
 
 # get the len of the array
 myArraySize = size(variableMatrix)[1]
 
 # array of arrays 
 inputTermArray = Array[["+3*x", "-2*y"], ["+4*y", "-x"]]
-# inputTermArray = Array[["+3*x", "-2*y"], ["+4*y", "-x"], ["+σ*u[2]", "-σ*u[1]"], ["+u[1]*ρ" ,"-u[1]*u[3]" ,"- u[2]"], ["+u[1]*u[2]" ,"- β*u[3]"]]
+# inputTermArray = Array[["+3*x", "-2*y"], ["+4*y", "-x"], ["+σ*y", "-σ*x"], ["+x*ρ" ,"-x*z" ,"- y"], ["+x*y" ,"- β*z"]]
 
 # get the maximal term count
 maxTermCount = getMaxTermCount(inputTermArray)
@@ -78,20 +84,23 @@ end
 # re-unit the variable matrix with their terms and precompile the equations
 expressionMatrix = [Meta.parse(string(variableMatrix[i], "=" ,activatedTermMatrix[i])) for i in 1:myArraySize]
 
+@info "expression matrix for terms is created successfully"
+
 function parameterized_lorenz(du,u,p,t)
-
+  # println(du, u)
   global x,y,z = u
-
+  # println(u[1])
   for j = 1:myArraySize
     eval(expressionMatrix[j])
   end
-  # dx = σ*(y-x) * e
-  # dy = x*(ρ-z) - y *d 
-  # dz = x*y - β*z
+
   # for better performance 
-  du[1] = σ*u[2]-σ*u[1]
-  du[2] = u[1]*ρ-u[1]*u[3] - u[2]
-  du[3] = u[1]*u[2] - β*u[3]
+  du[1] = σ*y-σ*x
+  du[2] = x*ρ-x*z - y
+  du[3] = x*y - β*z
+  # du[1] = σ*u[2]-σ*u[1]
+  # du[2] = u[1]*ρ-u[1]*u[3] - u[2]
+  # du[3] = u[1]*u[2] - β*u[3]
 end
 
 # defining our noise as parameterized functions
@@ -112,6 +121,8 @@ problem = SDEProblem(parameterized_lorenz, noiseModelSystem, initialValues, time
 
 # # solve the problem
 sol = solve(problem)
+
+@info "the equation system is solved"
 
 # # check how long it takes to solve the equation system 
 # @benchmark sol = solve(problem)#, save_everystep=false)

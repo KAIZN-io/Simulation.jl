@@ -99,10 +99,13 @@ function evalExpressionForSolver(u,du)
     eval(Meta.parse(string(odeVariable[i], "=", u[i])))
   end
 
+  # initialize empty results array 
+  # global duDummie = zeros(size(odeNames)[1])
   for j = 1:myArraySize
+    # duDummie[j] = eval(expressionMatrix[j])
     eval(expressionMatrix[j])
 
-    # if last equation is calculated --> overgive the solution the solver 
+    # # if last equation is calculated --> overgive the solution the solver 
     if j == myArraySize
       # global duDummie = [eval(Meta.parse(odeNames[i])) for i in odeNames]
       global duDummie = [dx, dy, dz]
@@ -136,7 +139,7 @@ timeRange = (0.0,2.0)
 
 problem = SDEProblem(parameterized_lorenz, noiseModelSystem, initialValues, timeRange, seed=1234)#, noise=choosenNoise)
 
-@info "start the simulation"
+@info "start of the simulation"
 # solve the problem
 sol = solve(problem)
 

@@ -44,8 +44,8 @@ function fillTermMatrix(fillMatrix, arrayTerms)
 end
 
 # matrix with the variables name
-variableMatrix = ["e"; "d"]
-# variableMatrix = ["e"; "d"; "dx"; "dy"; "dz"]
+# variableMatrix = ["e"; "d"]
+variableMatrix = ["e"; "d"; "dx"; "dy"; "dz"]
 # variableMatrix = ["e"; "d"; "du[1]"; "du[2]"; "du[3]"]
 
 
@@ -55,8 +55,8 @@ variableMatrix = ["e"; "d"]
 myArraySize = size(variableMatrix)[1]
 
 # array of arrays 
-inputTermArray = Array[["+3*x", "-2*y"], ["+4*y", "-x"]]
-# inputTermArray = Array[["+3*x", "-2*y"], ["+4*y", "-x"], ["+σ*y", "-σ*x"], ["+x*ρ" ,"-x*z" ,"- y"], ["+x*y" ,"- β*z"]]
+# inputTermArray = Array[["+3*x", "-2*y"], ["+4*y", "-x"]]
+inputTermArray = Array[["+3*x", "-2*y"], ["+4*y", "-x"], ["+σ*y", "-σ*x"], ["+x*ρ" ,"-x*z" ,"- y"], ["+x*y" ,"- β*z"]]
 
 # get the maximal term count
 maxTermCount = getMaxTermCount(inputTermArray)
@@ -86,22 +86,52 @@ expressionMatrix = [Meta.parse(string(variableMatrix[i], "=" ,activatedTermMatri
 
 @info "expression matrix for terms is created successfully"
 
-function parameterized_lorenz(du,u,p,t)
-  # println(du, u)
+function evalExpressionForSolver(u,du)
   global x,y,z = u
-  # println(u[1])
+  global dx,dy,dz = du
+
   for j = 1:myArraySize
     eval(expressionMatrix[j])
-  end
 
-  # for better performance 
-  du[1] = σ*y-σ*x
-  du[2] = x*ρ-x*z - y
-  du[3] = x*y - β*z
-  # du[1] = σ*u[2]-σ*u[1]
-  # du[2] = u[1]*ρ-u[1]*u[3] - u[2]
-  # du[3] = u[1]*u[2] - β*u[3]
+    # if last equation is calculated --> overgive the solution the solver 
+    if j == myArraySize
+      global duDummie = [dx, dy, dz]
+    end
+  end
+  du[1], du[2], du[3] = duDummie
+  return du[1], du[2], du[3]
+
 end
+
+
+function parameterized_lorenz(du,u,p,t)
+  evalExpressionForSolver(u,du)
+
+  # global x,y,z = u
+  # global dx,dy,dz = du
+
+  # for j = 1:myArraySize
+  #   eval(expressionMatrix[j])
+
+  #   # if last equation is calculated --> overgive the solution the solver 
+  #   if j == myArraySize
+  #     global duDummie = [dx, dy, dz]
+  #   end
+  # end
+
+  # du[1], du[2], du[3] = duDummie
+
+end
+
+# f_lorenz = @ode_def_bare LorenzSDE begin
+#   for j = 1:myArraySize
+#     eval(expressionMatrix[j])
+#   end
+#   # println(dx,dy,dz)
+#   dx = σ*(y-x) * e
+#   dy = x*(ρ-z) - y *d 
+#   dz = x*y - β*z
+# end 
 
 # defining our noise as parameterized functions
 noiseModelSystem(du,u,p,t) = @.(du = 3.0)
@@ -117,9 +147,11 @@ timeRange = (0.0,2.0)
 
 # define the Problem  -->  Gaussian white noise is default
 # set the seed for reproducing the same stochastic simulation
-problem = SDEProblem(parameterized_lorenz, noiseModelSystem, initialValues, timeRange)#, seed=1234)#, noise=choosenNoise)
 
-# # solve the problem
+problem = SDEProblem(parameterized_lorenz, noiseModelSystem, initialValues, timeRange, seed=1234)#, noise=choosenNoise)
+
+@info "start the simulation"
+# solve the problem
 sol = solve(problem)
 
 @info "the equation system is solved"

@@ -22,14 +22,14 @@ services:
     # this defines how this container will be rated as "healthy"
     # definiert, wann die Datenbank hochgefahren ist
     healthcheck:
-      test: ["CMD", "pg_isready -U postgres"]
+      test: ["CMD", "pg_isready"]
       interval: 10s
       timeout: 10s
       retries: 15
     # erstellt Portmapping; wenn Rechner angesprochen wird, reicht er es ihn den
     # Container weiter
     # <Port am PC>:<Port am Container>
-    ports:
+    ports: 
       - "5433:5432"
     networks:
       default:
@@ -72,4 +72,3 @@ services:
 # Eigenart von docker-compose file; hier nochmal die verwendeten volumes angeben
 volumes:
   user-db:
-

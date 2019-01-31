@@ -15,16 +15,33 @@ using Logging
 # get the parameter for the model
 myParameterList = ["σ=10.0", "ρ=28.0", "β=8/3"]
 
+# matrix with the variables name
+variableMatrix = ["e"; "d"; "dx"; "dy"; "dz"]
+
+# array of arrays 
+inputTermArray = Array[["+3*x", "-2*y", "+2*z"], ["+4*y", "-x"], ["+σ*y", "-σ*x"], ["+x*ρ" ,"-x*z" ,"- y"], ["+x*y" ,"- β*z"]]
+
+# array with the ODEs
+odeNames = ["dx", "dy", "dz"]
+odeVariable = ["x", "y", "z"]
+
+# define the initial Values --> [1*m] vector 
+initialValues=[1.0;1.0;1.0]
+
+# time array (must be a tuple)
+timeRange = (0.0,2.0)
+
+# # # # # # # # # # # # 
+
 # make the parameter global 
 for i = 1:size(myParameterList)[1]
-    ex = Meta.parse(myParameterList[i])
+  ex = Meta.parse(myParameterList[i])
     eval(ex)
 end
 
 function getMaxTermCount(arrayTerms)
   maxTermCount = 0
   for row in eachindex(arrayTerms)
-    y = arrayTerms[row]
     arraySize = size(arrayTerms[row])[1]
     if arraySize > maxTermCount
       maxTermCount = arraySize
@@ -43,23 +60,8 @@ function fillTermMatrix(fillMatrix, arrayTerms)
   return fillMatrix 
 end
 
-# matrix with the variables name
-# variableMatrix = ["e"; "d"]
-variableMatrix = ["e"; "d"; "dx"; "dy"; "dz"]
-# variableMatrix = ["e"; "d"; "du[1]"; "du[2]"; "du[3]"]
-
-# array with the ODEs
-odeNames = ["dx", "dy", "dz"]
-odeVariable = ["x", "y", "z"]
-
-
-
 # get the len of the array
 myArraySize = size(variableMatrix)[1]
-
-# array of arrays 
-# inputTermArray = Array[["+3*x", "-2*y"], ["+4*y", "-x"]]
-inputTermArray = Array[["+3*x", "-2*y"], ["+4*y", "-x"], ["+σ*y", "-σ*x"], ["+x*ρ" ,"-x*z" ,"- y"], ["+x*y" ,"- β*z"]]
 
 # get the maximal term count
 maxTermCount = getMaxTermCount(inputTermArray)
@@ -84,7 +86,7 @@ for row in 1:myArraySize
   end
 end  
 
-# re-unit the variable matrix with their terms and precompile the equations
+# re-unite the variable matrix with their terms and precompile the equations
 expressionMatrix = [Meta.parse(string(variableMatrix[i], "=" ,activatedTermMatrix[i])) for i in 1:myArraySize]
 
 @info "expression matrix for terms is created successfully"
@@ -99,57 +101,43 @@ function evalExpressionForSolver(u,du)
     eval(Meta.parse(string(odeVariable[i], "=", u[i])))
   end
 
-  # initialize empty results array 
-  # global duDummie = zeros(size(odeNames)[1])
+  # calculate the equations
   for j = 1:myArraySize
-    # duDummie[j] = eval(expressionMatrix[j])
     eval(expressionMatrix[j])
-
-    # # if last equation is calculated --> overgive the solution the solver 
-    if j == myArraySize
-      # global duDummie = [eval(Meta.parse(odeNames[i])) for i in odeNames]
-      global duDummie = [dx, dy, dz]
-    end
   end
-  du[1], du[2], du[3] = duDummie
-  return du[1], du[2], du[3]
 
+  # overgive only the d_ terms 
+  for i = 1:size(odeNames)[1]
+    du[i]= eval(Meta.parse(odeNames[i]))
+  end
+
+  return du
 end
 
-
+# the function for solving the SDE
 function parameterized_lorenz(du,u,p,t)
   evalExpressionForSolver(u,du)
 end
 
-
 # defining our noise as parameterized functions
 noiseModelSystem(du,u,p,t) = @.(du = 3.0)
 
-# define the initial Values --> [1*m] vector 
-initialValues=[1.0;1.0;1.0]
-
-# time array (must be a tuple)
-timeRange = (0.0,2.0)
-
-# # change the Gaussian white noise
-# choosenNoise = WienerProcess(0.0,0.0,0.0)
+# change the Gaussian white noise
+choosenNoise = WienerProcess(0.0,0.0,0.0)
 
 # define the Problem  -->  Gaussian white noise is default
-# set the seed for reproducing the same stochastic simulation
-
-problem = SDEProblem(parameterized_lorenz, noiseModelSystem, initialValues, timeRange, seed=1234)#, noise=choosenNoise)
+# set the seed for reproducing the same stochastic simulation --> seed=1234
+problem = SDEProblem(parameterized_lorenz, noiseModelSystem, initialValues, timeRange)#, noise=choosenNoise)
 
 @info "start of the simulation"
+
 # solve the problem
 sol = solve(problem)
 
 @info "the equation system is solved"
 
-# # check how long it takes to solve the equation system 
-# @benchmark sol = solve(problem)#, save_everystep=false)
+# check how long it takes to solve the equation system 
+# @benchmark sol = solve(problem)
 
-# # plot the solution
+# plot the solution
 plot(sol, linewidth=3,title="Solution of the SDE system")
-
-# # 3d plot
-# plot(sol,vars=(1,2,3))

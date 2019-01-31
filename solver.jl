@@ -48,6 +48,9 @@ end
 variableMatrix = ["e"; "d"; "dx"; "dy"; "dz"]
 # variableMatrix = ["e"; "d"; "du[1]"; "du[2]"; "du[3]"]
 
+# array with the ODEs
+odeNames = ["dx", "dy", "dz"]
+odeVariable = ["x", "y", "z"]
 
 
 
@@ -87,14 +90,21 @@ expressionMatrix = [Meta.parse(string(variableMatrix[i], "=" ,activatedTermMatri
 @info "expression matrix for terms is created successfully"
 
 function evalExpressionForSolver(u,du)
-  global x,y,z = u
-  global dx,dy,dz = du
+
+  for i = 1:size(odeNames)[1]
+    # convert the ODE names
+    eval(Meta.parse(string(odeNames[i], "=", du[i])))
+
+    # assign the initial values to their ODEs
+    eval(Meta.parse(string(odeVariable[i], "=", u[i])))
+  end
 
   for j = 1:myArraySize
     eval(expressionMatrix[j])
 
     # if last equation is calculated --> overgive the solution the solver 
     if j == myArraySize
+      # global duDummie = [eval(Meta.parse(odeNames[i])) for i in odeNames]
       global duDummie = [dx, dy, dz]
     end
   end
@@ -106,32 +116,8 @@ end
 
 function parameterized_lorenz(du,u,p,t)
   evalExpressionForSolver(u,du)
-
-  # global x,y,z = u
-  # global dx,dy,dz = du
-
-  # for j = 1:myArraySize
-  #   eval(expressionMatrix[j])
-
-  #   # if last equation is calculated --> overgive the solution the solver 
-  #   if j == myArraySize
-  #     global duDummie = [dx, dy, dz]
-  #   end
-  # end
-
-  # du[1], du[2], du[3] = duDummie
-
 end
 
-# f_lorenz = @ode_def_bare LorenzSDE begin
-#   for j = 1:myArraySize
-#     eval(expressionMatrix[j])
-#   end
-#   # println(dx,dy,dz)
-#   dx = σ*(y-x) * e
-#   dy = x*(ρ-z) - y *d 
-#   dz = x*y - β*z
-# end 
 
 # defining our noise as parameterized functions
 noiseModelSystem(du,u,p,t) = @.(du = 3.0)

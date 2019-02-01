@@ -41,7 +41,7 @@ services:
           - "db_postgres"
 
   sdtm:
-    image: janlucaklees/docker-image-q:0.2.1-web0.4
+    image: janpiotraschke/projectq:0.2.2
 
     # was sdtm braucht: ein hochgefahrene Datenbank (in diesem Beispiel)
     # wie Verzweigungen zwischen Programmen auslegen

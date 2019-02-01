@@ -10,6 +10,12 @@ using DifferentialEquations, BenchmarkTools
 using Plots; plotly()
 using Logging
 
+# The DEDataArray{T} type allows one to add other "non-continuous" variables to an array
+mutable struct SimType{T} <: DEDataVector{T}
+    x::Array{T,1}
+    f1::T
+end
+
 # get the parameter for the model
 myParameterList = ["σ=10.0", "ρ=28.0", "β=8/3"]
 
@@ -24,10 +30,16 @@ odeNames = ["dx", "dy", "dz"]
 odeVariable = ["x", "y", "z"]
 
 # define the initial Values --> [1*m] vector 
-initialValues=[1.0;1.0;1.0]
+initialValuesList=[1.0;1.0;1.0]
+initialValues = SimType(initialValuesList, 0.0)
 
 # time array (must be a tuple)
-timeRange = (0.0,2.0)
+timeRange = (0.0,8.0)
+
+tstop = [5.0;6.0]
+
+# apply a stimulus value
+stimulus = 10.5
 
 # # # # # # # # # # # # 
 
@@ -120,17 +132,31 @@ end
 # defining our noise as parameterized functions
 noiseModelSystem(du,u,p,t) = @.(du = 3.0)
 
+function condition(u,t,integrator)
+    t in tstop
+end
+
+function affect!(integrator)
+    # add the term to the ode
+    integrator.u[3] += stimulus
+end
+
+cb = DiscreteCallback(condition, affect!)
+# could be a set of callback
+cbs = CallbackSet(cb)
+
+
 # change the Gaussian white noise
 choosenNoise = WienerProcess(0.0,0.0,0.0)
 
 # define the Problem  -->  Gaussian white noise is default
 # set the seed for reproducing the same stochastic simulation --> seed=1234
-problem = SDEProblem(parameterized_lorenz, noiseModelSystem, initialValues, timeRange)#, noise=choosenNoise)
-
+problem = SDEProblem(parameterized_lorenz, noiseModelSystem, initialValues, timeRange, seed=1234)#, noise=choosenNoise)
 @info "start of the simulation"
 
 # solve the problem
-sol = solve(problem)
+# sol = solve(problem)
+sol = solve(problem,Tsit5(),callback = cbs, tstops=tstop)
 
 @info "the equation system is solved"
 

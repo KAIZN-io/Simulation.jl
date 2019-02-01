@@ -6,6 +6,7 @@ __license__ = 'private'
 import sys
 import logging
 import uuid
+import json
 from decimal import Decimal
 from sqlalchemy import func
 
@@ -336,7 +337,7 @@ class SimulationPreparation:
         return runningChit
 
 def sdtm(args, simulation):
-    logger.debug(args)
+    logger.debug(json.dumps(args))
 
     dict_visualisation = {
         'not_to_visualize': ['Yt', 'z1', 'z2', 'z3', 'z4', 'L_ArH', 'L_HH',

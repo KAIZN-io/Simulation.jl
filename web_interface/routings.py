@@ -16,7 +16,7 @@ def home():
 def start():
     form = SimulationForm()
     if form.validate_on_submit() and not sm.has_running_simulation():
-        sm.start_new_simulation(data=form.data)
+        sm.start_new_simulation(formData=form.data)
         return redirect('/simulation')
     return render_template(
         'simulation/form.html',

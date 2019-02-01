@@ -100,6 +100,4 @@ def sessionScope():
     except:
         session.rollback()
         raise
-    finally:
-        session.close()
 

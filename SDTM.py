@@ -10,7 +10,6 @@ from decimal import Decimal
 from sqlalchemy import func
 
 from db import Ex, Pd, ParameterSet, Parameter, InitialValueSet, InitialValue, sessionScope
-from initializeModel import initializeDb
 from values import SimulationTypes
 from DataExtraction import DataExtraction
 from Model import Model
@@ -343,11 +342,10 @@ class Simulation():
         pass
 
 
-def sdtm(args):
+def sdtm(args, simulation):
     logger.debug(args)
 
     dict_visualisation = {
-
         'not_to_visualize': ['Yt', 'z1', 'z2', 'z3', 'z4', 'L_ArH', 'L_HH',
                              'Na_in', 'Na_out', 'K_out', 'K_in',
                              'Cl_out', 'H_in', 'H_out', 'ATP', 'Hog1PPc',
@@ -476,6 +474,9 @@ def sdtm(args):
             "initial_value_set_id": model.getInitialValueSetId(),
             "parameter_set_id": model.getParameterSetId()
         }
+        simulation.extrt = EXTRT
+        simulation.exdose = EXDOSE
+        simulation.exstdtc_array = EXSTDTC
 
         modelFingerprint = str(SEQ) + '_' + model.getTypeAsString()
 
@@ -577,6 +578,7 @@ def sdtm(args):
         )
 
         EX_dict['image_path'] = pictureName
+        simulation.image_path = pictureName
 
         logger.info('Simulation id: ' + str(SEQ))
 
@@ -634,9 +636,6 @@ def sdtm(args):
         """export the EX dict to the database"""
         if systemSwitchDict.get('export_data_to_sql') == True:
             with sessionScope() as session:
-                """dict to sql database"""
-                ex = Ex(**EX_dict)
-
                 """make the dict keys as new variables"""
                 locals().update(simulationSettingsForTimeRange)
 
@@ -644,7 +643,7 @@ def sdtm(args):
 
                 for DTC, innerDict in dataframeAsDict.items():
                     for substance, value in innerDict.items():
-                        ex.pds.append(Pd(
+                        simulation.pds.append(Pd(
                             studyid = STUDYID,
                             domain = 'pd',
                             usubjid = model.getTypeAsString(),
@@ -655,8 +654,6 @@ def sdtm(args):
                             pddtc = DTC,
                             co = "pddtc in Sekunden",
                         ))
-
-                session.add(ex)
 
             logger.info("Simulation results stored in database")
 

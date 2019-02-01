@@ -22,6 +22,7 @@ def start():
         'simulation/form.html',
         form=form,
         was_validated=True,
+        has_running_simulation = sm.has_running_simulation()
     )
 
 @routes.route('/simulation')

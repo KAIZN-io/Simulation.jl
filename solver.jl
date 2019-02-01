@@ -1,13 +1,11 @@
 """copy paste this code into the terminal"""
-
 # include("/Users/janpiotraschke/GithubRepository/ProjectQ/solver.jl")
+
 # import Pkg; Pkg.add("DifferentialEquations")
 # import Pkg; Pkg.add("Plots")
-# import Pkg; Pkg.add("ParameterizedFunctions")
 # import Pkg; Pkg.add("BenchmarkTools")
 # import Pkg; Pkg.add("Logging")
 
-using ParameterizedFunctions
 using DifferentialEquations, BenchmarkTools
 using Plots; plotly()
 using Logging

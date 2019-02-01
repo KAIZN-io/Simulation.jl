@@ -12,7 +12,6 @@ from sqlalchemy import func
 from db import Ex, Pd, ParameterSet, Parameter, InitialValueSet, InitialValue, sessionScope
 from values import SimulationTypes
 from DataExtraction import DataExtraction
-from Model import Model
 
 """import the standard used packages"""
 exec(open("SYSTEM/py_packages.py").read())
@@ -26,7 +25,7 @@ class DataVisualization:
         pass
 
     def plotTimeSeries(
-        model,
+        simulation,
         SEQ,
         timeSeriesData=pd.DataFrame(),
         subplotLogic={},
@@ -80,7 +79,7 @@ class DataVisualization:
         """x axis is shared and the ticks are rotated"""
         fig.autofmt_xdate(bottom=0.2,
                             rotation=30)
-        fig.suptitle(t='{}_Model'.format(model.getTypeAsString().title()),
+        fig.suptitle(t='{}_Model'.format(simulation.getTypeAsString().title()),
                         fontsize=fontSize)
 
         # fig.suptitle(t='Volume',
@@ -112,7 +111,7 @@ class DataVisualization:
 
                     for i in substance:
 
-                        if model.isOfType('combined_models') and i == 'Hog1PPn':
+                        if simulation.isOfType('combined_models') and i == 'Hog1PPn':
                             exec(
                                 "ax{}.plot(timeSeriesData[i],label='Hog1PPn (*1E7)')".format(axis_index))
 
@@ -137,7 +136,7 @@ class DataVisualization:
 
             """"save the plot"""
 
-            pictureName = '{0}_{1}.png'.format(model.getTypeAsString(), SEQ)
+            pictureName = '{0}_{1}.png'.format(simulation.getTypeAsString(), SEQ)
             plt.savefig('SimulationPictures/{0}'.format(pictureName),
                         dpi=360,
                         format='png',
@@ -230,8 +229,8 @@ class DataVisualization:
         return ODE_RESULTS, groupedPDORRESU
 
 class SimulationPreparation:
-    def __init__(self, model):
-        self.model = model
+    def __init__(self, simulation):
+        self.simulation = simulation
         self.usedStimulusWithConcentration = None
         self.stimulusTimePoints = None
 
@@ -245,7 +244,7 @@ class SimulationPreparation:
             target = stimulusDict.get(i)[2]
 
             """if the targets are in the specific model"""
-            if set(target).issubset(self.model.getODENames()) == True:
+            if set(target).issubset(self.simulation.getOdeNames()) == True:
                 affectedModelFromStimulus = True
 
         return affectedModelFromStimulus
@@ -287,7 +286,7 @@ class SimulationPreparation:
         simulationTimePoints = [start, stop]
 
         # TEMP : bad way
-        if self.model.isAnyOf(['combined_models', 'ion']):
+        if self.simulation.isAnyOf(['combined_models', 'ion']):
             simulationTimePoints.append(Glucose_impuls_start)
 
         runningChit = []
@@ -314,7 +313,7 @@ class SimulationPreparation:
                                             for i, j in zip(simulationTimePoints[0::], simulationTimePoints[1::])
                                             ]
 
-                dict_runningChit = {'name': self.model.getTypeAsString(),
+                dict_runningChit = {'name': self.simulation.getTypeAsString(),
                                      'EXTRT': TRT,
                                      'EXDOSE': singleDose,
                                      'EXSTDTC': self.stimulusTimePoints[TRT],
@@ -336,12 +335,6 @@ class SimulationPreparation:
                 break
         return runningChit
 
-
-class Simulation():
-    def __init__(self):
-        pass
-
-
 def sdtm(args, simulation):
     logger.debug(args)
 
@@ -351,9 +344,6 @@ def sdtm(args, simulation):
                              'Cl_out', 'H_in', 'H_out', 'ATP', 'Hog1PPc',
                              'Hog1c', 'Hog1n', 'Pbs2', 'Pbs2PP', 'R_ref', 'r_os', 'r_b', 'c_i', 'Sorbitol_out'],
     }
-
-    """momentanes arbeitsverzeichnis = cwd"""
-    cwd = os.getcwd()
 
     STUDYID = 'Yeast_BSc'
     EXCAT = 'Salz'
@@ -379,25 +369,6 @@ def sdtm(args, simulation):
     signal_type = stimulusDict.get('signal_type')[0]
     NaCl_impuls = stimulusDict.get('NaCl_impuls')[0]
 
-    """host name taken from docker-compose.yml"""
-    conn = psycopg2.connect(
-        host='db_postgres',
-        user='postgres',
-        dbname='simulation_results'
-    )
-
-    """open a cursor to perform database operations"""
-    cur = conn.cursor()
-
-    model = Model.getModelFromDb(
-        typeAsString = [i for i, j in dict_model_switch.items() if j == True][0],
-        version = args['dict_system_switch']['specificModelVersionSEQ'][0],
-        initialValueVersion = args['dict_system_switch']['specificInitValuesVersionSEQ'][0],
-        parameterVersion = args['dict_system_switch']['specificParameterVersionSEQ'][0]
-    )
-
-    model.updateLocalJsonModel()
-
     """activated stimuli
 
     find out which stimulus pipeline is opened for the experiment series
@@ -405,7 +376,7 @@ def sdtm(args, simulation):
     activated_stimuli = [stimulus_name for stimulus_name, items
                          in stimulusDict.items() if items[-1] == True]
 
-    simulationPreparation = SimulationPreparation(model)
+    simulationPreparation = SimulationPreparation(simulation)
 
     """find out how and if the model is affected from the activated stimulus"""
     affectedModelFromStimulus = simulationPreparation.isModelAffected(
@@ -432,7 +403,7 @@ def sdtm(args, simulation):
 
     the actual simulation begins
     """
-    logger.info('Simulation Type: ' + model.getTypeAsString())
+    logger.info('Simulation Type: ' + simulation.getTypeAsString())
     for simulationSettingsForTimeRange in runningChit:
 
         """initialize an empty DataFrame for each time value"""
@@ -461,7 +432,7 @@ def sdtm(args, simulation):
             "uuid": args['uuid'],
             "studyid": STUDYID,
             "domain": "ex",
-            "usubjid": model.getTypeAsString(),
+            "usubjid": simulation.getTypeAsString(),
             "excat": EXCAT,
             "extrt": EXTRT,
             "exdose": EXDOSE,
@@ -470,21 +441,18 @@ def sdtm(args, simulation):
             "simulation_start": timeDict['start'],
             "simulation_stop": timeDict['stop'],
             "co": "exstdtc in Sekunden",
-            "model_id": model.getId(),
-            "initial_value_set_id": model.getInitialValueSetId(),
-            "parameter_set_id": model.getParameterSetId()
         }
         simulation.extrt = EXTRT
         simulation.exdose = EXDOSE
         simulation.exstdtc_array = EXSTDTC
 
-        modelFingerprint = str(SEQ) + '_' + model.getTypeAsString()
+        modelFingerprint = str(SEQ) + '_' + simulation.getTypeAsString()
 
         """get the parameter from the database"""
         with sessionScope() as session:
             q = session.query(Parameter.testcd, Parameter.orres) \
                     .join(ParameterSet) \
-                    .filter(ParameterSet.id == model.getParameterSetId())
+                    .filter(ParameterSet.id == simulation.parameter_set_id)
 
         TESTCD_ORRESU_tuple = q.all()
 
@@ -499,7 +467,7 @@ def sdtm(args, simulation):
         with sessionScope() as session:
             q = session.query(InitialValue.testcd, InitialValue.orres, InitialValue.orresu) \
                     .join(InitialValueSet) \
-                    .filter(InitialValueSet.id == model.getInitialValueSetId())
+                    .filter(InitialValueSet.id == simulation.initial_value_set_id)
 
         TESTCD_ORRESU_tuple = q.all()
 
@@ -543,7 +511,7 @@ def sdtm(args, simulation):
                 glucose_switch = [False]
 
             simulationFrame = DataExtraction.callSimulation(
-                nameOfModel = model.getTypeAsString(),
+                nameOfModel = simulation.getTypeAsString(),
                 Glucose_impuls_start = timeDict['Glucose_impuls_start'],
                 Glucose_impuls_end = timeDict['Glucose_impuls_end'],
                 glucose_switch = glucose_switch,
@@ -564,14 +532,14 @@ def sdtm(args, simulation):
 
         resultsForOdes, groupedPDORRESU = DataVisualization.prepareVisualization(
             dict_visualisation = dict_visualisation,
-            sql_USUBJID=model.getTypeAsString(),
+            sql_USUBJID=simulation.getTypeAsString(),
             ODE_RESULTS=rawOdeResults,
             PDORRESU_x=simulationSettingsForTimeRange['units']
         )
 
         """plot the results, save the plot and return the pictureName"""
         pictureName = DataVisualization.plotTimeSeries(
-            model = model,
+            simulation = simulation,
             SEQ = SEQ,
             timeSeriesData=resultsForOdes,
             subplotLogic=groupedPDORRESU
@@ -597,7 +565,7 @@ def sdtm(args, simulation):
         dataframeAsMatrix = simulationSettingsForTimeRange['results'].values
         columnsOfDataframe = simulationSettingsForTimeRange['results'].columns.tolist()
 
-        if not model.isOfType('volume'):
+        if not simulation.isOfType('volume'):
             def truncate(n, decimals=0):
                 multiplier = 10 ** decimals
                 return int(n * multiplier) / multiplier
@@ -646,7 +614,7 @@ def sdtm(args, simulation):
                         simulation.pds.append(Pd(
                             studyid = STUDYID,
                             domain = 'pd',
-                            usubjid = model.getTypeAsString(),
+                            usubjid = simulation.getTypeAsString(),
                             pdtestcd = substance,
                             pdtest = None,
                             pdorres = value,
@@ -657,5 +625,3 @@ def sdtm(args, simulation):
 
             logger.info("Simulation results stored in database")
 
-    cur.close()
-    conn.close()

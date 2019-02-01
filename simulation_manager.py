@@ -5,7 +5,7 @@ import multiprocessing
 import time
 import datetime
 import uuid
-from sqlalchemy import func
+from sqlalchemy import func, desc
 
 from web_interface.simulation_form import simulation_models
 from db import Ex, Model, InitialValueSet, ParameterSet, Impulse, Stimulus, sessionScope, ThreadScopedSession
@@ -31,7 +31,10 @@ class SimulationManager:
 
     def get_finished_simulations(self):
         with sessionScope() as session:
-            return session.query(Ex).filter(Ex.finished_at != None).all()
+            return session.query(Ex) \
+                    .filter(Ex.finished_at != None) \
+                    .order_by(desc(Ex.started_at)) \
+                    .all()
 
     def has_running_simulation(self):
         return len(self.get_running_simulations()) > 0
@@ -47,8 +50,13 @@ class SimulationProcess(multiprocessing.Process):
         self.uuid = self.simulation.uuid
 
     def start(self):
+        # get settion
+        threadScopedSession = ThreadScopedSession()
+        session = threadScopedSession()
+
         # update the started at value
         self.simulation.started_at = datetime.datetime.now()
+        session.commit()
 
         super().start()
 

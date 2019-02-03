@@ -45,13 +45,23 @@ class Parameter(base):
     set_id = Column(Integer, ForeignKey('parameter_set.id'), nullable=False)
     set = relationship('ParameterSet', back_populates='values')
 
+    # name
     testcd = Column(String, nullable=False)
-    test = Column(String)
+    #value
     orres = Column(DOUBLE_PRECISION)
+    # unit
     orresu = Column(String)
+    test = Column(String)
     co = Column(String)
 
     __table_args__ = (
         UniqueConstraint('set_id', 'testcd', name='Parameter_testcd_unique_per_set'),
     )
+
+    def to_dict(self):
+        return {
+            'testcd': self.testcd,
+            'orres': self.orres,
+            'orresu': self.orresu
+        }
 

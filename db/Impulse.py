@@ -25,4 +25,10 @@ class Impulse(base):
         UniqueConstraint('ex_id', 'substance', 'start', 'stop', name='Impulse_uniqe_per_simulation'),
     )
 
+    def to_dict(self):
+        return {
+            'substance': self.substance,
+            'start': float(self.start),
+            'stop': float(self.stop)
+        }
 

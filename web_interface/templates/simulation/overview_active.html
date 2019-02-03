@@ -3,11 +3,11 @@
 {% block title %}Laufende Simulationen{% endblock %}
 
 {% block content %}
-    <h2>Laufende Simulationen</h2>
+    <h2>Geplante Simulationen</h2>
 
-    {% if running_simulations %}
+    {% if scheduled_simulations %}
         <div id="running-simulations" class="mb-5">
-            {% for simulation in running_simulations %}
+            {% for simulation in scheduled_simulations %}
                 <div class="card">
                     <div id="sim-{{ simulation.uuid }}"
                          class="card-header"
@@ -15,7 +15,7 @@
                          data-target="#sim-data-{{ simulation.uuid }}">
                         {{ simulation.name }}
                         <small class="text-secondary">
-                            gestartet am: {{ simulation.started_at.strftime( "%d.%m.%Y %H:%M" ) }}
+                            gestartet am: {{ simulation.started_at.strftime( "%d.%m.%Y %H:%M" ) if simulation.started_at }}
                         </small>
                     </div>
                     <div id="sim-data-{{ simulation.uuid }}"

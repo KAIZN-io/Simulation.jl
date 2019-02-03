@@ -46,13 +46,23 @@ class InitialValue(base):
     set_id = Column(Integer, ForeignKey('initial_value_set.id'), nullable=False)
     set = relationship('InitialValueSet', back_populates='values')
 
+    # name
     testcd = Column(String, nullable=False)
-    test = Column(String)
+    # value
     orres = Column(DOUBLE_PRECISION)
+    # unit
     orresu = Column(String)
+    test = Column(String)
     co = Column(String)
 
     __table_args__ = (
         UniqueConstraint('set_id', 'testcd', name='InitialValue_testcd_unique_per_set'),
     )
+
+    def to_dict(self):
+        return {
+            'testcd': self.testcd,
+            'orres': self.orres,
+            'orresu': self.orresu
+        }
 

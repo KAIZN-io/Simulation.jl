@@ -10,12 +10,6 @@ from SDTM import sdtm
 
 QUEUE_SCHEDULED_SIMULATIONS = os.environ['QUEUE_SCHEDULED_SIMULATIONS']
 QUEUE_SIMULATION_RESULTS    = os.environ['QUEUE_SIMULATION_RESULTS']
-print(QUEUE_SIMULATION_RESULTS)
-
-connection = pika.BlockingConnection(pika.ConnectionParameters(host='task-queue'))
-channel = connection.channel()
-channel.queue_declare(queue=QUEUE_SCHEDULED_SIMULATIONS)
-channel.queue_declare(queue=QUEUE_SIMULATION_RESULTS)
 
 def processSimulation(ch, method, properties, body):
     simulationDict = json.loads(body, use_decimal=True)
@@ -104,9 +98,6 @@ def generate_dict_stimulus(simulationDict):
             'dict_system_switch'  : generate_dict_system_switch()
         }
 
-channel.basic_qos(prefetch_count=1)
-channel.basic_consume(processSimulation, queue=QUEUE_SCHEDULED_SIMULATIONS)
-
 print("Waiting for simulations")
-channel.start_consuming()
+mq.listen(processSimulation, QUEUE_SCHEDULED_SIMULATIONS)
 

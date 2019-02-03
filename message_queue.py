@@ -44,3 +44,13 @@ def enqueue(msg, queue):
     # close the connection to make sure the message gets flushed to the server
     connection.close()
 
+def listen(callback, queue):
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host='task-queue'))
+    channel = connection.channel()
+    channel.queue_declare(queue=queue)
+
+    channel.basic_qos(prefetch_count=1)
+    channel.basic_consume(callback, queue=queue)
+
+    channel.start_consuming()
+

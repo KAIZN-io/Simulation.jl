@@ -337,7 +337,7 @@ class SimulationPreparation:
         return runningChit
 
 def sdtm(args, simulation):
-    logger.debug(json.dumps(args))
+    logger.debug(args)
 
     dict_visualisation = {
         'not_to_visualize': ['Yt', 'z1', 'z2', 'z3', 'z4', 'L_ArH', 'L_HH',
@@ -501,7 +501,7 @@ def sdtm(args, simulation):
                 for TESTCDAffectedByStimulus in stimulusDict.get(EXTRT)[2]:
                     """adds the right value to the right ODE"""
                     simulationFrame.loc[i[0],
-                                        TESTCDAffectedByStimulus] += EXDOSE
+                                        TESTCDAffectedByStimulus] += float(EXDOSE)
 
                 """switch for glucose adding"""
                 glucose_switch = [False]

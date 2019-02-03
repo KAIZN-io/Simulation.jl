@@ -1,11 +1,12 @@
 import os
 import time
 import pika
-import time
+import datetime
 import simplejson as json
 
 import message_queue as mq
 from SDTM import sdtm
+from db import sessionScope, Ex
 
 
 QUEUE_SCHEDULED_SIMULATIONS = os.environ['QUEUE_SCHEDULED_SIMULATIONS']
@@ -16,8 +17,17 @@ def processSimulation(ch, method, properties, body):
     print('Simulation received, id: ' + str(simulationDict['id']))
 
     print('Simulating...')
-    # result = sdtm(getArgsFromSimulationDict(simulation_data))
-    time.sleep(5)
+    with sessionScope() as session:
+        simulation = session.query(Ex) \
+                .filter(Ex.id == simulationDict['id']) \
+                .one()
+
+        simulation.started_at = datetime.datetime.utcnow()
+
+        result = sdtm(generate_dicts(simulationDict), simulation)
+
+        simulation.finished_at = datetime.datetime.utcnow()
+
 
     print('Publishing results...')
     mq.publishSimulationResult({
@@ -47,10 +57,10 @@ def generate_dict_time(simulationDict):
     }
 
     for impulse in simulationDict['impulses']:
-        if impulse.substance == 'Glucose':
+        if impulse['substance'] == 'Glucose':
             d['Glucose_impuls_start'] = str( impulse['start'] )
             d['Glucose_impuls_end']   = str( impulse['stop'] )
-        elif impulse.substance == 'NaCl':
+        elif impulse['substance'] == 'NaCl':
             d['NaCl_impuls_start']     = str( impulse['start'] )
             d['NaCl_impuls_firststop'] = str( impulse['stop'] )
 
@@ -59,18 +69,18 @@ def generate_dict_time(simulationDict):
 def generate_dict_uniqe_EXSTDTC(simulationDict):
     dict_unique_EXSTDTC = {}
 
-    for stimulus in simlationDict['stimuli']:
+    for stimulus in simulationDict['stimuli']:
         dict_unique_EXSTDTC[ stimulus['substance'] ] = stimulus['timings']
 
     return dict_unique_EXSTDTC
 
 def generate_dict_stimulus(simulationDict):
     dict_stimulus = {
-        'NaCl_impuls' : [simulationDict['nacl_impulse'], 'mM'],
-        'signal_type' : [simulationDict['signal_type']],
+        'NaCl_impuls' : [simulationDict.get('nacl_impulse'), 'mM'],
+        'signal_type' : [simulationDict.get('signal_type')],
     }
 
-    for stimulus in simlationDict['stimuli']:
+    for stimulus in simulationDict['stimuli']:
         dict_stimulus[ stimulus['substance'] ] = [
             [ stimulus['amount'] ],
             stimulus['unit'],
@@ -80,23 +90,24 @@ def generate_dict_stimulus(simulationDict):
 
     return dict_stimulus
 
-    def generate_dict_system_switch(simulationDict):
-        return {
-            'export_data_to_sql': True,
-            'export_terms_data_to_sql': False,
-            'specificInitValuesVersionSEQ': [self.initial_value_set.version],
-            'specificModelVersionSEQ': [self.model.version],
-            'specificParameterVersionSEQ': [self.parameter_set.version]
-        }
+def generate_dict_system_switch(simulationDict):
+    return {
+        'export_data_to_sql': True,
+        'export_terms_data_to_sql': False,
+        'specificInitValuesVersionSEQ': [1],
+        'specificModelVersionSEQ': [1],
+        'specificParameterVersionSEQ': [1]
+    }
 
-    def generate_dicts(self):
-        return {
-            'dict_model_switch'   : generate_dict_model_switch(),
-            'dict_time'           : generate_dict_time(),
-            'dict_unique_EXSTDTC' : generate_dict_uniqe_EXSTDTC(),
-            'dict_stimulus'       : generate_dict_stimulus(),
-            'dict_system_switch'  : generate_dict_system_switch()
-        }
+def generate_dicts(simulationDict):
+    return {
+        'uuid' : simulationDict['uuid'],
+        'dict_model_switch'   : generate_dict_model_switch(simulationDict),
+        'dict_time'           : generate_dict_time(simulationDict),
+        'dict_unique_EXSTDTC' : generate_dict_uniqe_EXSTDTC(simulationDict),
+        'dict_stimulus'       : generate_dict_stimulus(simulationDict),
+        'dict_system_switch'  : generate_dict_system_switch(simulationDict)
+    }
 
 print("Waiting for simulations")
 mq.listen(processSimulation, QUEUE_SCHEDULED_SIMULATIONS)

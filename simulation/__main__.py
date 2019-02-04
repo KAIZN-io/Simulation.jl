@@ -1,12 +1,13 @@
 import os
 import time
 import pika
-import datetime
 import simplejson as json
+from datetime import datetime
 
 import message_queue as mq
 from SDTM import sdtm
 from db import sessionScope, Ex
+from values import RFC3339_DATE_FORMAT
 
 
 QUEUE_SCHEDULED_SIMULATIONS = os.environ['QUEUE_SCHEDULED_SIMULATIONS']
@@ -17,22 +18,26 @@ def processSimulation(ch, method, properties, body):
     print('Simulation received, id: ' + str(simulationDict['id']))
 
     print('Simulating...')
+    started_at = datetime.utcnow()
     with sessionScope() as session:
         simulation = session.query(Ex) \
                 .filter(Ex.id == simulationDict['id']) \
                 .one()
 
-        simulation.started_at = datetime.datetime.utcnow()
 
         result = sdtm(generate_dicts(simulationDict), simulation)
 
-        simulation.finished_at = datetime.datetime.utcnow()
-
+    finished_at = datetime.utcnow()
 
     print('Publishing results...')
     mq.publishSimulationResult({
         'simulation_id': simulationDict['id'],
-        'pds': []
+        'started_at': started_at.strftime(RFC3339_DATE_FORMAT),
+        'finished_at': finished_at.strftime(RFC3339_DATE_FORMAT),
+        'extrt': result['extrt'],
+        'exdose': result['exdose'],
+        'exstdtc_array': result['exstdtc_array'],
+        'pds': result['pds']
     })
 
     # confirm that the message was received and processed
@@ -102,6 +107,7 @@ def generate_dict_system_switch(simulationDict):
 def generate_dicts(simulationDict):
     return {
         'uuid' : simulationDict['uuid'],
+        'type' : simulationDict['type'],
         'dict_model_switch'   : generate_dict_model_switch(simulationDict),
         'dict_time'           : generate_dict_time(simulationDict),
         'dict_unique_EXSTDTC' : generate_dict_uniqe_EXSTDTC(simulationDict),

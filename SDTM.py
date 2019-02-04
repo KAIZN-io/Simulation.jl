@@ -404,7 +404,7 @@ def sdtm(args, simulation):
 
     the actual simulation begins
     """
-    logger.info('Simulation Type: ' + simulation.getTypeAsString())
+    logger.info('Simulation Type: ' + args['type'])
     for simulationSettingsForTimeRange in runningChit:
 
         """initialize an empty DataFrame for each time value"""
@@ -433,7 +433,7 @@ def sdtm(args, simulation):
             "uuid": args['uuid'],
             "studyid": STUDYID,
             "domain": "ex",
-            "usubjid": simulation.getTypeAsString(),
+            "usubjid": args['type'],
             "excat": EXCAT,
             "extrt": EXTRT,
             "exdose": EXDOSE,
@@ -442,12 +442,10 @@ def sdtm(args, simulation):
             "simulation_start": timeDict['start'],
             "simulation_stop": timeDict['stop'],
             "co": "exstdtc in Sekunden",
+            "pds": []
         }
-        simulation.extrt = EXTRT
-        simulation.exdose = EXDOSE
-        simulation.exstdtc_array = EXSTDTC
 
-        modelFingerprint = str(SEQ) + '_' + simulation.getTypeAsString()
+        modelFingerprint = str(SEQ) + '_' + args['type']
 
         """get the parameter from the database"""
         with sessionScope() as session:
@@ -512,7 +510,7 @@ def sdtm(args, simulation):
                 glucose_switch = [False]
 
             simulationFrame = DataExtraction.callSimulation(
-                nameOfModel = simulation.getTypeAsString(),
+                nameOfModel = args['type'],
                 Glucose_impuls_start = timeDict['Glucose_impuls_start'],
                 Glucose_impuls_end = timeDict['Glucose_impuls_end'],
                 glucose_switch = glucose_switch,
@@ -533,7 +531,7 @@ def sdtm(args, simulation):
 
         resultsForOdes, groupedPDORRESU = DataVisualization.prepareVisualization(
             dict_visualisation = dict_visualisation,
-            sql_USUBJID=simulation.getTypeAsString(),
+            sql_USUBJID=args['type'],
             ODE_RESULTS=rawOdeResults,
             PDORRESU_x=simulationSettingsForTimeRange['units']
         )
@@ -602,27 +600,24 @@ def sdtm(args, simulation):
         """
         simulationSettingsForTimeRange['results'] = simulationSettingsForTimeRange['results'].loc[::int(1/timeDict['time_steps'])]
 
-        """export the EX dict to the database"""
-        if systemSwitchDict.get('export_data_to_sql') == True:
-            with sessionScope() as session:
-                """make the dict keys as new variables"""
-                locals().update(simulationSettingsForTimeRange)
+        """make the dict keys as new variables"""
+        locals().update(simulationSettingsForTimeRange)
 
-                dataframeAsDict = simulationSettingsForTimeRange['results'].to_dict('index')
+        dataframeAsDict = simulationSettingsForTimeRange['results'].to_dict('index')
 
-                for DTC, innerDict in dataframeAsDict.items():
-                    for substance, value in innerDict.items():
-                        simulation.pds.append(Pd(
-                            studyid = STUDYID,
-                            domain = 'pd',
-                            usubjid = simulation.getTypeAsString(),
-                            pdtestcd = substance,
-                            pdtest = None,
-                            pdorres = value,
-                            pdorresu = simulationSettingsForTimeRange['units'][substance],
-                            pddtc = DTC,
-                            co = "pddtc in Sekunden",
-                        ))
+        for DTC, innerDict in dataframeAsDict.items():
+            for substance, value in innerDict.items():
+                EX_dict['pds'].append({
+                    'studyid' : STUDYID,
+                    'domain' : 'pd',
+                    'usubjid' : args['type'],
+                    'pdtestcd' : substance,
+                    'pdtest' : None,
+                    'pdorres' : value,
+                    'pdorresu' : simulationSettingsForTimeRange['units'][substance],
+                    'pddtc' : DTC,
+                    'co' : "pddtc in Sekunden",
+                })
 
-            logger.info("Simulation results stored in database")
+        return EX_dict
 

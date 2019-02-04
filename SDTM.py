@@ -3,19 +3,16 @@ __email__ = 'jan.piotraschke@mail.de'
 __version__ = 'bachelor_thesis'
 __license__ = 'private'
 
-import sys
 import logging
-import uuid
-import json
 from decimal import Decimal
-from sqlalchemy import func
 
-from db import Ex, Pd, ParameterSet, Parameter, InitialValueSet, InitialValue, sessionScope
-from values import SimulationTypes
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import itertools
+
 from DataExtraction import DataExtraction
-
-"""import the standard used packages"""
-exec(open("SYSTEM/py_packages.py").read())
 
 
 logger = logging.getLogger(__name__)
@@ -26,7 +23,7 @@ class DataVisualization:
         pass
 
     def plotTimeSeries(
-        simulation,
+        simulationData,
         SEQ,
         timeSeriesData=pd.DataFrame(),
         subplotLogic={},
@@ -80,7 +77,7 @@ class DataVisualization:
         """x axis is shared and the ticks are rotated"""
         fig.autofmt_xdate(bottom=0.2,
                             rotation=30)
-        fig.suptitle(t='{}_Model'.format(simulation.getTypeAsString().title()),
+        fig.suptitle(t='{}_Model'.format(simulationData['type'].title()),
                         fontsize=fontSize)
 
         # fig.suptitle(t='Volume',
@@ -112,7 +109,7 @@ class DataVisualization:
 
                     for i in substance:
 
-                        if simulation.isOfType('combined_models') and i == 'Hog1PPn':
+                        if simulationData['type'] == 'combined_models' and i == 'Hog1PPn':
                             exec(
                                 "ax{}.plot(timeSeriesData[i],label='Hog1PPn (*1E7)')".format(axis_index))
 
@@ -137,7 +134,7 @@ class DataVisualization:
 
             """"save the plot"""
 
-            pictureName = '{0}_{1}.png'.format(simulation.getTypeAsString(), SEQ)
+            pictureName = '{0}_{1}.png'.format(simulationData['type'], SEQ)
             plt.savefig('SimulationPictures/{0}'.format(pictureName),
                         dpi=360,
                         format='png',
@@ -230,8 +227,8 @@ class DataVisualization:
         return ODE_RESULTS, groupedPDORRESU
 
 class SimulationPreparation:
-    def __init__(self, simulation):
-        self.simulation = simulation
+    def __init__(self, simulationData):
+        self.simulationData = simulationData
         self.usedStimulusWithConcentration = None
         self.stimulusTimePoints = None
 
@@ -245,10 +242,13 @@ class SimulationPreparation:
             target = stimulusDict.get(i)[2]
 
             """if the targets are in the specific model"""
-            if set(target).issubset(self.simulation.getOdeNames()) == True:
+            if set(target).issubset(self.getOdeNames()) == True:
                 affectedModelFromStimulus = True
 
         return affectedModelFromStimulus
+
+    def getOdeNames(self):
+        return [value['testcd'] for value in self.simulationData['initial_value_set']]
 
     def rulesForStimulus(self, stimulusDict={}, stimulusTimePoints={}):
         self.stimulusTimePoints = {}
@@ -287,7 +287,7 @@ class SimulationPreparation:
         simulationTimePoints = [start, stop]
 
         # TEMP : bad way
-        if self.simulation.isAnyOf(['combined_models', 'ion']):
+        if self.simulationData['type'] in ['combined_models', 'ion']:
             simulationTimePoints.append(Glucose_impuls_start)
 
         runningChit = []
@@ -314,7 +314,7 @@ class SimulationPreparation:
                                             for i, j in zip(simulationTimePoints[0::], simulationTimePoints[1::])
                                             ]
 
-                dict_runningChit = {'name': self.simulation.getTypeAsString(),
+                dict_runningChit = {'name': self.simulationData['type'],
                                      'EXTRT': TRT,
                                      'EXDOSE': singleDose,
                                      'EXSTDTC': self.stimulusTimePoints[TRT],
@@ -336,7 +336,7 @@ class SimulationPreparation:
                 break
         return runningChit
 
-def sdtm(args, simulation):
+def sdtm(args, simulationData):
     logger.debug(args)
 
     dict_visualisation = {
@@ -377,7 +377,7 @@ def sdtm(args, simulation):
     activated_stimuli = [stimulus_name for stimulus_name, items
                          in stimulusDict.items() if items[-1] == True]
 
-    simulationPreparation = SimulationPreparation(simulation)
+    simulationPreparation = SimulationPreparation(simulationData)
 
     """find out how and if the model is affected from the activated stimulus"""
     affectedModelFromStimulus = simulationPreparation.isModelAffected(
@@ -410,14 +410,6 @@ def sdtm(args, simulation):
         """initialize an empty DataFrame for each time value"""
         simulationFrame = pd.DataFrame()
 
-        with sessionScope() as session:
-            q = session.query(func.max(Ex.id))
-
-        if q.scalar():
-            SEQ = q.scalar() + 1
-        else:
-            SEQ = 1
-
         if affectedModelFromStimulus == False:
             EXTRT = 0
             EXDOSE = 0
@@ -429,7 +421,7 @@ def sdtm(args, simulation):
             EXSTDTC = simulationSettingsForTimeRange['EXSTDTC']
 
         EX_dict = {
-            "id": SEQ,
+            "id": args['id'],
             "uuid": args['uuid'],
             "studyid": STUDYID,
             "domain": "ex",
@@ -445,37 +437,22 @@ def sdtm(args, simulation):
             "pds": []
         }
 
-        modelFingerprint = str(SEQ) + '_' + args['type']
-
-        """get the parameter from the database"""
-        with sessionScope() as session:
-            q = session.query(Parameter.testcd, Parameter.orres) \
-                    .join(ParameterSet) \
-                    .filter(ParameterSet.id == simulation.parameter_set_id)
-
-        TESTCD_ORRESU_tuple = q.all()
+        modelFingerprint = str(args['id']) + '_' + args['type']
 
         """initialValues creation"""
         parameterAsLocalVariables = {}
-        for i in TESTCD_ORRESU_tuple:
-            parameterAsLocalVariables[i[0]] = i[1]
+        for parameter in simulationData['parameter_set']:
+            parameterAsLocalVariables[parameter['testcd']] = float(parameter['orres'])
 
         """make the dict keys as new variables"""
         locals().update(parameterAsLocalVariables)
 
-        with sessionScope() as session:
-            q = session.query(InitialValue.testcd, InitialValue.orres, InitialValue.orresu) \
-                    .join(InitialValueSet) \
-                    .filter(InitialValueSet.id == simulation.initial_value_set_id)
-
-        TESTCD_ORRESU_tuple = q.all()
-
         """initialValues creation"""
         initialValues = {}
         unitsForOdes = {}
-        for i in TESTCD_ORRESU_tuple:
-            initialValues[i[0]] = i[1]
-            unitsForOdes[i[0]] = i[2]
+        for value in simulationData['initial_value_set']:
+            initialValues[value['testcd']] = float(value['orres'])
+            unitsForOdes[value['testcd']] = value['orresu']
 
         """DataFrame initialisieren"""
 
@@ -511,6 +488,7 @@ def sdtm(args, simulation):
 
             simulationFrame = DataExtraction.callSimulation(
                 nameOfModel = args['type'],
+                model = args['model'],
                 Glucose_impuls_start = timeDict['Glucose_impuls_start'],
                 Glucose_impuls_end = timeDict['Glucose_impuls_end'],
                 glucose_switch = glucose_switch,
@@ -538,16 +516,15 @@ def sdtm(args, simulation):
 
         """plot the results, save the plot and return the pictureName"""
         pictureName = DataVisualization.plotTimeSeries(
-            simulation = simulation,
-            SEQ = SEQ,
+            simulationData = simulationData,
+            SEQ = args['id'],
             timeSeriesData=resultsForOdes,
             subplotLogic=groupedPDORRESU
         )
 
         EX_dict['image_path'] = pictureName
-        simulation.image_path = pictureName
 
-        logger.info('Simulation id: ' + str(SEQ))
+        logger.info('Simulation id: ' + str(args['id']))
 
         """last step before pushing results to database
         
@@ -564,7 +541,7 @@ def sdtm(args, simulation):
         dataframeAsMatrix = simulationSettingsForTimeRange['results'].values
         columnsOfDataframe = simulationSettingsForTimeRange['results'].columns.tolist()
 
-        if not simulation.isOfType('volume'):
+        if not simulationData['type'] == 'volume':
             def truncate(n, decimals=0):
                 multiplier = 10 ** decimals
                 return int(n * multiplier) / multiplier

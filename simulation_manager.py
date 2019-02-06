@@ -61,18 +61,19 @@ def getSimulationFromFormData(session, formData):
 
     session.add(ex)
 
-    ex.impulses.append(Impulse(
-        substance = 'Glucose',
-        start = formData['glucose_impulse_start'],
-        stop = formData['glucose_impulse_stop']
-    ))
+    if ex.isAnyOf([SimulationTypes.combined, SimulationTypes.ion]):
+        ex.impulses.append(Impulse(
+            substance = 'Glucose',
+            start = formData['glucose_impulse_start'],
+            stop = formData['glucose_impulse_stop']
+        ))
 
-    # if ex.isOfType(SimulationTypes.hog):
-    ex.impulses.append(Impulse(
-        substance = 'NaCl',
-        start = formData['nacl_impulse_start'],
-        stop = formData['nacl_impulse_stop']
-    ))
+    if ex.isOfType(SimulationTypes.hog):
+        ex.impulses.append(Impulse(
+            substance = 'NaCl',
+            start = formData['nacl_impulse_start'],
+            stop = formData['nacl_impulse_stop']
+        ))
 
     kcl_stimulus = Stimulus(
         substance = 'KCl',
@@ -82,8 +83,8 @@ def getSimulationFromFormData(session, formData):
         timings = [ int( e ) for e in formData['kcl_timing'].split(',') ],
         active = formData['kcl_active']
     )
-    # if formData['kcl_active'] and isStimulusAffectingSimulation(kcl_stimulus, ex):
-    ex.stimuli.append(kcl_stimulus)
+    if formData['kcl_active'] and isStimulusAffectingSimulation(kcl_stimulus, ex):
+        ex.stimuli.append(kcl_stimulus)
 
     nacl_stimulus = Stimulus(
         substance = 'NaCl',
@@ -93,8 +94,8 @@ def getSimulationFromFormData(session, formData):
         timings = [ int( e ) for e in formData['nacl_timing'].split(',') ],
         active = formData['nacl_active']
     )
-    # if formData['nacl_active'] and isStimulusAffectingSimulation(nacl_stimulus, ex):
-    ex.stimuli.append(nacl_stimulus)
+    if formData['nacl_active'] and isStimulusAffectingSimulation(nacl_stimulus, ex):
+        ex.stimuli.append(nacl_stimulus)
 
     sorbitol_stimulus = Stimulus(
         substance = 'Sorbitol',
@@ -104,8 +105,8 @@ def getSimulationFromFormData(session, formData):
         timings = [ int( e ) for e in formData['sorbitol_timing'].split(',') ],
         active = formData['sorbitol_active']
     )
-    # if formData['sorbitol_active'] and isStimulusAffectingSimulation(sorbitol_stimulus, ex):
-    ex.stimuli.append(sorbitol_stimulus)
+    if formData['sorbitol_active'] and isStimulusAffectingSimulation(sorbitol_stimulus, ex):
+        ex.stimuli.append(sorbitol_stimulus)
 
     return ex
 

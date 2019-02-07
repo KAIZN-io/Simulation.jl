@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID, ARRAY, REAL, DOUBLE_PRECISION
 import datetime
 import uuid
+import simplejson as json
 
 from db.base import base
 from values import SimulationTypes
@@ -106,64 +107,34 @@ class Ex(base):
     def hasStimuli(self):
         return len(self.stimuli) > 0
 
-    def generate_dict_model_switch(self):
-        return {
-            'combined_models' : self.isOfType('combined_models'),
-            'hog'             : self.isOfType('hog'),
-            'ion'             : self.isOfType('ion'),
-            'volume'          : self.isOfType('volume'),
-        }
-
-    def generate_dict_time(self):
-        d = {
-            'start'                 : self.start,
-            'stop'                  : self.stop,
-            'time_steps'            : str( self.step_size ),
-        }
-
-        for impulse in self.impulses:
-            if impulse.substance == 'Glucose':
-                d['Glucose_impuls_start'] = str( impulse.start )
-                d['Glucose_impuls_end']   = str( impulse.stop )
-            elif impulse.substance == 'NaCl':
-                d['NaCl_impuls_start']     = str( impulse.start )
-                d['NaCl_impuls_firststop'] = str( impulse.stop )
-
-        return d
-
-    def generate_dict_uniqe_EXSTDTC(self):
-        dict_unique_EXSTDTC = {}
-
-        for stimulus in self.stimuli:
-            dict_unique_EXSTDTC[ stimulus.substance ] = stimulus.timings
-
-        return dict_unique_EXSTDTC
-
-    def generate_dict_stimulus(self):
-        dict_stimulus = {
-            'NaCl_impuls' : [200, 'mM'],
-            'signal_type' : [2],
-        }
-
-        for stimulus in self.stimuli:
-            dict_stimulus[ stimulus.substance ] = stimulus.get_as_array()
-
-        return dict_stimulus
-
     def generate_dict_system_switch(self):
         return {
-            'export_data_to_sql': True,
-            'export_terms_data_to_sql': False,
             'specificInitValuesVersionSEQ': [self.initial_value_set.version],
             'specificModelVersionSEQ': [self.model.version],
             'specificParameterVersionSEQ': [self.parameter_set.version]
         }
 
-    def generate_dicts(self):
-        return {
-            'dict_model_switch'   : self.generate_dict_model_switch(),
-            'dict_time'           : self.generate_dict_time(),
-            'dict_unique_EXSTDTC' : self.generate_dict_uniqe_EXSTDTC(),
-            'dict_stimulus'       : self.generate_dict_stimulus(),
-            'dict_system_switch'  : self.generate_dict_system_switch()
+    def to_dict(self):
+        d = {
+            'id': self.id,
+            'uuid': str(self.uuid),
+            'type': self.getTypeAsString(),
+            'start': float(self.start),
+            'stop': float(self.stop),
+            'step_size': float(self.step_size),
+            'impulses': [impulse.to_dict() for impulse in self.impulses],
+            'stimuli': [stimulus.to_dict() for stimulus in self.stimuli],
+            'model': json.loads(self.model.json),
+            'initial_value_set': [initial_value.to_dict() for initial_value in self.initial_value_set.values],
+            'parameter_set': [parameter.to_dict() for parameter in self.parameter_set.values],
         }
+
+        if self.isOfType(SimulationTypes.hog):
+            d['signal_type'] = self.hog_signal_type
+            d['nacl_impulse'] = self.hog_nacl_impulse
+
+        return d
+
+    def to_json_str(self):
+        return json.dumps(self.to_dict(), use_decimal=True)
+

@@ -28,6 +28,13 @@ class Stimulus(base):
         UniqueConstraint('ex_id', 'substance', 'amount', 'unit', 'targets', 'timings', name='Stimulus_uniqe_per_simulation'),
     )
 
-    def get_as_array(self):
-        return [ [ self.amount ], self.unit, self.targets, self.active ]
+    def to_dict(self):
+        return {
+            'substance': self.substance,
+            'amount': float(self.amount),
+            'unit': self.unit,
+            'targets': self.targets,
+            'timings': self.timings,
+            'active': self.active
+        }
 

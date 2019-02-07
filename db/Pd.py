@@ -20,14 +20,31 @@ class Pd(base):
     studyid = Column(String)
     domain = Column(String)
     usubjid = Column(String)
+    # Substance
     pdtestcd = Column(String, nullable=False)
     pdtest = Column(String)
+    # value
     pdorres = Column(DOUBLE_PRECISION)
     pdorresu = Column(String)
+    # time in simulation
     pddtc = Column(DOUBLE_PRECISION)
     co = Column(String)
 
     __table_args__ = (
-        UniqueConstraint('ex_id', 'usubjid', 'pdtestcd', 'pddtc',  name='Pd_uc'),
+        UniqueConstraint('ex_id', 'pdtestcd', 'pddtc',  name='Pd_uc'),
     )
+
+    @classmethod
+    def from_dict(cls, pd_dict):
+        return Pd(
+            studyid  = pd_dict.get('studyid'),
+            domain   = pd_dict.get('domain'),
+            usubjid  = pd_dict.get('usubjid'),
+            pdtestcd = pd_dict['pdtestcd'],
+            pdtest   = pd_dict.get('pdtest'),
+            pdorres  = pd_dict.get('pdorres'),
+            pdorresu = pd_dict.get('pdorresu'),
+            pddtc    = pd_dict.get('pddtc'),
+            co       = pd_dict.get('co'),
+        )
 

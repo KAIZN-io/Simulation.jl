@@ -10,7 +10,7 @@ NOT_TO_VISUALIZE = [
     'r_b', 'c_i', 'Sorbitol_out'
 ]
 
-class DataVisualization:
+class Visualizer:
     def __init__(self):
         pass
 

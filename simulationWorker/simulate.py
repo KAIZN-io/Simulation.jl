@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import itertools
 
-from DataVisualization import DataVisualization
+from visualization import Visualizer
 from values import SimulationTypes
 from simulationWorker.Solver import Solver
 
@@ -308,14 +308,14 @@ def simulate(simulationData):
                 i=i
             )
 
-        resultsForOdes, groupedPDORRESU = DataVisualization.prepareVisualization(
+        resultsForOdes, groupedPDORRESU = Visualizer.prepareVisualization(
             sql_USUBJID=simulationData['type'],
             ODE_RESULTS=simulationFrame,
             PDORRESU_x=unitsForOdes
         )
 
         """plot the results, save the plot and return the pictureName"""
-        pictureName = DataVisualization.plotTimeSeries(
+        pictureName = Visualizer.plotTimeSeries(
             simulationData = simulationData,
             SEQ = simulationData['id'],
             timeSeriesData=resultsForOdes,

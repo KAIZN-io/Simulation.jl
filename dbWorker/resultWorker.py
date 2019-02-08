@@ -1,5 +1,4 @@
 import os
-import pika
 import json
 from datetime import datetime
 
@@ -8,7 +7,7 @@ from db import sessionScope, Ex, Pd
 from values import RFC3339_DATE_FORMAT, QUEUE_SIMULATION_RESULTS
 
 
-def process_simulation_result(ch, method, properties, body):
+def processSimulationResult(ch, method, properties, body):
     # parse the JSON to python dict, so one can work with it
     simulation_result = json.loads(body)
     print("Simulation results received, id: " + str(simulation_result['simulation_id']))
@@ -38,5 +37,5 @@ def process_simulation_result(ch, method, properties, body):
     ch.basic_ack(delivery_tag = method.delivery_tag)
 
 print("Waiting for simulation results...")
-mq.listen(process_simulation_result, QUEUE_SIMULATION_RESULTS)
+mq.listen(processSimulationResult, QUEUE_SIMULATION_RESULTS)
 

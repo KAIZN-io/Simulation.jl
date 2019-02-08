@@ -46,7 +46,7 @@ services:
         condition: service_healthy
       simulationWorker:
         condition: service_started
-      result-worker:
+      dbWorker:
         condition: service_started
 
     ports:
@@ -67,7 +67,7 @@ services:
     # Befehl der and ENTRYPOINT aus dem Image dran gehangen wird.
     command: ["-m", "flask", "run", "--host=0.0.0.0"]
 
-  result-worker:
+  dbWorker:
     image: janpiotraschke/projectq:0.2.2-task-queue-tmp
     depends_on:
       db:
@@ -78,7 +78,7 @@ services:
       - QUEUE_SIMULATION_RESULTS
     volumes:
       - ./:/ProjektQ/
-    command: ["-u", "-m", "result_worker"]
+    command: ["-u", "-m", "dbWorker"]
 
   simulationWorker:
     image: janpiotraschke/projectq:0.2.2-task-queue-tmp

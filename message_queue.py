@@ -3,9 +3,8 @@ import logging
 import pika
 import json
 
+from values import QUEUE_SCHEDULED_SIMULATIONS, QUEUE_SIMULATION_RESULTS
 
-QUEUE_SCHEDULED_SIMULATIONS = os.environ.get('QUEUE_SCHEDULED_SIMULATIONS')
-QUEUE_SIMULATION_RESULTS    = os.environ.get('QUEUE_SIMULATION_RESULTS')
 
 logger = logging.getLogger(__name__)
 

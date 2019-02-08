@@ -44,7 +44,7 @@ services:
         condition: service_healthy
       task-queue:
         condition: service_healthy
-      simulation:
+      simulationWorker:
         condition: service_started
       result-worker:
         condition: service_started
@@ -80,7 +80,7 @@ services:
       - ./:/ProjektQ/
     command: ["-u", "-m", "result_worker"]
 
-  simulation:
+  simulationWorker:
     image: janpiotraschke/projectq:0.2.2-task-queue-tmp
     depends_on:
       task-queue:
@@ -91,7 +91,7 @@ services:
     volumes:
       - ./:/ProjektQ/
     working_dir: /ProjektQ
-    command: ["-u", "-m", "simulation"]
+    command: ["-u", "-m", "simulationWorker"]
 
   task-queue:
     image: rabbitmq:3.7.11-rc.2-alpine

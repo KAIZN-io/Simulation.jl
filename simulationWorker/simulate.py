@@ -9,9 +9,9 @@ import numpy as np
 import pandas as pd
 import itertools
 
-from DataExtraction import DataExtraction
 from DataVisualization import DataVisualization
 from values import SimulationTypes
+from simulationWorker.Solver import Solver
 
 
 STUDYID = 'Yeast_BSc'
@@ -22,24 +22,6 @@ class SimulationPreparation:
         self.simulationData = simulationData
         self.usedStimulusWithConcentration = None
         self.stimulusTimePoints = None
-
-    def isModelAffected(self, stimulusDict, activatedStimulus=[]):
-        modelAffectedFromStimulus = False
-
-        """iterating over all activated stimuli"""
-        for i in activatedStimulus:
-
-            """get me the target of the specific stimuli"""
-            target = stimulusDict.get(i)[2]
-
-            """if the targets are in the specific model"""
-            if set(target).issubset(self.getOdeNames()) == True:
-                modelAffectedFromStimulus = True
-
-        return modelAffectedFromStimulus
-
-    def getOdeNames(self):
-        return [value['testcd'] for value in self.simulationData['initial_value_set']]
 
     def rulesForStimulus(self, stimulusDict={}, stimulusTimePoints={}):
         self.stimulusTimePoints = {}
@@ -198,7 +180,7 @@ def generate_dict_system_switch(simulationData):
         'specificParameterVersionSEQ': [1]
     }
 
-def sdtm(simulationData):
+def simulate(simulationData):
 
     odeNames = getOdeNames(simulationData['initial_value_set'])
     type = SimulationTypes(simulationData['type'])
@@ -311,7 +293,7 @@ def sdtm(simulationData):
             else:
                 glucose_switch = [False]
 
-            simulationFrame = DataExtraction.callSimulation(
+            simulationFrame = Solver.callSimulation(
                 nameOfModel = simulationData['type'],
                 model = simulationData['model'],
                 Glucose_impuls_start = timeDict['Glucose_impuls_start'],

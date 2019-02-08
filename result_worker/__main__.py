@@ -5,10 +5,8 @@ from datetime import datetime
 
 import message_queue as mq
 from db import sessionScope, Ex, Pd
-from values import RFC3339_DATE_FORMAT
+from values import RFC3339_DATE_FORMAT, QUEUE_SIMULATION_RESULTS
 
-
-QUEUE_SIMULATION_RESULTS = os.environ['QUEUE_SIMULATION_RESULTS']
 
 def process_simulation_result(ch, method, properties, body):
     # parse the JSON to python dict, so one can work with it

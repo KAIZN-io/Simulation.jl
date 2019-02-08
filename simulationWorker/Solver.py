@@ -5,7 +5,7 @@ from collections import OrderedDict
 import json
 
 
-class DataExtraction:
+class Solver:
     def __init__(self):
         pass
 
@@ -134,7 +134,7 @@ class DataExtraction:
 
         """solves the ode and algebraic equations"""
         states = odeint(
-            func = DataExtraction.solveTheODEs,
+            func = Solver.solveTheODEs,
             y0 = dataForSimulation.tail(1).values.tolist()[0],
             t = i,
             args = (

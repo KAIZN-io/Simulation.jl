@@ -1,4 +1,9 @@
+import os
 from enum import Enum
+
+
+QUEUE_SCHEDULED_SIMULATIONS = os.environ.get('QUEUE_SCHEDULED_SIMULATIONS')
+QUEUE_SIMULATION_RESULTS    = os.environ.get('QUEUE_SIMULATION_RESULTS')
 
 RFC3339_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S.%f'
 

@@ -1,14 +1,10 @@
-import os
 import json
 from datetime import datetime
 
 import message_queue as mq
-from SDTM import sdtm
-from values import RFC3339_DATE_FORMAT
+from values import RFC3339_DATE_FORMAT, QUEUE_SCHEDULED_SIMULATIONS, QUEUE_SIMULATION_RESULTS
+from simulationWorker.simulate import simulate
 
-
-QUEUE_SCHEDULED_SIMULATIONS = os.environ['QUEUE_SCHEDULED_SIMULATIONS']
-QUEUE_SIMULATION_RESULTS    = os.environ['QUEUE_SIMULATION_RESULTS']
 
 def processSimulation(ch, method, properties, body):
     simulationData = json.loads(body)
@@ -16,7 +12,7 @@ def processSimulation(ch, method, properties, body):
 
     print('Simulating...')
     started_at = datetime.utcnow()
-    result = sdtm(simulationData)
+    result = simulate(simulationData)
     finished_at = datetime.utcnow()
 
     print('Publishing results...')
@@ -39,4 +35,5 @@ def processSimulation(ch, method, properties, body):
 
 print("Waiting for simulations")
 mq.listen(processSimulation, QUEUE_SCHEDULED_SIMULATIONS)
+
 

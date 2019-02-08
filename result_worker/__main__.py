@@ -1,6 +1,6 @@
 import os
 import pika
-import simplejson as json
+import json
 from datetime import datetime
 
 import message_queue as mq

@@ -1,7 +1,7 @@
 import os
 import logging
 import pika
-import simplejson as json
+import json
 
 
 QUEUE_SCHEDULED_SIMULATIONS = os.environ.get('QUEUE_SCHEDULED_SIMULATIONS')

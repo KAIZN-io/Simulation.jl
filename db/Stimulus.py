@@ -1,6 +1,6 @@
-from sqlalchemy import Column, String, DateTime, Integer, UniqueConstraint, ForeignKey, Boolean
+from sqlalchemy import Column, String, DateTime, Integer, Float, UniqueConstraint, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID, DOUBLE_PRECISION, ARRAY
+from sqlalchemy.dialects.postgresql import UUID, ARRAY
 import datetime
 
 from db.base import base
@@ -18,7 +18,7 @@ class Stimulus(base):
     ex = relationship('Ex', back_populates='stimuli')
 
     substance = Column(String, nullable=False)
-    amount = Column(DOUBLE_PRECISION, nullable=False)
+    amount = Column(Float, nullable=False)
     unit = Column(String, nullable=False)
     targets = Column(ARRAY(String))
     timings = Column(ARRAY(Integer))
@@ -31,7 +31,7 @@ class Stimulus(base):
     def to_dict(self):
         return {
             'substance': self.substance,
-            'amount': float(self.amount),
+            'amount': self.amount,
             'unit': self.unit,
             'targets': self.targets,
             'timings': self.timings,

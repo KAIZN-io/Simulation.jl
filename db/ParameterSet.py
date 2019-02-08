@@ -1,6 +1,6 @@
-from sqlalchemy import Column, String, DateTime, Integer, Enum, UniqueConstraint, ForeignKey
+from sqlalchemy import Column, String, DateTime, Integer, Float, Enum, UniqueConstraint, ForeignKey
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID, DOUBLE_PRECISION
+from sqlalchemy.dialects.postgresql import UUID
 import datetime
 
 from db.base import base
@@ -48,7 +48,7 @@ class Parameter(base):
     # name
     testcd = Column(String, nullable=False)
     #value
-    orres = Column(DOUBLE_PRECISION)
+    orres = Column(Float)
     # unit
     orresu = Column(String)
     test = Column(String)

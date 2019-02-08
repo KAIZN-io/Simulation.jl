@@ -375,11 +375,11 @@ def generate_dict_time(simulationData):
 
     for impulse in simulationData['impulses']:
         if impulse['substance'] == 'Glucose':
-            d['Glucose_impuls_start'] = float( impulse['start'] )
-            d['Glucose_impuls_end']   = float( impulse['stop'] )
+            d['Glucose_impuls_start'] =  impulse['start']
+            d['Glucose_impuls_end']   =  impulse['stop']
         elif impulse['substance'] == 'NaCl':
-            d['NaCl_impuls_start']     = float( impulse['start'] )
-            d['NaCl_impuls_firststop'] = float( impulse['stop'] )
+            d['NaCl_impuls_start']     =  impulse['start']
+            d['NaCl_impuls_firststop'] =  impulse['stop']
 
     return d
 
@@ -448,9 +448,9 @@ def sdtm(simulationData):
 
     """time points for not external stimulated models"""
     runningChit = simulationPreparation.simulationTimePoints(
-        start = float(simulationData['start']),
-        stop = float(simulationData['stop']),
-        time_steps = float(simulationData['step_size']),
+        start = simulationData['start'],
+        stop = simulationData['stop'],
+        time_steps = simulationData['step_size'],
         Glucose_impuls_start = timeDict['Glucose_impuls_start'],
         modelAffectedFromStimulus = modelAffectedFromStimuli,
     )
@@ -497,7 +497,7 @@ def sdtm(simulationData):
         initialValues = {}
         unitsForOdes = {}
         for value in simulationData['initial_value_set']:
-            initialValues[value['testcd']] = float(value['orres'])
+            initialValues[value['testcd']] = value['orres']
             unitsForOdes[value['testcd']] = value['orresu']
 
         """DataFrame initialisieren"""
@@ -519,7 +519,7 @@ def sdtm(simulationData):
                 for TESTCDAffectedByStimulus in stimulusDict.get(EXTRT)[2]:
                     """adds the right value to the right ODE"""
                     simulationFrame.loc[i[0],
-                                        TESTCDAffectedByStimulus] += float(EXDOSE)
+                                        TESTCDAffectedByStimulus] += EXDOSE
 
                 """switch for glucose adding"""
                 glucose_switch = [False]

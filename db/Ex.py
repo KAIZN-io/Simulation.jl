@@ -1,9 +1,9 @@
-from sqlalchemy import Column, String, DateTime, Integer, Enum, ForeignKey
+from sqlalchemy import Column, String, DateTime, Integer, Float, Enum, ForeignKey
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID, ARRAY, REAL, DOUBLE_PRECISION
+from sqlalchemy.dialects.postgresql import UUID, ARRAY, REAL
 import datetime
 import uuid
-import simplejson as json
+import json
 
 from db.base import base
 from values import SimulationTypes
@@ -54,10 +54,10 @@ class Ex(base):
     extrt = Column(String)
     exdose = Column(REAL)
     exdosu = Column(String)
-    exstdtc_array = Column(ARRAY(DOUBLE_PRECISION))
-    start = Column(DOUBLE_PRECISION)
-    stop = Column(DOUBLE_PRECISION)
-    step_size = Column(DOUBLE_PRECISION)
+    exstdtc_array = Column(ARRAY(Float))
+    start = Column(Float)
+    stop = Column(Float)
+    step_size = Column(Float)
     co = Column(String)
 
     def isOfType(self, otherType):
@@ -119,9 +119,9 @@ class Ex(base):
             'id': self.id,
             'uuid': str(self.uuid),
             'type': self.getTypeAsString(),
-            'start': float(self.start),
-            'stop': float(self.stop),
-            'step_size': float(self.step_size),
+            'start': self.start,
+            'stop': self.stop,
+            'step_size': self.step_size,
             'impulses': [impulse.to_dict() for impulse in self.impulses],
             'stimuli': [stimulus.to_dict() for stimulus in self.stimuli],
             'model': json.loads(self.model.json),
@@ -136,5 +136,5 @@ class Ex(base):
         return d
 
     def to_json_str(self):
-        return json.dumps(self.to_dict(), use_decimal=True)
+        return json.dumps(self.to_dict())
 

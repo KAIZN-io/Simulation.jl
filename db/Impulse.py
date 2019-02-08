@@ -1,6 +1,6 @@
-from sqlalchemy import Column, String, DateTime, Integer, UniqueConstraint, ForeignKey
+from sqlalchemy import Column, String, DateTime, Integer, Float, UniqueConstraint, ForeignKey
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID, DOUBLE_PRECISION
+from sqlalchemy.dialects.postgresql import UUID
 import datetime
 
 from db.base import base
@@ -18,8 +18,8 @@ class Impulse(base):
     ex = relationship('Ex', back_populates='impulses')
 
     substance = Column(String, nullable=False)
-    start = Column(DOUBLE_PRECISION, nullable=False)
-    stop = Column(DOUBLE_PRECISION, nullable=False)
+    start = Column(Float, nullable=False)
+    stop = Column(Float, nullable=False)
 
     __table_args__ = (
         UniqueConstraint('ex_id', 'substance', 'start', 'stop', name='Impulse_uniqe_per_simulation'),
@@ -28,7 +28,7 @@ class Impulse(base):
     def to_dict(self):
         return {
             'substance': self.substance,
-            'start': float(self.start),
-            'stop': float(self.stop)
+            'start': self.start,
+            'stop': self.stop
         }
 

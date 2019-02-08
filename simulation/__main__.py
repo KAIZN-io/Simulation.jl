@@ -1,5 +1,5 @@
 import os
-import simplejson as json
+import json
 from datetime import datetime
 
 import message_queue as mq
@@ -11,7 +11,7 @@ QUEUE_SCHEDULED_SIMULATIONS = os.environ['QUEUE_SCHEDULED_SIMULATIONS']
 QUEUE_SIMULATION_RESULTS    = os.environ['QUEUE_SIMULATION_RESULTS']
 
 def processSimulation(ch, method, properties, body):
-    simulationData = json.loads(body, use_decimal=True)
+    simulationData = json.loads(body)
     print('Simulation received, id: ' + str(simulationData['id']))
 
     print('Simulating...')

@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir --no-deps pandas
 # after installing pandas, we can install seaborn
 RUN pip install --no-cache-dir seaborn
 # packages for web
-RUN pip install --no-cache-dir psycopg2 sqlalchemy Flask Flask-WTF uuid namesgenerator pika simplejson
+RUN pip install --no-cache-dir psycopg2 sqlalchemy Flask Flask-WTF uuid namesgenerator pika
 
 # wo es losgehen soll
 ENTRYPOINT ["python"]

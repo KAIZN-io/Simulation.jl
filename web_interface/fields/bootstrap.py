@@ -1,4 +1,4 @@
-from wtforms import DecimalField, IntegerField, RadioField, BooleanField, StringField, SelectField
+from wtforms import FloatField, IntegerField, RadioField, BooleanField, StringField, SelectField
 from wtforms.widgets import TextInput
 from wtforms.widgets.html5 import NumberInput
 
@@ -17,7 +17,7 @@ class BSTextInput( TextInput ):
             kwargs['class'] = u'%s %s' % ( 'is-invalid', c )
         return super(BSTextInput, self).__call__(field, **kwargs)
 
-class BSDecimalField( DecimalField ):
+class BSFloatField( FloatField ):
     widget = BSNumberInput( step='any' )
 
 class BSIntegerField( IntegerField ):

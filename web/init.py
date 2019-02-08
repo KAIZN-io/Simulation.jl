@@ -17,9 +17,6 @@ if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
     session = ThreadScopedSession()
     base.metadata.create_all(session.getEngine())
 
-    # fill in initial values into the database
-    initializeDb()
-
     """Create folders"""
     if not os.path.isdir('SimulationPictures'):
         logger.info("Created folder `SimulationPictures`")

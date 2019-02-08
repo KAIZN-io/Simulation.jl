@@ -124,7 +124,7 @@ class Ex(base):
             'step_size': self.step_size,
             'impulses': [impulse.to_dict() for impulse in self.impulses],
             'stimuli': [stimulus.to_dict() for stimulus in self.stimuli],
-            'model': json.loads(self.model.json),
+            'model': self.model.json,
             'initial_value_set': [initial_value.to_dict() for initial_value in self.initial_value_set.values],
             'parameter_set': [parameter.to_dict() for parameter in self.parameter_set.values],
         }

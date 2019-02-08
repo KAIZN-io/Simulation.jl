@@ -1,10 +1,15 @@
+import datetime
+import logging
 from sqlalchemy import Column, String, DateTime, Integer, Float, Enum, UniqueConstraint, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
-import datetime
 
-from db.base import base
 from values import SimulationTypes
+from db.base import base
+from db.initialData import initialDataList
+
+
+logger = logging.getLogger(__name__)
 
 class ParameterSet(base):
     __tablename__ = 'parameter_set'
@@ -33,6 +38,28 @@ class ParameterSet(base):
     __table_args__ = (
         UniqueConstraint('type', 'version', name='ParameterSet_version_unique_per_type'),
     )
+
+    @classmethod
+    def initialize(cls, session):
+        for modelData in initialDataList:
+            logger.info('Initializing ' + modelData.getType().name + ' parameters...')
+
+            parameterSet = ParameterSet(
+                type = modelData.getType(),
+                version = 1,
+            )
+
+            for parameter in modelData.getParameters():
+                parameterSet.values.append(
+                    Parameter(
+                        testcd = parameter.testcd,
+                        orres  = parameter.orres,
+                        orresu = parameter.orresu,
+                        co     = parameter.comment
+                    )
+                )
+
+            session.add(parameterSet)
 
 class Parameter(base):
     __tablename__ = 'parameter'

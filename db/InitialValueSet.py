@@ -1,11 +1,15 @@
+import datetime
+import logging
 from sqlalchemy import Column, String, DateTime, Integer, Float, Enum, UniqueConstraint, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
-import datetime
 
-from db.base import base
 from values import SimulationTypes
+from db.base import base
+from db.initialData import initialDataList
 
+
+logger = logging.getLogger(__name__)
 
 class InitialValueSet(base):
     __tablename__ = 'initial_value_set'
@@ -34,6 +38,28 @@ class InitialValueSet(base):
     __table_args__ = (
         UniqueConstraint('type', 'version', name='InitialValueSet_version_unique_per_type'),
     )
+
+    @classmethod
+    def initialize(cls, session):
+        for modelData in initialDataList:
+            logger.info('Initializing ' + modelData.getType().name + ' values...')
+
+            initialValueSet = InitialValueSet(
+                type = modelData.getType(),
+                version = 1,
+            )
+
+            for value in modelData.getInitialValues():
+                initialValueSet.values.append(
+                    InitialValue(
+                        testcd = value.testcd,
+                        orres  = value.orres,
+                        orresu = value.orresu,
+                        co     = value.comment
+                    )
+                )
+
+            session.add(initialValueSet)
 
 class InitialValue(base):
     __tablename__ = 'initial_value'
@@ -65,4 +91,5 @@ class InitialValue(base):
             'orres': self.orres,
             'orresu': self.orresu
         }
+
 

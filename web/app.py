@@ -22,7 +22,7 @@ dictConfig({
 # setup flask
 app = Flask(
     'ProjectQ',
-    template_folder='web_interface/templates',
+    template_folder='web/templates',
     static_url_path='/pictures',
     static_folder='SimulationPictures'
 )

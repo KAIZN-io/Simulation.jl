@@ -55,7 +55,7 @@ services:
     environment:
       - FLASK_ENV=develompent
       - FLASK_DEBUG=1
-      - FLASK_APP=web_interface/init.py
+      - FLASK_APP=web/init.py
       - QUEUE_SCHEDULED_SIMULATIONS
 
     # for development we mount the api-server-code into the container,

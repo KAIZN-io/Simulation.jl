@@ -122,3 +122,6 @@ SimulationPictures/
 
 # test environment
 test.py
+
+# vscode
+.vscode

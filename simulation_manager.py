@@ -1,227 +1,118 @@
-import json
-import logging
-import subprocess
-import multiprocessing
-import time
-import datetime
-import uuid
-from sqlalchemy import func
+import os
+from sqlalchemy import func, desc
 
-from web_interface.simulation_form import simulation_models
-from db import Ex, sessionScope, ThreadScopedSession
-from SDTM import sdtm
+from db import Ex, Model, InitialValueSet, ParameterSet, Impulse, Stimulus
+from values import SimulationTypes
 
 
-logger = logging.getLogger(__name__)
+def getScheduledSimulations(session):
+    return session.query(Ex) \
+            .filter(Ex.finished_at == None) \
+            .order_by(desc(Ex.started_at)) \
+            .all()
 
-class SimulationManager:
-    def __init__( self ):
-        self.simulations = []
+def getFinishedSimulations(session):
+    return session.query(Ex) \
+            .filter(Ex.finished_at != None) \
+            .order_by(desc(Ex.started_at)) \
+            .all()
 
-    def start_new_simulation(self, data):
-        if not self.has_running_simulation():
-            new_simulation = Simulation(data)
-            new_simulation.start()
-            self.simulations.append(new_simulation)
+def getSimulationFromFormData(session, formData):
+    modelType = SimulationTypes(formData['model'])
 
-    def get_running_simulations(self):
-        return [sim for sim in self.simulations if sim.is_running()]
+    model = session.query(Model) \
+            .filter(Model.type == modelType) \
+            .filter(Model.version == 1) \
+            .one()
 
-    def get_finished_simulations(self):
-        return [sim for sim in self.simulations if not sim.is_running()]
+    initialValueSet = session.query(InitialValueSet) \
+            .filter(InitialValueSet.type == modelType) \
+            .filter(InitialValueSet.version == 1) \
+            .one()
 
-    def has_running_simulation(self):
-        return len(self.get_running_simulations()) > 0
+    parameterSet = session.query(ParameterSet) \
+            .filter(ParameterSet.type == modelType) \
+            .filter(ParameterSet.version == 1) \
+            .one()
 
-class SimulationProcess(multiprocessing.Process):
-    def __init__(self, uuid, dicts = {}):
-        super(SimulationProcess, self).__init__()
-        self.uuid = uuid
-        self.dicts = dicts
+    ex = Ex(
+        name              = formData['name'],
 
-    def run(self):
-        logger.info('Simulation process started')
+        model_id             = model.id,
+        model                = model,
+        initial_value_set_id = initialValueSet.id,
+        initial_value_set    = initialValueSet,
+        parameter_set_id     = parameterSet.id,
+        parameter_set        = parameterSet,
 
-        # create a new thread scoped session
-        session = ThreadScopedSession()
-        logger.debug('session id: ' + str(id(session)))
+        hog_signal_type   = formData['hog_signal_type'],
+        hog_nacl_impulse  = formData['hog_nacl_impulse'],
 
-        # prepare args and call sdtm
-        self.dicts['uuid'] = str(self.uuid)
-        sdtm(self.dicts)
-
-        # cleaning up
-        session.remove()
-
-        logger.info('Simulation process ended')
-
-class Simulation:
-    def __init__(self, data):
-        self.name = data['name']
-        self.uuid = uuid.uuid4()
-        self.data = get_simulation_data_from_form(data)
-        self.created_at = datetime.datetime.now()
-        self.started_at = None
-        self.model = data['model']
-
-        self.process = SimulationProcess(
-            uuid=self.uuid,
-            dicts=self.data.generate_dicts()
-        )
-
-    def start(self):
-        self.process.start()
-        self.started_at = datetime.datetime.now()
-
-    def is_running(self):
-        return self.process.is_alive()
-
-    def get_picture_name(self):
-        with sessionScope() as session:
-            q = session.query(Ex.image_path).filter(Ex.uuid == self.uuid)
-        return q.scalar()
-
-class SimulationData:
-    def __init__(self, name, model, start, stop, step_size, impulses, stimuli ):
-        self.name = name
-        self.model = model
-
-        self.start = start
-        self.stop = stop
-        self.step_size = step_size
-
-        self.impulses = impulses
-        self.stimuli = stimuli
-
-    def get_model_name(self):
-        return simulation_models[self.model]
-
-    def generate_dict_model_switch(self):
-        return {
-            'combined_models' : self.model == 'combined_models',
-            'hog'             : self.model == 'hog',
-            'ion'             : self.model == 'ion',
-            'volume'          : self.model == 'volume',
-        }
-
-    def generate_dict_time(self):
-        return {
-            'start'                 : self.start,
-            'stop'                  : self.stop,
-            'time_steps'            : str( self.step_size ),
-            'Glucose_impuls_start'  : str( self.impulses['Glucose'].start ),
-            'Glucose_impuls_end'    : str( self.impulses['Glucose'].stop ),
-            'NaCl_impuls_start'     : str( self.impulses['NaCl'].start ),
-            'NaCl_impuls_firststop' : str( self.impulses['NaCl'].stop ),
-        }
-
-    def generate_dict_uniqe_EXSTDTC(self):
-        dict_unique_EXSTDTC = {}
-
-        for stimulus in self.stimuli:
-            dict_unique_EXSTDTC[ stimulus.substance ] = stimulus.timing
-
-        return dict_unique_EXSTDTC
-
-    def generate_dict_stimulus(self):
-        dict_stimulus = {
-            'NaCl_impuls' : [200, 'mM'],
-            'signal_type' : [2],
-        }
-
-        for stimulus in self.stimuli:
-            dict_stimulus[ stimulus.substance ] = stimulus.get_as_array()
-
-        return dict_stimulus
-
-    def generate_dict_system_switch(self):
-        return {
-            'export_data_to_sql': True,
-            'export_terms_data_to_sql': False,
-            'specificInitValuesVersionSEQ': [1],
-            'specificModelVersionSEQ': [1],
-            'specificParameterVersionSEQ': [1]
-        }
-
-    def generate_dicts(self):
-        return {
-            'dict_model_switch'   : self.generate_dict_model_switch(),
-            'dict_time'           : self.generate_dict_time(),
-            'dict_unique_EXSTDTC' : self.generate_dict_uniqe_EXSTDTC(),
-            'dict_stimulus'       : self.generate_dict_stimulus(),
-            'dict_system_switch'  : self.generate_dict_system_switch()
-        }
-
-class Impulse:
-    def __init__(self, substance, start, stop):
-        self.substance = substance
-        self.start = start
-        self.stop = stop
-
-class Stimulus:
-    def __init__(self, substance, amount, unit, target, timing, active):
-        self.substance = substance
-        self.amount = amount
-        self.unit = unit
-        self.target = target
-        self.timing = timing
-        self.active = active
-
-    def get_as_array(self):
-        return [ [ self.amount ], self.unit, self.target, self.active ]
-
-def get_simulation_data_from_form(form_data):
-    return SimulationData(
-        name = form_data['name'],
-        model = form_data['model'],
-
-        start = form_data['start'],
-        stop = form_data['stop'],
-        step_size = form_data['step_size'],
-
-        impulses = get_impulses_from_form_data(form_data),
-        stimuli = get_stimuli_from_form_data(form_data)
+        studyid           = 'Yeast_BSc',
+        usubjid           = modelType.name,
+        excat             = 'Salz',
+        domain            = "ex",
+        exdosu            = "mM",
+        start             = formData['start'],
+        stop              = formData['stop'],
+        step_size         = formData['step_size'],
+        co                = "exstdtc in Sekunden",
     )
 
-def get_impulses_from_form_data(form_data):
-    return {
-        'Glucose': Impulse(
-            substance = 'Glucose',
-            start = form_data['glucose_impulse_start'],
-            stop = form_data['glucose_impulse_stop']
-        ),
-        'NaCl': Impulse(
-            substance = 'NaCl',
-            start = form_data['nacl_impulse_start'],
-            stop = form_data['nacl_impulse_stop']
-        )
-    }
+    session.add(ex)
 
-def get_stimuli_from_form_data(form_data):
-    return [
-        Stimulus(
-            substance = 'KCl',
-            amount = form_data['kcl_amount'],
-            unit = 'mM',
-            target = ['K_out', 'Cl_out'],
-            timing = [ int( e ) for e in form_data['kcl_timing'].split(',') ],
-            active = form_data['kcl_active']
-        ),
-        Stimulus(
+    if ex.isAnyOf([SimulationTypes.combined, SimulationTypes.ion]):
+        ex.impulses.append(Impulse(
+            substance = 'Glucose',
+            start = formData['glucose_impulse_start'],
+            stop = formData['glucose_impulse_stop']
+        ))
+
+    if ex.isOfType(SimulationTypes.hog):
+        ex.impulses.append(Impulse(
             substance = 'NaCl',
-            amount = form_data['nacl_amount'],
-            unit = 'mM',
-            target = ['Na_out', 'Cl_out'],
-            timing = [ int( e ) for e in form_data['nacl_timing'].split(',') ],
-            active = form_data['nacl_active']
-        ),
-        Stimulus(
-            substance = 'Sorbitol',
-            amount = form_data['sorbitol_amount'],
-            unit = 'mM',
-            target = ['Sorbitol_out'],
-            timing = [ int( e ) for e in form_data['sorbitol_timing'].split(',') ],
-            active = form_data['sorbitol_active']
-        ),
-    ]
+            start = formData['nacl_impulse_start'],
+            stop = formData['nacl_impulse_stop']
+        ))
+
+    kcl_stimulus = Stimulus(
+        substance = 'KCl',
+        amount = formData['kcl_amount'],
+        unit = 'mM',
+        targets = ['K_out', 'Cl_out'],
+        timings = [ int( e ) for e in formData['kcl_timing'].split(',') ],
+        active = formData['kcl_active']
+    )
+    if formData['kcl_active'] and isStimulusAffectingSimulation(kcl_stimulus, ex):
+        ex.stimuli.append(kcl_stimulus)
+
+    nacl_stimulus = Stimulus(
+        substance = 'NaCl',
+        amount = formData['nacl_amount'],
+        unit = 'mM',
+        targets = ['Na_out', 'Cl_out'],
+        timings = [ int( e ) for e in formData['nacl_timing'].split(',') ],
+        active = formData['nacl_active']
+    )
+    if formData['nacl_active'] and isStimulusAffectingSimulation(nacl_stimulus, ex):
+        ex.stimuli.append(nacl_stimulus)
+
+    sorbitol_stimulus = Stimulus(
+        substance = 'Sorbitol',
+        amount = formData['sorbitol_amount'],
+        unit = 'mM',
+        targets = ['Sorbitol_out'],
+        timings = [ int( e ) for e in formData['sorbitol_timing'].split(',') ],
+        active = formData['sorbitol_active']
+    )
+    if formData['sorbitol_active'] and isStimulusAffectingSimulation(sorbitol_stimulus, ex):
+        ex.stimuli.append(sorbitol_stimulus)
+
+    return ex
+
+def isStimulusAffectingSimulation(stimulus, simulation):
+    assert isinstance(stimulus, Stimulus)
+    assert isinstance(simulation, Ex)
+
+    return set(stimulus.targets).issubset(simulation.getOdeNames())
 

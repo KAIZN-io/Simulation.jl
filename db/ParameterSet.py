@@ -1,6 +1,6 @@
-from sqlalchemy import Column, String, DateTime, Integer, Enum, UniqueConstraint, ForeignKey
+from sqlalchemy import Column, String, DateTime, Integer, Float, Enum, UniqueConstraint, ForeignKey
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID, DOUBLE_PRECISION
+from sqlalchemy.dialects.postgresql import UUID
 import datetime
 
 from db.base import base
@@ -45,13 +45,23 @@ class Parameter(base):
     set_id = Column(Integer, ForeignKey('parameter_set.id'), nullable=False)
     set = relationship('ParameterSet', back_populates='values')
 
+    # name
     testcd = Column(String, nullable=False)
-    test = Column(String)
-    orres = Column(DOUBLE_PRECISION)
+    #value
+    orres = Column(Float)
+    # unit
     orresu = Column(String)
+    test = Column(String)
     co = Column(String)
 
     __table_args__ = (
         UniqueConstraint('set_id', 'testcd', name='Parameter_testcd_unique_per_set'),
     )
+
+    def to_dict(self):
+        return {
+            'testcd': self.testcd,
+            'orres': self.orres,
+            'orresu': self.orresu
+        }
 

@@ -1,10 +1,10 @@
 from flask import Blueprint, render_template, redirect
 
-from simulation_manager import SimulationManager
+import simulation_manager as sm
+import message_queue as mq
 from simulation_form import SimulationForm
+from db import sessionScope
 
-
-sm = SimulationManager()
 
 routes = Blueprint('routes', __name__)
 
@@ -15,23 +15,33 @@ def home():
 @routes.route('/simulation/neu',  methods=['GET', 'POST'])
 def start():
     form = SimulationForm()
-    if form.validate_on_submit() and not sm.has_running_simulation():
-        sm.start_new_simulation(data=form.data)
+
+    if form.validate_on_submit():
+
+        with sessionScope() as session:
+            simulation = sm.getSimulationFromFormData(session, form.data)
+            session.commit()
+            mq.scheduleSimulation(simulation)
+
         return redirect('/simulation')
-    return render_template(
-        'simulation/form.html',
-        form=form,
-        was_validated=True,
-        has_running_simulation = sm.has_running_simulation()
-    )
+
+    else:
+        return render_template(
+            'simulation/form.html',
+            form=form,
+            was_validated=True
+        )
 
 @routes.route('/simulation')
 def running():
-    running_simulations = sm.get_running_simulations()
-    finished_simulations = sm.get_finished_simulations()
-    return render_template(
-        'simulation/overview_active.html',
-        running_simulations=running_simulations,
-        finished_simulations=finished_simulations
-    )
+
+    with sessionScope() as session:
+        scheduled_simulations = sm.getScheduledSimulations(session)
+        finished_simulations = sm.getFinishedSimulations(session)
+
+        return render_template(
+            'simulation/overview_active.html',
+            scheduled_simulations=scheduled_simulations,
+            finished_simulations=finished_simulations
+        )
 

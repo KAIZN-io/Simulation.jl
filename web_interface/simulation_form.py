@@ -2,7 +2,7 @@ import namesgenerator
 from wtforms.validators import InputRequired, NumberRange, Length
 from flask_wtf import FlaskForm
 
-from fields import BSDecimalField, BSIntegerField, BSRadioField, BSBooleanField, BSNumberInput, BSStringField, BSSelectField
+from fields import BSFloatField, BSIntegerField, BSRadioField, BSBooleanField, BSNumberInput, BSStringField, BSSelectField
 from fields.validators import NumberRangeExclusive, BiggerOrEqualToField, BiggerThanField, SmallerThanField, IntegerList, Conditional
 
 
@@ -60,7 +60,7 @@ class SimulationForm( FlaskForm ):
         ],
         widget     = BSNumberInput( min=0, step=0.01 )
     )
-    step_size = BSDecimalField(
+    step_size = BSFloatField(
         label      = 'Schrittgröße',
         default    = 0.1,
         validators = [
@@ -70,7 +70,7 @@ class SimulationForm( FlaskForm ):
         widget     = BSNumberInput( min=0.01, step=0.01 )
     )
 
-    glucose_impulse_start = BSDecimalField(
+    glucose_impulse_start = BSFloatField(
         label      = 'Start des Glucoseimpuls',
         default    = 1,
         validators = [
@@ -82,7 +82,7 @@ class SimulationForm( FlaskForm ):
         ],
         widget=BSNumberInput(min=0, step=0.01)
     )
-    glucose_impulse_stop = BSDecimalField(
+    glucose_impulse_stop = BSFloatField(
         label      = 'Ende des Glucoseimpuls',
         default    = 13,
         validators = [
@@ -95,7 +95,7 @@ class SimulationForm( FlaskForm ):
         widget=BSNumberInput(min=0, step=0.01)
     )
 
-    nacl_impulse_start = BSDecimalField(
+    nacl_impulse_start = BSFloatField(
         label      = 'Start des NaCl-Impuls',
         default    = 30,
         validators = [
@@ -112,7 +112,7 @@ class SimulationForm( FlaskForm ):
         ],
         widget     = BSNumberInput( min=0, step=0.01 )
     )
-    nacl_impulse_stop = BSDecimalField(
+    nacl_impulse_stop = BSFloatField(
         label      = 'Ende des NaCl-Impuls',
         default    = 10,
         validators = [
@@ -129,7 +129,7 @@ class SimulationForm( FlaskForm ):
         ],
         widget     = BSNumberInput( min=0, step=0.01 )
     )
-    hog_nacl_impulse = BSDecimalField(
+    hog_nacl_impulse = BSFloatField(
         label      = 'NaCl Impuls',
         default    = 200,
         validators = [

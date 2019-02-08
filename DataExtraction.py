@@ -14,6 +14,7 @@ class DataExtraction:
         t,
         dataForSimulation,
         nameOfModel,
+        model,
         Glucose_impuls_start,
         Glucose_impuls_end,
         glucose_switch,
@@ -44,13 +45,8 @@ class DataExtraction:
             except:
                 print(columnNames[i], initialValues[i], 'time:', t)
 
-        """get the model system from the json file"""
-        with open('Single_Models/json_files/{0}_system.json'.format(
-                nameOfModel)) as jsonData:
-            dataFromJson = json.load(jsonData)
-
         """activate the model system"""
-        for typeOfEquation, modelSpecies in dataFromJson.items():
+        for typeOfEquation, modelSpecies in model.items():
             if typeOfEquation == 'copa':
                 for copaName, copaTerm in modelSpecies.items():
 
@@ -123,6 +119,7 @@ class DataExtraction:
 
     def callSimulation(
         nameOfModel,
+        model,
         Glucose_impuls_start,
         Glucose_impuls_end,
         glucose_switch,
@@ -143,6 +140,7 @@ class DataExtraction:
             args = (
                 dataForSimulation,
                 nameOfModel,
+                model,
                 Glucose_impuls_start,
                 Glucose_impuls_end,
                 glucose_switch,

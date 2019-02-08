@@ -1,14 +1,9 @@
-# the version of the docker-compose file
 version: "2.1"
 
-# list of services - meaning containers - to be managed by docker-compose
 services:
 
-  # the user-db container
   db:
-
     image: postgres
-
     volumes:
       - user-db:/var/lib/postgresql/data/
 
@@ -16,8 +11,6 @@ services:
     # legt Databank simulation_results an
     environment:
       - POSTGRES_DB=simulation_results
-      # - POSTGRES_USER=${DB_USERNAME}
-      # - POSTGRES_PASSWORD=${DB_PASSWORD}
 
     # this defines how this container will be rated as "healthy"
     # definiert, wann die Datenbank hochgefahren ist
@@ -40,8 +33,8 @@ services:
         aliases:
           - "db_postgres"
 
-  sdtm:
-    image: janpiotraschke/projectq:0.2.2
+  web:
+    image: janpiotraschke/projectq:0.2.2-task-queue-tmp
 
     # was sdtm braucht: ein hochgefahrene Datenbank (in diesem Beispiel)
     # wie Verzweigungen zwischen Programmen auslegen
@@ -49,8 +42,12 @@ services:
       # the status of the api-db needs to be healthy (see above)
       db:
         condition: service_healthy
-
-    # restart: on-failure
+      task-queue:
+        condition: service_healthy
+      simulation:
+        condition: service_started
+      result-worker:
+        condition: service_started
 
     ports:
       - "8080:5000"
@@ -59,8 +56,10 @@ services:
       - FLASK_ENV=develompent
       - FLASK_DEBUG=1
       - FLASK_APP=web_interface/init.py
+      - QUEUE_SCHEDULED_SIMULATIONS
 
-    # for development we mount the api-server-code into the container, this way changes made to the code are directly synced with the container
+    # for development we mount the api-server-code into the container,
+    # this way changes made to the code are directly synced with the container
     volumes:
       # in welchen Pfad ich mich befinde : WORKDIR von Dockerfile
       - ./:/ProjektQ/
@@ -68,10 +67,39 @@ services:
     # Befehl der and ENTRYPOINT aus dem Image dran gehangen wird.
     command: ["-m", "flask", "run", "--host=0.0.0.0"]
 
-    networks:
-      default:
-        # aliases:
-        #   - ${API_SERVER_HOSTNAME}
+  result-worker:
+    image: janpiotraschke/projectq:0.2.2-task-queue-tmp
+    depends_on:
+      db:
+        condition: service_healthy
+      task-queue:
+        condition: service_healthy
+    environment:
+      - QUEUE_SIMULATION_RESULTS
+    volumes:
+      - ./:/ProjektQ/
+    command: ["-u", "-m", "result_worker"]
+
+  simulation:
+    image: janpiotraschke/projectq:0.2.2-task-queue-tmp
+    depends_on:
+      task-queue:
+        condition: service_healthy
+    environment:
+      - QUEUE_SCHEDULED_SIMULATIONS
+      - QUEUE_SIMULATION_RESULTS
+    volumes:
+      - ./:/ProjektQ/
+    working_dir: /ProjektQ
+    command: ["-u", "-m", "simulation"]
+
+  task-queue:
+    image: rabbitmq:3.7.11-rc.2-alpine
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 15s
+      timeout: 3s
+      retries: 8
 
 # Eigenart von docker-compose file; hier nochmal die verwendeten volumes angeben
 volumes:

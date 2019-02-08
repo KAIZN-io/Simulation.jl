@@ -3,23 +3,30 @@ __email__ = 'jan.piotraschke@mail.de'
 __version__ = 'bachelor_thesis'
 __license__ = 'private'
 
-import sys
 import logging
-import uuid
 from decimal import Decimal
-from sqlalchemy import func
 
-from db import Ex, Pd, ParameterSet, Parameter, InitialValueSet, InitialValue, sessionScope
-from initializeModel import initializeDb
-from values import SimulationTypes
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import itertools
+
 from DataExtraction import DataExtraction
-from Model import Model
-
-"""import the standard used packages"""
-exec(open("SYSTEM/py_packages.py").read())
+from values import SimulationTypes
 
 
 logger = logging.getLogger(__name__)
+
+
+NOT_TO_VISUALIZE = [
+    'Yt', 'z1', 'z2', 'z3', 'z4', 'L_ArH', 'L_HH', 'Na_in', 'Na_out', 'K_out', 'K_in', 'Cl_out',
+    'H_in', 'H_out', 'ATP', 'Hog1PPc', 'Hog1c', 'Hog1n', 'Pbs2', 'Pbs2PP', 'R_ref', 'r_os',
+    'r_b', 'c_i', 'Sorbitol_out'
+]
+
+STUDYID = 'Yeast_BSc'
+EXCAT = 'Salz'
 
 # TODO: this class should be removed from SDTM.py
 class DataVisualization:
@@ -27,7 +34,7 @@ class DataVisualization:
         pass
 
     def plotTimeSeries(
-        model,
+        simulationData,
         SEQ,
         timeSeriesData=pd.DataFrame(),
         subplotLogic={},
@@ -81,7 +88,7 @@ class DataVisualization:
         """x axis is shared and the ticks are rotated"""
         fig.autofmt_xdate(bottom=0.2,
                             rotation=30)
-        fig.suptitle(t='{}_Model'.format(model.getTypeAsString().title()),
+        fig.suptitle(t='{}_Model'.format(simulationData['type'].title()),
                         fontsize=fontSize)
 
         # fig.suptitle(t='Volume',
@@ -113,7 +120,7 @@ class DataVisualization:
 
                     for i in substance:
 
-                        if model.isOfType('combined_models') and i == 'Hog1PPn':
+                        if simulationData['type'] == 'combined_models' and i == 'Hog1PPn':
                             exec(
                                 "ax{}.plot(timeSeriesData[i],label='Hog1PPn (*1E7)')".format(axis_index))
 
@@ -138,7 +145,7 @@ class DataVisualization:
 
             """"save the plot"""
 
-            pictureName = '{0}_{1}.png'.format(model.getTypeAsString(), SEQ)
+            pictureName = '{0}_{1}.png'.format(simulationData['type'], SEQ)
             plt.savefig('SimulationPictures/{0}'.format(pictureName),
                         dpi=360,
                         format='png',
@@ -162,7 +169,6 @@ class DataVisualization:
             return pictureName
 
     def prepareVisualization(
-        dict_visualisation,
         sql_USUBJID='',
         ODE_RESULTS=pd.DataFrame(),
         PDORRESU_x={}
@@ -176,13 +182,12 @@ class DataVisualization:
         # TEMP: temporary solution; PDORRESU = PDORRESU_x because otherwise it
         # overwrites the simulationSettingsForTimeRange['units'] dict --> local/global variable problem?
         if sql_USUBJID == 'combined_models':
-            NotToVisualize = dict_visualisation.get('not_to_visualize')
             columnsOfDataframe = ODE_RESULTS.columns.tolist()
 
             ColumnsToVisualize = list(
-                set(columnsOfDataframe) - set(NotToVisualize))
+                set(columnsOfDataframe) - set(NOT_TO_VISUALIZE))
 
-            for i in NotToVisualize:
+            for i in NOT_TO_VISUALIZE:
                 ODE_RESULTS = ODE_RESULTS.drop(columns=[i])
 
             PDORRESU = {
@@ -231,13 +236,13 @@ class DataVisualization:
         return ODE_RESULTS, groupedPDORRESU
 
 class SimulationPreparation:
-    def __init__(self, model):
-        self.model = model
+    def __init__(self, simulationData):
+        self.simulationData = simulationData
         self.usedStimulusWithConcentration = None
         self.stimulusTimePoints = None
 
     def isModelAffected(self, stimulusDict, activatedStimulus=[]):
-        affectedModelFromStimulus = False
+        modelAffectedFromStimulus = False
 
         """iterating over all activated stimuli"""
         for i in activatedStimulus:
@@ -246,10 +251,13 @@ class SimulationPreparation:
             target = stimulusDict.get(i)[2]
 
             """if the targets are in the specific model"""
-            if set(target).issubset(self.model.getODENames()) == True:
-                affectedModelFromStimulus = True
+            if set(target).issubset(self.getOdeNames()) == True:
+                modelAffectedFromStimulus = True
 
-        return affectedModelFromStimulus
+        return modelAffectedFromStimulus
+
+    def getOdeNames(self):
+        return [value['testcd'] for value in self.simulationData['initial_value_set']]
 
     def rulesForStimulus(self, stimulusDict={}, stimulusTimePoints={}):
         self.stimulusTimePoints = {}
@@ -258,7 +266,7 @@ class SimulationPreparation:
 
         """iterate over all available stimulus"""
         for key, values in stimulusDict.items():
-            if values[-1] == True:
+            if values[-1] is True:
                 """get the concentrations"""
                 # TEMP: bad way, because this only allows one kind of concentrations
                 stimulusConcentrations.append(values[0])
@@ -281,14 +289,14 @@ class SimulationPreparation:
         start,
         stop,
         Glucose_impuls_start,
-        affectedModelFromStimulus,
+        modelAffectedFromStimulus,
         time_steps,
     ):
         """the 'universal' time list"""
         simulationTimePoints = [start, stop]
 
         # TEMP : bad way
-        if self.model.isAnyOf(['combined_models', 'ion']):
+        if self.simulationData['type'] in ['combined_models', 'ion']:
             simulationTimePoints.append(Glucose_impuls_start)
 
         runningChit = []
@@ -297,7 +305,7 @@ class SimulationPreparation:
             for singleDose in DOSE_list:
                 """for every dose volume a new Simulation"""
 
-                if affectedModelFromStimulus == True:
+                if modelAffectedFromStimulus == True:
 
                     """all the time points for this stimulus"""
                     simulationTimePoints.extend(self.stimulusTimePoints[TRT])
@@ -315,7 +323,7 @@ class SimulationPreparation:
                                             for i, j in zip(simulationTimePoints[0::], simulationTimePoints[1::])
                                             ]
 
-                dict_runningChit = {'name': self.model.getTypeAsString(),
+                dict_runningChit = {'name': self.simulationData['type'],
                                      'EXTRT': TRT,
                                      'EXDOSE': singleDose,
                                      'EXSTDTC': self.stimulusTimePoints[TRT],
@@ -331,89 +339,106 @@ class SimulationPreparation:
                 """append to the rest of the toodo simulation"""
                 runningChit.append(dict_runningChit)
 
-                if affectedModelFromStimulus == False:
+                if modelAffectedFromStimulus == False:
                     break
-            if affectedModelFromStimulus == False:
+            if modelAffectedFromStimulus == False:
                 break
+        if not runningChit:
+            runningChit = [{
+                'results': [np.arange(start, stop, time_steps)]
+            }]
         return runningChit
 
+def getOdeNames(initialValueSet):
+    return [value['testcd'] for value in initialValueSet]
 
-class Simulation():
-    def __init__(self):
-        pass
+def isModelAffectedFromStimuli(odeNames, stimuli):
+    for stimulus in stimuli:
+        if set(stimulus['targets']).issubset(odeNames):
+            return True
 
+    return False
 
-def sdtm(args):
-    logger.debug(args)
+def getActiveStimuli(stimuli):
+    return [stimulus for stimulus in stimuli if stimulus['active'] is True]
 
-    dict_visualisation = {
+def getActiveImpulses(type, impulses):
+    i = []
+    for impulse in impulses:
+        if impulse['substance'] is not 'NaCl' or type is SimulationTypes.hog:
+            i.append(impulse)
 
-        'not_to_visualize': ['Yt', 'z1', 'z2', 'z3', 'z4', 'L_ArH', 'L_HH',
-                             'Na_in', 'Na_out', 'K_out', 'K_in',
-                             'Cl_out', 'H_in', 'H_out', 'ATP', 'Hog1PPc',
-                             'Hog1c', 'Hog1n', 'Pbs2', 'Pbs2PP', 'R_ref', 'r_os', 'r_b', 'c_i', 'Sorbitol_out'],
+    return i
+
+def generate_dict_time(simulationData):
+    d = {}
+
+    for impulse in simulationData['impulses']:
+        if impulse['substance'] == 'Glucose':
+            d['Glucose_impuls_start'] =  impulse['start']
+            d['Glucose_impuls_end']   =  impulse['stop']
+        elif impulse['substance'] == 'NaCl':
+            d['NaCl_impuls_start']     =  impulse['start']
+            d['NaCl_impuls_firststop'] =  impulse['stop']
+
+    return d
+
+def generate_dict_uniqe_EXSTDTC(simulationData):
+    dict_unique_EXSTDTC = {}
+
+    for stimulus in simulationData['stimuli']:
+        dict_unique_EXSTDTC[ stimulus['substance'] ] = stimulus['timings']
+
+    return dict_unique_EXSTDTC
+
+def generate_dict_stimulus(simulationData):
+    dict_stimulus = {
+        'NaCl_impuls' : [simulationData.get('nacl_impulse'), 'mM'],
+        'signal_type' : [simulationData.get('signal_type')],
     }
 
-    """momentanes arbeitsverzeichnis = cwd"""
-    cwd = os.getcwd()
+    for stimulus in simulationData['stimuli']:
+        dict_stimulus[ stimulus['substance'] ] = [
+            [ stimulus['amount'] ],
+            stimulus['unit'],
+            stimulus['targets'],
+            stimulus['active']
+        ]
 
-    STUDYID = 'Yeast_BSc'
-    EXCAT = 'Salz'
+    return dict_stimulus
 
+def generate_dict_system_switch(simulationData):
+    return {
+        'export_data_to_sql': True,
+        'export_terms_data_to_sql': False,
+        'specificInitValuesVersionSEQ': [1],
+        'specificModelVersionSEQ': [1],
+        'specificParameterVersionSEQ': [1]
+    }
+
+def sdtm(simulationData):
+
+    odeNames = getOdeNames(simulationData['initial_value_set'])
+    type = SimulationTypes(simulationData['type'])
+    stimuli = getActiveStimuli(simulationData['stimuli'])
+    impulses = getActiveImpulses(type, simulationData['impulses'])
+    modelAffectedFromStimuli = isModelAffectedFromStimuli(odeNames, stimuli)
+
+    dict_time = generate_dict_time(simulationData)
     timeDict = {
-        'start': float(args['dict_time']['start']),
-        'stop': float(args['dict_time']['stop']),
-        'time_steps': float(args['dict_time']['time_steps']),
-        'Glucose_impuls_start': float(args['dict_time']['Glucose_impuls_start']),
-        'Glucose_impuls_end': float(args['dict_time']['Glucose_impuls_end']),
-        'NaCl_impuls_start': float(args['dict_time']['NaCl_impuls_start']),
-        'NaCl_impuls_firststop': float(args['dict_time']['NaCl_impuls_firststop']),
+        'Glucose_impuls_start': dict_time.get('Glucose_impuls_start') or 0,
+        'Glucose_impuls_end': dict_time.get('Glucose_impuls_end') or 0,
+        'NaCl_impuls_start': dict_time.get('NaCl_impuls_start') or 0,
+        'NaCl_impuls_firststop': dict_time.get('NaCl_impuls_firststop') or 0,
     }
-    # TODO: will be replaced with enum
-    dict_model_switch = args['dict_model_switch']
-    uniqueEXSTDTC = args['dict_unique_EXSTDTC']
-    stimulusDict = args['dict_stimulus']
-    systemSwitchDict = args['dict_system_switch']
+    uniqueEXSTDTC = generate_dict_uniqe_EXSTDTC(simulationData)
+    stimulusDict = generate_dict_stimulus(simulationData)
+    systemSwitchDict = generate_dict_system_switch(simulationData)
 
-    """make the dict keys as new variables"""
-    locals().update(timeDict)
+    signal_type = stimulusDict.get('signal_type')[0] or 0
+    NaCl_impuls = stimulusDict.get('NaCl_impuls')[0] or 0
 
-    signal_type = stimulusDict.get('signal_type')[0]
-    NaCl_impuls = stimulusDict.get('NaCl_impuls')[0]
-
-    """host name taken from docker-compose.yml"""
-    conn = psycopg2.connect(
-        host='db_postgres',
-        user='postgres',
-        dbname='simulation_results'
-    )
-
-    """open a cursor to perform database operations"""
-    cur = conn.cursor()
-
-    model = Model.getModelFromDb(
-        typeAsString = [i for i, j in dict_model_switch.items() if j == True][0],
-        version = args['dict_system_switch']['specificModelVersionSEQ'][0],
-        initialValueVersion = args['dict_system_switch']['specificInitValuesVersionSEQ'][0],
-        parameterVersion = args['dict_system_switch']['specificParameterVersionSEQ'][0]
-    )
-
-    model.updateLocalJsonModel()
-
-    """activated stimuli
-
-    find out which stimulus pipeline is opened for the experiment series
-    """
-    activated_stimuli = [stimulus_name for stimulus_name, items
-                         in stimulusDict.items() if items[-1] == True]
-
-    simulationPreparation = SimulationPreparation(model)
-
-    """find out how and if the model is affected from the activated stimulus"""
-    affectedModelFromStimulus = simulationPreparation.isModelAffected(
-        stimulusDict = stimulusDict,
-        activatedStimulus=activated_stimuli,
-    )
+    simulationPreparation = SimulationPreparation(simulationData)
 
     """"if the model is effected from the stimulus --> get the stimulus settings"""
     usedStimulusWithConcentration = simulationPreparation.rulesForStimulus(
@@ -423,96 +448,59 @@ def sdtm(args):
 
     """time points for not external stimulated models"""
     runningChit = simulationPreparation.simulationTimePoints(
-        start = timeDict['start'],
-        stop = timeDict['stop'],
+        start = simulationData['start'],
+        stop = simulationData['stop'],
+        time_steps = simulationData['step_size'],
         Glucose_impuls_start = timeDict['Glucose_impuls_start'],
-        affectedModelFromStimulus = affectedModelFromStimulus,
-        time_steps = timeDict['time_steps'],
+        modelAffectedFromStimulus = modelAffectedFromStimuli,
     )
 
     """simulation
 
     the actual simulation begins
     """
-    logger.info('Simulation Type: ' + model.getTypeAsString())
+    logger.info('Simulation Type: ' + simulationData['type'])
     for simulationSettingsForTimeRange in runningChit:
 
         """initialize an empty DataFrame for each time value"""
         simulationFrame = pd.DataFrame()
 
-        with sessionScope() as session:
-            q = session.query(func.max(Ex.id))
-
-        if q.scalar():
-            SEQ = q.scalar() + 1
+        if modelAffectedFromStimuli:
+            EXTRT = simulationSettingsForTimeRange['EXTRT']
+            EXDOSE = simulationSettingsForTimeRange['EXDOSE']
+            EXSTDTC = simulationSettingsForTimeRange['EXSTDTC']
         else:
-            SEQ = 1
-
-        if affectedModelFromStimulus == False:
             EXTRT = 0
             EXDOSE = 0
             EXSTDTC = [0]
 
-        else:
-            EXTRT = simulationSettingsForTimeRange['EXTRT']
-            EXDOSE = simulationSettingsForTimeRange['EXDOSE']
-            EXSTDTC = simulationSettingsForTimeRange['EXSTDTC']
-
         EX_dict = {
-            "id": SEQ,
-            "uuid": args['uuid'],
+            "id": simulationData['id'],
+            "uuid": simulationData['uuid'],
             "studyid": STUDYID,
             "domain": "ex",
-            "usubjid": model.getTypeAsString(),
+            "usubjid": simulationData['type'],
             "excat": EXCAT,
             "extrt": EXTRT,
             "exdose": EXDOSE,
             "exdosu": "mM",
             "exstdtc_array": EXSTDTC,
-            "simulation_start": timeDict['start'],
-            "simulation_stop": timeDict['stop'],
+            "simulation_start": simulationData['start'],
+            "simulation_stop": simulationData['stop'],
             "co": "exstdtc in Sekunden",
-            "model_id": model.getId(),
-            "initial_value_set_id": model.getInitialValueSetId(),
-            "parameter_set_id": model.getParameterSetId()
+            "pds": []
         }
 
-        modelFingerprint = str(SEQ) + '_' + model.getTypeAsString()
-
-        """get the parameter from the database"""
-        with sessionScope() as session:
-            q = session.query(Parameter.testcd, Parameter.orres) \
-                    .join(ParameterSet) \
-                    .filter(ParameterSet.id == model.getParameterSetId())
-
-        TESTCD_ORRESU_tuple = q.all()
-
-        """initialValues creation"""
-        parameterAsLocalVariables = {}
-        for i in TESTCD_ORRESU_tuple:
-            parameterAsLocalVariables[i[0]] = i[1]
-
-        """make the dict keys as new variables"""
-        locals().update(parameterAsLocalVariables)
-
-        with sessionScope() as session:
-            q = session.query(InitialValue.testcd, InitialValue.orres, InitialValue.orresu) \
-                    .join(InitialValueSet) \
-                    .filter(InitialValueSet.id == model.getInitialValueSetId())
-
-        TESTCD_ORRESU_tuple = q.all()
+        modelFingerprint = str(simulationData['id']) + '_' + simulationData['type']
 
         """initialValues creation"""
         initialValues = {}
         unitsForOdes = {}
-        for i in TESTCD_ORRESU_tuple:
-            initialValues[i[0]] = i[1]
-            unitsForOdes[i[0]] = i[2]
+        for value in simulationData['initial_value_set']:
+            initialValues[value['testcd']] = value['orres']
+            unitsForOdes[value['testcd']] = value['orresu']
 
         """DataFrame initialisieren"""
-
-        simulationSettingsForTimeRange['units'] = unitsForOdes
-
         simulationFrame = pd.DataFrame([initialValues])
 
         for i in simulationSettingsForTimeRange['results']:
@@ -526,7 +514,7 @@ def sdtm(args):
             """
 
             if i[0] in EXSTDTC\
-                    and affectedModelFromStimulus == True:
+                    and modelAffectedFromStimuli == True:
 
                 for TESTCDAffectedByStimulus in stimulusDict.get(EXTRT)[2]:
                     """adds the right value to the right ODE"""
@@ -536,13 +524,14 @@ def sdtm(args):
                 """switch for glucose adding"""
                 glucose_switch = [False]
             elif i[0] == timeDict['Glucose_impuls_start'] \
-                    and affectedModelFromStimulus == True:
+                    and modelAffectedFromStimuli == True:
                 glucose_switch = [True]
             else:
                 glucose_switch = [False]
 
             simulationFrame = DataExtraction.callSimulation(
-                nameOfModel = model.getTypeAsString(),
+                nameOfModel = simulationData['type'],
+                model = simulationData['model'],
                 Glucose_impuls_start = timeDict['Glucose_impuls_start'],
                 Glucose_impuls_end = timeDict['Glucose_impuls_end'],
                 glucose_switch = glucose_switch,
@@ -555,30 +544,23 @@ def sdtm(args):
                 i=i
             )
 
-        """replace the time array with the simulation results"""
-        simulationSettingsForTimeRange['results'] = simulationFrame
-
-        """create a copy for the design of the plot"""
-        rawOdeResults = simulationSettingsForTimeRange['results']
-
         resultsForOdes, groupedPDORRESU = DataVisualization.prepareVisualization(
-            dict_visualisation = dict_visualisation,
-            sql_USUBJID=model.getTypeAsString(),
-            ODE_RESULTS=rawOdeResults,
-            PDORRESU_x=simulationSettingsForTimeRange['units']
+            sql_USUBJID=simulationData['type'],
+            ODE_RESULTS=simulationFrame,
+            PDORRESU_x=unitsForOdes
         )
 
         """plot the results, save the plot and return the pictureName"""
         pictureName = DataVisualization.plotTimeSeries(
-            model = model,
-            SEQ = SEQ,
+            simulationData = simulationData,
+            SEQ = simulationData['id'],
             timeSeriesData=resultsForOdes,
             subplotLogic=groupedPDORRESU
         )
 
         EX_dict['image_path'] = pictureName
 
-        logger.info('Simulation id: ' + str(SEQ))
+        logger.info('Simulation id: ' + str(simulationData['id']))
 
         """last step before pushing results to database
         
@@ -587,15 +569,15 @@ def sdtm(args):
 
         """round the time points"""
         roundByUsedTimeStepsgroupedPDORRESU = abs(
-            Decimal(str(timeDict['time_steps'])).as_tuple().exponent)
+            Decimal(str(simulationData['step_size'])).as_tuple().exponent)
 
-        oldTimeIndex = list(simulationSettingsForTimeRange['results'].index)
+        oldTimeIndex = list(simulationFrame.index)
         newTimeIndex = np.round(oldTimeIndex, decimals=roundByUsedTimeStepsgroupedPDORRESU)
 
-        dataframeAsMatrix = simulationSettingsForTimeRange['results'].values
-        columnsOfDataframe = simulationSettingsForTimeRange['results'].columns.tolist()
+        dataframeAsMatrix = simulationFrame.values
+        columnsOfDataframe = simulationFrame.columns.tolist()
 
-        if not model.isOfType('volume'):
+        if not simulationData['type'] == 'volume':
             def truncate(n, decimals=0):
                 multiplier = 10 ** decimals
                 return int(n * multiplier) / multiplier
@@ -621,44 +603,32 @@ def sdtm(args):
 
                 dataframeAsMatrix[x, y] = roundedValue
 
-        simulationSettingsForTimeRange['results'] = pd.DataFrame(dataframeAsMatrix,
-                                      columns=columnsOfDataframe,
-                                      index=newTimeIndex)
-
         """get less data 
         
         only get each (1/time_steps) simulation results
         """
-        simulationSettingsForTimeRange['results'] = simulationSettingsForTimeRange['results'].loc[::int(1/timeDict['time_steps'])]
+        simulationFrameFiltered = pd.DataFrame(
+            dataframeAsMatrix,
+            columns=columnsOfDataframe,
+            index=newTimeIndex
+        ) \
+                .loc[::int(1/simulationData['step_size'])]
 
-        """export the EX dict to the database"""
-        if systemSwitchDict.get('export_data_to_sql') == True:
-            with sessionScope() as session:
-                """dict to sql database"""
-                ex = Ex(**EX_dict)
+        dataframeAsDict = simulationFrameFiltered.to_dict('index')
 
-                """make the dict keys as new variables"""
-                locals().update(simulationSettingsForTimeRange)
+        for DTC, innerDict in dataframeAsDict.items():
+            for substance, value in innerDict.items():
+                EX_dict['pds'].append({
+                    'studyid' : STUDYID,
+                    'domain' : 'pd',
+                    'usubjid' : simulationData['type'],
+                    'pdtestcd' : substance,
+                    'pdtest' : None,
+                    'pdorres' : value,
+                    'pdorresu' : unitsForOdes[substance],
+                    'pddtc' : DTC,
+                    'co' : "pddtc in Sekunden",
+                })
 
-                dataframeAsDict = simulationSettingsForTimeRange['results'].to_dict('index')
+        return EX_dict
 
-                for DTC, innerDict in dataframeAsDict.items():
-                    for substance, value in innerDict.items():
-                        ex.pds.append(Pd(
-                            studyid = STUDYID,
-                            domain = 'pd',
-                            usubjid = model.getTypeAsString(),
-                            pdtestcd = substance,
-                            pdtest = None,
-                            pdorres = value,
-                            pdorresu = simulationSettingsForTimeRange['units'][substance],
-                            pddtc = DTC,
-                            co = "pddtc in Sekunden",
-                        ))
-
-                session.add(ex)
-
-            logger.info("Simulation results stored in database")
-
-    cur.close()
-    conn.close()

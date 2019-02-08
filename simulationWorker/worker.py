@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 
-import message_queue as mq
+import messageQueue as mq
 from values import RFC3339_DATE_FORMAT, QUEUE_SCHEDULED_SIMULATIONS, QUEUE_SIMULATION_RESULTS
 from simulationWorker.simulate import simulate
 

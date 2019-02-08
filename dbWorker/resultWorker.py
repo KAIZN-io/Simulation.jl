@@ -2,7 +2,7 @@ import os
 import json
 from datetime import datetime
 
-import message_queue as mq
+import messageQueue as mq
 from db import sessionScope, Ex, Pd
 from values import RFC3339_DATE_FORMAT, QUEUE_SIMULATION_RESULTS
 

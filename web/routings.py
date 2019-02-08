@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect
 
-import message_queue as mq
+import messageQueue as mq
 from db import sessionScope
 from web.simulation import getSimulationFromFormData, getScheduledSimulations, getFinishedSimulations
 from web.form import SimulationForm

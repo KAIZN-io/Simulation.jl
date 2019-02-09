@@ -15,11 +15,14 @@ volumeData = ModelData(
         P('E_3D', 2.58e6, 'Pa', 'measured Youngs modulus; Goldenbogen & Giese et al. 2016'),
         P('c_e', 240, 'mM'),
         P('pi_e', 604594.08, 'mM'),
-        P('E', 3440000.0,'Pa'),
+        P('modulus_adjustment', '(1 - nu ** 2) ** (-1)', 'dimensionless'),
+        # P('E', 3440000.0,'Pa'),
+        P('E', 'modulus_adjustment * E_3D', '', 'adjusted to 2D Young\'s modulus (surface)'),
 
         P('T', 303.15, 'K'),
         P('R', 8.314, 'J K^-1 mol^-1'),
         P('F', 96485, 'C mol^-1'),
+
     ],
     initialValues = [
         I('r_os' , 1.18773900649, 'um'),

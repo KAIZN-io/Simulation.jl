@@ -13,26 +13,26 @@ class Solver:
         initialValues,
         t,
         dataForSimulation,
-        nameOfModel,
-        model,
+        simulationData,
         Glucose_impuls_start,
         Glucose_impuls_end,
-        glucose_switch,
-        systemSwitchDict,
-        signal_type,
-        NaCl_impuls,
         NaCl_impuls_start,
         NaCl_impuls_firststop,
+        glucose_switch,
+        signal_type,
+        NaCl_impuls,
     ):
 
         resultsDictPlaceholder = {}
         resultsOfTheTerms = ()
 
-        """read the model file"""
-        exec(open(
-            'Single_Models/{0}/{0}.py'.format(nameOfModel),
-            encoding="utf-8"
-        ).read())
+        """make initial values and parameters locallly available"""
+        for value in simulationData['initial_value_set']:
+            exec('{} = {}'.format(value['testcd'], value['orres']))
+
+        for value in simulationData['parameter_set']:
+            exec('{} = {}'.format(value['testcd'], value['orres']))
+
 
         """get the Names of the ODEs"""
         columnNames = dataForSimulation.columns.tolist()
@@ -46,7 +46,7 @@ class Solver:
                 print(columnNames[i], initialValues[i], 'time:', t)
 
         """activate the model system"""
-        for typeOfEquation, modelSpecies in model.items():
+        for typeOfEquation, modelSpecies in simulationData['model'].items():
             if typeOfEquation == 'copa':
                 for copaName, copaTerm in modelSpecies.items():
 
@@ -99,36 +99,34 @@ class Solver:
         odeResultsForSolver = [j for i, j in resultsDictPlaceholder.items()]
 
         """export the individuel terms to the database"""
-        if systemSwitchDict.get('export_data_to_sql') == True\
-                and systemSwitchDict.get('export_terms_data_to_sql') == True:
-
-            """sql connection"""
-            engine = create_engine(
-                'postgres://postgres:@db_postgres:5432/simulation_results')
-
-            dictWithTerms = {}
-            for i in resultsOfTheTerms:
-                dictWithTerms[i] = eval(i)
-
-            df = pd.DataFrame(dictWithTerms, index=[t])
-
-            df.to_sql(modelFingerprint, con=engine, schema='{}_terms'.format(
-                nameOfModel), if_exists='append')
-
+        # if systemSwitchDict.get('export_data_to_sql') == True\
+        #         and systemSwitchDict.get('export_terms_data_to_sql') == True:
+ 
+        #     """sql connection"""
+        #     engine = create_engine(
+        #         'postgres://postgres:@db_postgres:5432/simulation_results')
+ 
+        #     dictWithTerms = {}
+        #     for i in resultsOfTheTerms:
+        #         dictWithTerms[i] = eval(i)
+ 
+        #     df = pd.DataFrame(dictWithTerms, index=[t])
+ 
+        #     df.to_sql(modelFingerprint, con=engine, schema='{}_terms'.format(
+        #         nameOfModel), if_exists='append')
+ 
         return odeResultsForSolver
 
     def callSimulation(
-        nameOfModel,
-        model,
+        simulationData,
         Glucose_impuls_start,
         Glucose_impuls_end,
-        glucose_switch,
-        systemSwitchDict,
-        signal_type,
-        NaCl_impuls,
         NaCl_impuls_start,
         NaCl_impuls_firststop,
-        dataForSimulation=pd.DataFrame(),
+        glucose_switch,
+        signal_type,
+        NaCl_impuls,
+        dataForSimulation=pd.DataFrame(dtype='float'),
         i=[],
     ):
 
@@ -139,16 +137,14 @@ class Solver:
             t = i,
             args = (
                 dataForSimulation,
-                nameOfModel,
-                model,
+                simulationData,
                 Glucose_impuls_start,
                 Glucose_impuls_end,
-                glucose_switch,
-                systemSwitchDict,
-                signal_type,
-                NaCl_impuls,
                 NaCl_impuls_start,
                 NaCl_impuls_firststop,
+                glucose_switch,
+                signal_type,
+                NaCl_impuls,
             )
         )
 

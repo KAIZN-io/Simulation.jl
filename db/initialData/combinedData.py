@@ -76,9 +76,12 @@ combinedData = ModelData(
         P('k_incrHH' , 3.54 * 1e-9, 'mol^2 J^-1 m^-2 s^-2'),
         P('k_incrArH' , -3.64 * 1e-9, 'mol^2 J^-1 m^-2 s^-2'),
         P('k_ATPincr' , 10, 'mol m^-3 s^-1'),
-        P('k_ATPdecr', 4.0, ''),
-        P('k_decrArH', 1.8666666666666669e-06, ''),
-        P('k_decrHH', 1.8631578947368422e-06, ''),
+        # P('k_ATPdecr', 4.0, ''),
+        P('k_ATPdecr', 'k_ATPincr / ATP_stimulus', ''),
+        # P('k_decrArH', 1.8666666666666669e-06, ''),
+        P('k_decrArH', 'k_incrArH / L_ArHaG', ''),
+        # P('k_decrHH', 1.8631578947368422e-06, ''),
+        P('k_decrHH', 'k_incrHH / L_HHaG', ''),
     ],
     initialValues = [
         # unphosphorylated Pbs2

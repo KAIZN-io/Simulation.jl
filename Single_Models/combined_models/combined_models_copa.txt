@@ -1,3 +1,0 @@
-t0_glucose = Glucose_impuls_start
-t1_glucose = Glucose_impuls_end
-Glucose = glucose_switch[0]

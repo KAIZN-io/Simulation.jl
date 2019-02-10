@@ -4,56 +4,107 @@
 
 # # Flux is the neural network framework
 # Flux finds the parameters of the neural network (p) which minimize the cost function
+# using Flux, DiffEqFlux, DifferentialEquations, Plots
 
-using Flux, DiffEqFlux, DifferentialEquations, Plots
+# # Setup ODE to optimize
+# function lotka_volterra(du,u,p,t)
+#     x, y = u
+#     α, β, δ, γ = p
+#     du[1] = dx = α*x - β*x*y
+#     du[2] = dy = -δ*y + γ*x*y
+# end
 
-u0 = Float32[2.; 0.]
-datasize = 30
-tspan = (0.0f0,1.5f0)
+# u0 = Float32[1.0; 1.0]
 
-function trueODEfunc(du,u,p,t)
-    true_A = [-0.1 2.0; -2.0 -0.1]
-    du .= ((u.^3)'true_A)'
-end
-t = range(tspan[1],tspan[2],length=datasize)
-prob = ODEProblem(trueODEfunc,u0,tspan)
-ode_data = Array(solve(prob,Tsit5(),saveat=t))
+# tspan = (0.0,5.0)
+# p = [1.5,1.0,3.0,1.0]
 
-dudt = Chain(x -> x.^3,
-             Dense(2,50,tanh),
-             Dense(50,2))
-ps = Flux.params(dudt)
-n_ode = x->neural_ode(dudt,x,tspan,Tsit5(),saveat=t,reltol=1e-7,abstol=1e-9)
+# # start:step:stop
+# t = tspan[1]:0.2:tspan[2]
 
-pred = n_ode(u0) # Get the prediction using the correct initial condition
-scatter(t,ode_data[1,:],label="data")
-scatter!(t,Flux.data(pred[1,:]),label="prediction")
+# problem = ODEProblem(lotka_volterra,u0,tspan,p)
 
-function predict_n_ode()
-  n_ode(u0)
-end
-loss_n_ode() = sum(abs2,ode_data .- predict_n_ode())
+# @info "start of the simulation"
 
-data = Iterators.repeated((), 5)
-opt = ADAM(0.1)
-cb = function () #callback function to observe training
-  display(loss_n_ode())
-  # plot current prediction against data
-  cur_pred = Flux.data(predict_n_ode())
-  pl = scatter(t,ode_data[1,:],label="data")
-  scatter!(pl,t,cur_pred[1,:],label="prediction")
-  display(plot(pl))
-end
+# odeData = Array(solve(problem,Tsit5(),saveat=t))
 
-# Display the ODE with the initial parameter values.
-cb()
+# @show typeof(odeData)
+# @info "the equation system is solved"
 
-Flux.train!(loss_n_ode, ps, data, opt, cb = cb)
+# # In Flux, we can define a multilayer perceptron with 1 hidden layer and
+# # a tanh activation function like:
+# dudt = Chain(x -> x.^3,
+#              Dense(2,50,tanh),
+#              Dense(50,2))
+# @show dudt
+
+# # we will wrap our parameters in param to be tracked by Flux
+# ps = Flux.params(dudt)
+
+# # pTest = param(p)
+# # params = Flux.Params([pTest])
+
+# # # diffeq_rd takes in parameters p for the integrand, puts it in the differential 
+# # # equation defined by prob, and solves it with the chosen arguments (solver, tolerance, etc)
+
+# # function predict_rd() # Our 1-layer neural network
+# #   diffeq_rd(pTest,prob,Tsit5(),saveat=0.1)[1,:]
+# # end
+# # @info "ps from Flux:"
+# # @info ps 
+
+# """
+# Notice that the neural_ode has the same timespan and saveat as the solution 
+# that generated the data. This means that given an x (and initial value), it will 
+# generate a guess for what it thinks the time series will be where the dynamics 
+# (the structure) is predicted by the internal neural network.
+# """
+
+# n_ode = x->neural_ode(dudt,x,tspan,Tsit5(),saveat=t,reltol=1e-7,abstol=1e-9)
+
+# # get the prediction using the correct initial condition
+# pred = n_ode(u0) 
+
+# @info Flux.data(pred)
+
+
+# # plot only the first ode (for simplification)
+# scatter(t,odeData[1,:],label="data")
+# scatter!(t,Flux.data(pred[1,:]),label="prediction")
+
+# # @show Flux.data(pred[1,:])
+
+# # define a prediciton and loss function for the model training
+# function predict_n_ode()
+#     n_ode(u0)
+# end
+
+# # loss between our prediction and data
+# loss_n_ode() = sum(abs2,odeData .- predict_n_ode())
+# # loss_fd_sde() = sum(abs2,x-1 for x in predict_fd_sde())
+
+# # train the neural network
+# data = Iterators.repeated((), 5)
+# opt = ADAM(0.1)
+# cb = function () #callback function to observe training
+#   display(loss_n_ode())
+#   # plot current prediction against data
+#   cur_pred = Flux.data(predict_n_ode())
+#   pl = scatter(t,odeData[1,:],label="data")
+#   scatter!(pl,t,cur_pred[1,:],label="prediction")
+#   display(plot(pl))
+# end
+
+# # # Display the ODE with the initial parameter values.
+# cb()
+
+# # # the actual training part
+# # Flux.train!(loss_n_ode, ps, data, opt, cb = cb)
 
 
 
 
-# SDE with neural network
+# # SDE with neural network
 # using Flux, DiffEqFlux, DifferentialEquations, Plots
 
 # function lotka_volterra(du,u,p,t)
@@ -82,7 +133,7 @@ Flux.train!(loss_n_ode, ps, data, opt, cb = cb)
 # opt = ADAM(0.1)
 # cb = function ()
 #   display(loss_fd_sde())
-# #   display(plot(solve(remake(prob,p=Flux.data(p)),SOSRI(),saveat=0.1),ylim=(0,8)))
+#   display(plot(solve(remake(prob,p=Flux.data(p)),SOSRI(),saveat=0.1),ylim=(0,8)))
 # end
 
 # # Display the ODE with the current parameter values.
@@ -103,58 +154,95 @@ Flux.train!(loss_n_ode, ps, data, opt, cb = cb)
 
 
 
-# using Flux, DiffEqFlux, DifferentialEquations, Plots
+using Flux, DiffEqFlux, DifferentialEquations, Plots
 
-# ## Setup ODE to optimize
-# function lotka_volterra(du,u,p,t)
-#   x, y = u
-#   α, β, δ, γ = p
-#   du[1] = dx = α*x - β*x*y
-#   du[2] = dy = -δ*y + γ*x*y
-# end
+# TEMP : data generation
+function lotka_volterra_experimental(du,u,p,t)
+    x, y = u
+    α, β, δ, γ = p
+    du[1] = dx = α*x - β*x*y
+    du[2] = dy = -δ*y + γ*x*y
+end
 
-# u0 = [1.0,1.0]
-# tspan = (0.0,10.0)
-# p = [1.5,1.0,3.0,1.0]
-# prob = ODEProblem(lotka_volterra,u0,tspan,p)
+u00 = Float32[1.0; 1.0]
 
+tspan0 = (0.0,10.0)
+p0 = [2.5,1.0,3.0,1.0]
 
-# # Generate data from the ODE
-# sol = solve(prob,Tsit5(),saveat=0.1)
-# A = sol[1,:] # length 101 vector
+# start:step:stop
+t0 = tspan0[1]:0.2:tspan0[2]
 
-# plot(sol)
-# # start:step:stop
-# t = 0:0.1:10.0
-# scatter!(t,A)
+problem0 = ODEProblem(lotka_volterra_experimental,u00,tspan0,p0)
+
+@info "start of the simulation"
+
+experimentalData = Array(solve(problem0,Tsit5(),saveat=t0))
+
+@info experimentalData
+
+scatter(t0,experimentalData[1,:],label="experimental data")
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+
+# Setup ODE to optimize
+function lotka_volterra(du,u,p,t)
+  x, y = u
+  α, β, δ, γ = p
+  du[1] = dx = α*x - β*x*y
+  du[2] = dy = -δ*y + γ*x*y
+end
+
+u0 = [1.01,1.0]
+tspan = (0.0,10.0)
+p = [1.5,1.0,3.0,1.0]
+prob = ODEProblem(lotka_volterra,u0,tspan,p)
+
+# start:step:stop
+t = tspan[1]:0.2:tspan[2]
+
+# Generate data from the ODE
+# saveat: Denotes specific times to save the solution at
+sol = solve(prob,Tsit5(),saveat=t)
+A = sol[1,:] # length 101 vector
+
+display(plot!(t,A,label="first ODE data"))
+
+@info "initial simulation is plotted"
 
 # # Build a neural network that sets the cost as the difference from the
 # # generated data and 1
 
-# p = param([2.2, 1.0, 2.0, 0.4]) # Initial Parameter Vector
+# Initial Parameter Vector
+neuralParameter = param(p)
+# p = param([2.2, 1.0, 2.0, 0.4]) 
 
 # # diffeq_rd takes in parameters p for the integrand, puts it in the differential 
 # # equation defined by prob, and solves it with the chosen arguments (solver, tolerance, etc)
 
-# function predict_rd() # Our 1-layer neural network
-#   diffeq_rd(p,prob,Tsit5(),saveat=0.1)[1,:]
-# end
+function predict_rd() # Our 1-layer neural network
+  diffeq_rd(neuralParameter,prob,Tsit5(),saveat=0.1)[1,:]
+end
 
-# loss_rd() = sum(abs2,x-1 for x in predict_rd()) # loss function
+loss_rd() = sum(abs2,x-1 for x in predict_rd()) # loss function
 
-# # Optimize the parameters so the ODE's solution stays near 1
-# # run 100 epoch 
-# data = Iterators.repeated((), 5)
+# Optimize the parameters so the ODE's solution stays near 1
+# run 100 iteration 
+data = Iterators.repeated((), 5)
 
-# # Now we tell Flux to train the neural network by running a 100 epoch to minimise our loss function 
-# opt = ADAM(0.1)
-# cb = function () #callback function to observe training
-#   display(loss_rd())
-#   # using `remake` to re-create our `prob` with current parameters `p`
-#   display(plot(solve(remake(prob,p=Flux.data(p)),Tsit5(),saveat=0.1),ylim=(0,6)))
-# end
+# Now we tell Flux to train the neural network by running a 100 epoch to minimise our loss function 
+# Optimiser: Descent, Momentum, Nesterov, ADAM
+opt = ADAM(0.1)
+
+# # callback function to observe training
+cb = function() 
+  # using `remake` to re-create our `prob` with current parameters `p`
+  # display only the first ODE
+  odeData = solve(remake(prob,p=Flux.data(neuralParameter)),Tsit5(),saveat=t)
+  display(plot!(odeData[1,:],ylim=(0,10)))
+end
 
 # # Display the ODE with the initial parameter values.
-# cb()
+cb()
 
-# Flux.train!(loss_rd, [p], data, opt, cb = cb)
+Flux.train!(loss_rd, [neuralParameter], data, opt, cb = cb)
+# @info "loss function: " loss_rd()

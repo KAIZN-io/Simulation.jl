@@ -1,3 +1,18 @@
+"""
+Universal Approximation Theorem states that, for enough layers or enough parameters 
+ML(x) can approximate any nonlinear function sufficiently close. 
+
+In many cases we do not know the full nonlinear equation, but we may know 
+details about its structure. 
+
+So as our machine learning models grow and are hungry for larger and larger amounts 
+of data, differential equations have become an attractive option for specifying
+nonlinearities in a learnable (via the parameters) but constrained form.
+
+They are essentially a way of incorporating prior domain-specific knowledge of 
+the structural relations between the inputs and outputs.
+"""
+
 """copy paste this code into the terminal"""
 # include("/Users/janpiotraschke/GithubRepository/ProjectQ/solver.jl")
 

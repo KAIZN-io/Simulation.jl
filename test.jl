@@ -223,7 +223,7 @@ which will be changed by the training algorithm.
 The param function converts a normal Julia array into a new object that, while 
 behaving like an array, tracks extra information that allows us to calculate derivatives
 """
-neuralParameter = param(p)
+neuralParameter = param([2., 1.0, 2.0, 0.4])
 
 """
 next we define a single layer neural network that uses the diffeq_rd layer 
@@ -231,35 +231,38 @@ function that takes the parameters and returns the solution of the x(t)
 variable
 """
 function predict_rd() 
-  diffeq_rd(neuralParameter,prob,Tsit5(),saveat=t)[1,:]
+  diffeq_rd(neuralParameter,prob,Tsit5(),saveat=t)#[1,:]
 end
 
+"""cost function"""
 # calculate the sum of the absolute squares of the entries of a vector v: sum(abs2,v)
-loss_rd() = sum(abs2,x-1 for x in predict_rd()) # loss function
+loss_rd() = sum(abs2,predict_rd()-sol)
 
-# Optimize the parameters so the ODE's solution stays near 1
-# run 100 iteration 
+# run n iteration 
 data = Iterators.repeated((), 5)
 
 # Now we tell Flux to train the neural network by running a 100 epoch to minimise our loss function 
 # Optimiser: Descent, Momentum, Nesterov, ADAM
 opt = ADAM(0.1)
 
-# # callback function to observe training
+# callback function to observe training
 cb = function() 
+
   # using `remake` to re-create our `prob` with current parameters `p`
   odeData = solve(remake(prob,p=Flux.data(neuralParameter)),Tsit5(),saveat=t)
 
   # display only the first ODE in the same figure as the data
-  display(plot(t,odeData[1,:],ylim=(0,10)))
+  scatter(t,A,color=[1],label = "first ODE data")
+  display(plot!(t,odeData[1,:],ylim=(0,10),label="fit"))
 end
 
 # Display the ODE with the initial parameter values.
 cb()
 Flux.train!(loss_rd, [neuralParameter], data, opt, cb = cb)
 
+@info "trained parameters:" neuralParameter
+@info "loss function: " loss_rd()
+
 # You may wish to save models so that they can be loaded and run in a later 
 # session. The easiest way to do this is via BSON.jl.
 # @save "mymodel.bson" neuralParameter
-
-# @info "loss function: " loss_rd()

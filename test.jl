@@ -149,10 +149,10 @@ display(plot(t,experimentalData,label="first ODE data"))
 which will be changed by the training algorithm.
 
 The param function converts a normal Julia array into a new object that, while 
-behaving like an array, tracks extra information that allows us to calculate derivatives
+behaving like an array, tracks extra information that allows us to calculate 
+derivatives
 """
 neuralParameter = param([2.2, 1.0, 2.0, 0.4])
-
 """
 Next we define a single layer neural network that uses the diffeq_rd (for ODE)
 or a diffeq_fd (for SDE) layer function that takes the parameters and 
@@ -167,15 +167,26 @@ function predict_rd()
   # diffeq_fd(neuralParameter,sol->sol[1,:],101,prob,Tsit5(),saveat=t)
 end
 
-"""cost function"""
-# calculate the sum of the absolute squares of the entries of a vector v: sum(abs2,v)
-# loss_rd() = sum(abs2,predict_rd()-sol)
-predict_rdTest= hcat(predict_rd()[:]...)'
-loss_rd() = sum(abs2,predict_rdTest- solTesttracked)
+"""cost function
+
+calculate the sum of the absolute squares of the entries of a vector v: sum(abs2,v)
+
+erklaerung: 
+predict_rd().u entspricht den Variablen Werten des Fits
+solTest sind die Messwerte
+man nimmt die Differenz von den Messpunkten des gleichen Zeitpunkt...
+und dreht die Matrix um 90 Grad mittels hcat(Matrix...), damit sum(abs2,Matrix)
+damit rechnen kann
+
+einschraenkung:
+momentan müssen die Messwerte die gleichen Zeitpunkte besitzen.
+"""
+loss_rd() = sum(abs2,hcat((predict_rd().u - solTest)...))
+
 @info "alles ok" loss_rd()
 
 # run n iteration 
-data = Iterators.repeated((), 5)
+data = Iterators.repeated((), 100)
 
 # Now we tell Flux to train the neural network by running a 100 epoch to minimise our loss function 
 # Optimiser: Descent, Momentum, Nesterov, ADAM
@@ -190,6 +201,7 @@ cb = function()
   # display only the first ODE in the same figure as the data
   scatter(t,experimentalData,color=[1],label = "first ODE data")
   display(plot!(t,odeData[1,:],ylim=(0,10),label="fit"))
+
 end
 
 Flux.train!(loss_rd, [neuralParameter], data, opt, cb = cb)

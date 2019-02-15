@@ -1,6 +1,8 @@
 # include("/Users/janpiotraschke/GithubRepository/ProjectQ/test.jl")
 # import Pkg; Pkg.add("Flux")
 # import Pkg; Pkg.add("DiffEqFlux")
+# import Pkg; Pkg.add("DifferentialEquations")
+# import Pkg; Pkg.add("Plots")
 # import Pkg; Pkg.add("BSON")
 
 # Flux is the neural network framework
@@ -8,62 +10,6 @@
 using Flux, DiffEqFlux, DifferentialEquations, Plots
 # using BSON: @save
 
-
-# # SDE with neural network
-
-# function lotka_volterra(du,u,p,t)
-#   x, y = u
-#   α, β, δ, γ = p
-#   du[1] = dx = α*x - β*x*y
-#   du[2] = dy = -δ*y + γ*x*y
-# end
-
-# function lotka_volterra_noise(du,u,p,t)
-#   du[1] = 0.1u[1]
-#   du[2] = 0.1u[2]
-# end
-
-# prob = SDEProblem(lotka_volterra,lotka_volterra_noise,[1.0,1.0],(0.0,10.0))
-# sol = solve(prob,Tsit5(),saveat=0.1)
-# p = param([2.2, 1.0, 2.0, 0.4])
-# params = Flux.Params([p])
-
-# function predict_fd_sde()
-#   diffeq_fd(p,sol->sol[1,:],101,prob,SOSRI(),saveat=0.1)
-# end
-# # loss_fd_sde() = sum(abs2,x-1 for x in predict_fd_sde())
-# loss_fd_sde() = sum(abs2,predict_rd()-sol)
-
-# data = Iterators.repeated((), 5)
-# opt = ADAM(0.1)
-# cb = function ()
-#   display(loss_fd_sde())
-#   display(plot(solve(remake(prob,p=Flux.data(p)),SOSRI(),saveat=0.1),ylim=(0,8)))
-# end
-
-# # Display the ODE with the current parameter values.
-# cb()
-
-# Flux.train!(loss_fd_sde, params, data, opt, cb = cb)
-
-
-
-function lotka_volterra(du,u,p,t)
-  x, y = u
-  α, β, δ, γ = p
-  du[1] = dx = α*x - β*x*y
-  du[2] = dy = -δ*y + γ*x*y
-end
-
-# defining our noise as parameterized functions
-noiseModelSystem(du,u,p,t) = @.(du = 3.0)
-
-u0 = [1.01,1.0]
-tspan = (0.0,10.0)
-p = [1.5,1.0,3.0,1.0]
-
-prob = ODEProblem(lotka_volterra,u0,tspan,p)
-# prob = SDEProblem(lotka_volterra,noiseModelSystem,u0,tspan,p)
 solTest =[[1.01, 1.0], 
  [1.15528, 0.680492],
  [1.39068, 0.48099] ,
@@ -115,33 +61,47 @@ solTest =[[1.01, 1.0],
  [0.994033 ,1.96846],
  [0.970674, 1.31208],
  [1.05568 ,0.880433]]
+
+
 """ temporary experimental data handling
 
 convert from a `Vector{Vector{Float64}}` to a `Vector{Float64, 2}`
---> with that the array of the sde solution and this data are of the same type
+--> with that the array of the sde solution and the data have the same type
 """
-testSol = hcat(solTest...)
 
-# transpose it with `'` and track it 
-solTesttracked =hcat(solTest...)'
-# track it 
-# solTesttracked= param(solTesttracked)
+testSol = hcat(solTest...)[1,:]
+
+# # transpose it with `'` 
+# solTesttracked =hcat(solTest...)'
+
+# SDE with neural network
+function lotka_volterra(du,u,p,t)
+  x, y = u
+  α, β, δ, γ = p
+  du[1] = dx = α*x - β*x*y
+  du[2] = dy = -δ*y + γ*x*y
+end
+
+# defining our noise as parameterized functions
+noiseModelSystem(du,u,p,t) = @.(du = 3.0)
+
+function lotka_volterra_noise(du,u,p,t)
+  du[1] = 0.1u[1]
+  du[2] = 0.1u[2]
+end
+
+u0 = [1.01,1.0]
+tspan = (0.0,10.0)
+p = [1.5,1.0,3.0,1.0]
+
+# choose a solver: SOSRI(), Tsit5()
+choosenSolver = SOSRI()
 
 # start:step:stop
 t = tspan[1]:0.2:tspan[2]
 
-""" Infos about the solver
+prob = SDEProblem(lotka_volterra,lotka_volterra_noise,u0, tspan, p)#,seed=1234)
 
-returns = n-element Array{Array{Float64,1},1}
-saveat: Denotes specific times to save the solution at
-"""
-sol = solve(prob,Tsit5(),saveat=t)
-# experimentalData = sol[1,:]
-experimentalData = testSol[1,:]
-
-display(plot(t,experimentalData,label="first ODE data"))
-
-@info "initial simulation is plotted"
 
 
 """Initial Parameter Vector 
@@ -153,27 +113,28 @@ behaving like an array, tracks extra information that allows us to calculate
 derivatives
 """
 neuralParameter = param([2.2, 1.0, 2.0, 0.4])
+
+
 """
 Next we define a single layer neural network that uses the diffeq_rd (for ODE)
 or a diffeq_fd (for SDE) layer function that takes the parameters and 
 returns the solution of the x(t) variable
 """
-# function predict_rd() 
-#   diffeq_rd(neuralParameter,prob,Tsit5(),saveat=t)#[1,:]
-# end
-function predict_rd() 
-  diffeq_rd(neuralParameter,prob,Tsit5(),saveat=t)
-
-  # diffeq_fd(neuralParameter,sol->sol[1,:],101,prob,Tsit5(),saveat=t)
+function predict_fd_sde()
+  # # diffeq_fd(p,sol->sol[1,:],101,prob,SOSRI(),saveat=0.1)
+  diffeq_fd(neuralParameter,sol->sol[1,:],51,prob,choosenSolver,saveat=t)
 end
 
 """cost function
 
-calculate the sum of the absolute squares of the entries of a vector v: sum(abs2,v)
+use a predifined loss function or calculate however you want
+
+now: calculate the sum of the absolute squares of the entries of 
+      a vector v: sum(abs2,v)
 
 erklaerung: 
-predict_rd().u entspricht den Variablen Werten des Fits
-solTest sind die Messwerte
+predict_rd().u / predict_fd_sde() entspricht den Variablen Werten des Fits
+solTest / testSol sind die Messwerte
 man nimmt die Differenz von den Messpunkten des gleichen Zeitpunkt...
 und dreht die Matrix um 90 Grad mittels hcat(Matrix...), damit sum(abs2,Matrix)
 damit rechnen kann
@@ -181,34 +142,56 @@ damit rechnen kann
 einschraenkung:
 momentan müssen die Messwerte die gleichen Zeitpunkte besitzen.
 """
-loss_rd() = sum(abs2,hcat((predict_rd().u - solTest)...))
 
-@info "alles ok" loss_rd()
+loss_fd_sde() = sum(abs2,hcat((predict_fd_sde() - testSol)))
+# loss(x,y) = Flux.mse(predict_fd_sde(),testSol)
 
-# run n iteration 
+# run n iteration
 data = Iterators.repeated((), 100)
 
-# Now we tell Flux to train the neural network by running a 100 epoch to minimise our loss function 
-# Optimiser: Descent, Momentum, Nesterov, ADAM
 opt = ADAM(0.1)
 
 # callback function to observe training
-cb = function() 
+cb = function ()
+  @show loss_fd_sde()
 
+  """ Infos about the solver
+
+  returns = n-element Array{Array{Float64,1},1}
+  saveat: Denotes specific times to save the solution at
+  maxiters: Maximum number of iterations before stopping. Defaults to 1e5.
+  """
   # using `remake` to re-create our `prob` with current parameters `p`
-  odeData = solve(remake(prob,p=Flux.data(neuralParameter)),Tsit5(),saveat=t)
-  
-  # display only the first ODE in the same figure as the data
-  scatter(t,experimentalData,color=[1],label = "first ODE data")
-  display(plot!(t,odeData[1,:],ylim=(0,10),label="fit"))
+  odeData = solve(remake(prob,p=Flux.data(neuralParameter)),choosenSolver,saveat=t,maxiters = 1e5)
 
+  # display only the first ODE in the same figure as the data
+  scatter(t,testSol,color=[1],label = "first ODE data")
+
+  display(plot!(t,odeData[1,:],ylim=(0,10),label="fit"))
 end
 
-Flux.train!(loss_rd, [neuralParameter], data, opt, cb = cb)
+"""train function
+
+3 Steps:
+1. how good is our model with 
+2. the given data
+3. and how could we improve it by changing the parameters
+
+Flux.train!(objective, params, data, opt)
+objective: evaluates how well a model is doing given some input data.
+opt: (optimiser) update the model parameters appropriately
+
+Callbacks are called for every batch of training data. You can slow this down 
+using Flux.throttle(f, timeout) which prevents f from being called more than 
+once every timeout seconds.
+"""
+
+Flux.train!(loss_fd_sde, [neuralParameter], data, opt, cb = cb)
+
 
 @info "trained parameters:" neuralParameter
-@info "loss function: " loss_rd()
 
-# # You may wish to save models so that they can be loaded and run in a later 
-# # session. The easiest way to do this is via BSON.jl.
-# # @save "mymodel.bson" neuralParameter
+
+# # # You may wish to save models so that they can be loaded and run in a later 
+# # # session. The easiest way to do this is via BSON.jl.
+# # # @save "mymodel.bson" neuralParameter

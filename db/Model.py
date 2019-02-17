@@ -1,11 +1,15 @@
+import json
+import datetime
+import logging
 from sqlalchemy import Column, String, DateTime, Integer, Enum, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID, JSON
-import datetime
 
 from db.base import base
-from values import SimulationTypes
+from values import SimulationTypes, ROOT_DIR
 
+
+logger = logging.getLogger(__name__)
 
 class Model(base):
     __tablename__ = 'model'
@@ -34,4 +38,34 @@ class Model(base):
     __table_args__ = (
         UniqueConstraint('type', 'version',  name='Model_version_unique_per_type'),
     )
+
+    @classmethod
+    def initialize(cls, session):
+        for type in SimulationTypes:
+            logger.info('Initializing ' + type.value + '...')
+
+            session.add(Model(
+                type = type,
+                name = 'initial ' + type.name + 'model',
+                description = 'The initial ' + type.name + ' model, hardcoded into the code base.',
+                version = 1,
+                display_version = '1.0.0',
+                json = cls._getInitialModelJson(type)
+            ))
+
+    @classmethod
+    def _getInitialModelJson(cls, type):
+        assert isinstance(type, SimulationTypes)
+
+        path = ROOT_DIR + '/db/initialData/json/' + type.name + '.json'
+
+        try:
+            fileHandle = open(path)
+            modelJson = json.load(fileHandle)
+        except IOError as e:
+            logger.error('Could not load module json file: ' + str(e))
+        except ValueError as e:
+            logger.error('Could not decode JSON: ' + str(e))
+
+        return modelJson
 

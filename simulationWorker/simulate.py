@@ -171,15 +171,6 @@ def generate_dict_stimulus(simulationData):
 
     return dict_stimulus
 
-def generate_dict_system_switch(simulationData):
-    return {
-        'export_data_to_sql': True,
-        'export_terms_data_to_sql': False,
-        'specificInitValuesVersionSEQ': [1],
-        'specificModelVersionSEQ': [1],
-        'specificParameterVersionSEQ': [1]
-    }
-
 def simulate(simulationData):
 
     odeNames = getOdeNames(simulationData['initial_value_set'])
@@ -197,7 +188,6 @@ def simulate(simulationData):
     }
     uniqueEXSTDTC = generate_dict_uniqe_EXSTDTC(simulationData)
     stimulusDict = generate_dict_stimulus(simulationData)
-    systemSwitchDict = generate_dict_system_switch(simulationData)
 
     signal_type = stimulusDict.get('signal_type')[0] or 0
     NaCl_impuls = stimulusDict.get('NaCl_impuls')[0] or 0
@@ -265,7 +255,7 @@ def simulate(simulationData):
             unitsForOdes[value['testcd']] = value['orresu']
 
         """DataFrame initialisieren"""
-        simulationFrame = pd.DataFrame([initialValues])
+        simulationFrame = pd.DataFrame([initialValues], dtype='float')
 
         for i in simulationSettingsForTimeRange['results']:
 
@@ -294,16 +284,14 @@ def simulate(simulationData):
                 glucose_switch = [False]
 
             simulationFrame = Solver.callSimulation(
-                nameOfModel = simulationData['type'],
-                model = simulationData['model'],
+                simulationData = simulationData,
                 Glucose_impuls_start = timeDict['Glucose_impuls_start'],
                 Glucose_impuls_end = timeDict['Glucose_impuls_end'],
-                glucose_switch = glucose_switch,
-                systemSwitchDict = systemSwitchDict,
-                signal_type = signal_type,
-                NaCl_impuls = NaCl_impuls,
                 NaCl_impuls_start = timeDict['NaCl_impuls_start'],
                 NaCl_impuls_firststop = timeDict['NaCl_impuls_firststop'],
+                glucose_switch = glucose_switch,
+                signal_type = signal_type,
+                NaCl_impuls = NaCl_impuls,
                 dataForSimulation=simulationFrame,
                 i=i
             )

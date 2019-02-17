@@ -115,10 +115,13 @@ dmypy.json
 .pyre/
 
 # simulated pictures
-SimulationPictures/
+/projectQ/SimulationPictures
 
 # MAC OS X
 .DS_Store
 
 # test environment
 test.py
+
+# vscode
+.vscode

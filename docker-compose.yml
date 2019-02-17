@@ -44,9 +44,9 @@ services:
         condition: service_healthy
       task-queue:
         condition: service_healthy
-      simulation:
+      simulationWorker:
         condition: service_started
-      result-worker:
+      dbWorker:
         condition: service_started
 
     ports:
@@ -55,19 +55,19 @@ services:
     environment:
       - FLASK_ENV=develompent
       - FLASK_DEBUG=1
-      - FLASK_APP=web_interface/init.py
+      - FLASK_APP=web/init.py
       - QUEUE_SCHEDULED_SIMULATIONS
 
     # for development we mount the api-server-code into the container,
     # this way changes made to the code are directly synced with the container
     volumes:
       # in welchen Pfad ich mich befinde : WORKDIR von Dockerfile
-      - ./:/ProjektQ/
+      - ./projectQ/:/ProjektQ/
 
     # Befehl der and ENTRYPOINT aus dem Image dran gehangen wird.
     command: ["-m", "flask", "run", "--host=0.0.0.0"]
 
-  result-worker:
+  dbWorker:
     image: janpiotraschke/projectq:0.2.2-task-queue-tmp
     depends_on:
       db:
@@ -77,10 +77,10 @@ services:
     environment:
       - QUEUE_SIMULATION_RESULTS
     volumes:
-      - ./:/ProjektQ/
-    command: ["-u", "-m", "result_worker"]
+      - ./projectQ/:/ProjektQ/
+    command: ["-u", "-m", "dbWorker"]
 
-  simulation:
+  simulationWorker:
     image: janpiotraschke/projectq:0.2.2-task-queue-tmp
     depends_on:
       task-queue:
@@ -89,9 +89,9 @@ services:
       - QUEUE_SCHEDULED_SIMULATIONS
       - QUEUE_SIMULATION_RESULTS
     volumes:
-      - ./:/ProjektQ/
+      - ./projectQ/:/ProjektQ/
     working_dir: /ProjektQ
-    command: ["-u", "-m", "simulation"]
+    command: ["-u", "-m", "simulationWorker"]
 
   task-queue:
     image: rabbitmq:3.7.11-rc.2-alpine

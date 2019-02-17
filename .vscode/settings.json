@@ -1,8 +1,0 @@
-{
-    "python.linting.pylintEnabled": false,
-    "code-runner.clearPreviousOutput": true,
-    "code-runner.runInTerminal": true,
-    "workbench.statusBar.feedback.visible": false,
-    "python.pythonPath": "/anaconda3/bin/python",
-    "zenMode.hideActivityBar": false,
-}

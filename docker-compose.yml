@@ -62,7 +62,7 @@ services:
     # this way changes made to the code are directly synced with the container
     volumes:
       # in welchen Pfad ich mich befinde : WORKDIR von Dockerfile
-      - ./:/ProjektQ/
+      - ./projectQ/:/ProjektQ/
 
     # Befehl der and ENTRYPOINT aus dem Image dran gehangen wird.
     command: ["-m", "flask", "run", "--host=0.0.0.0"]
@@ -77,7 +77,7 @@ services:
     environment:
       - QUEUE_SIMULATION_RESULTS
     volumes:
-      - ./:/ProjektQ/
+      - ./projectQ/:/ProjektQ/
     command: ["-u", "-m", "dbWorker"]
 
   simulationWorker:
@@ -89,7 +89,7 @@ services:
       - QUEUE_SCHEDULED_SIMULATIONS
       - QUEUE_SIMULATION_RESULTS
     volumes:
-      - ./:/ProjektQ/
+      - ./projectQ/:/ProjektQ/
     working_dir: /ProjektQ
     command: ["-u", "-m", "simulationWorker"]
 

@@ -1,3 +1,6 @@
+"""learn from simulation data --> DoE with simulation data"""
+
+
 """
 Universal Approximation Theorem states that, for enough layers or enough parameters 
 ML(x) can approximate any nonlinear function sufficiently close. 

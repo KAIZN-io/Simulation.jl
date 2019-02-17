@@ -3,7 +3,6 @@ import logging
 
 from app import app
 from db.base import base, ThreadScopedSession
-from initializeModel import initializeDb
 from routings import routes
 
 

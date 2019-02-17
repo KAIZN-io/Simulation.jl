@@ -1,3 +1,6 @@
+"""learn from experimental data --> DoE with simulation and experimental data"""
+
+
 # include("/Users/janpiotraschke/GithubRepository/ProjectQ/test.jl")
 # import Pkg; Pkg.add("Flux")
 # import Pkg; Pkg.add("DiffEqFlux")
@@ -7,7 +10,7 @@
 
 # Flux is the neural network framework
 # Flux finds the parameters of the neural network (p) which minimize the cost function
-using Flux, DiffEqFlux, DifferentialEquations, Plots
+using Flux, DiffEqFlux, DifferentialEquations, Plots, Logging
 # using BSON: @save
 
 solTest =[[1.01, 1.0], 
@@ -83,12 +86,7 @@ function lotka_volterra(du,u,p,t)
 end
 
 # defining our noise as parameterized functions
-noiseModelSystem(du,u,p,t) = @.(du = 3.0)
-
-function lotka_volterra_noise(du,u,p,t)
-  du[1] = 0.1u[1]
-  du[2] = 0.1u[2]
-end
+noiseModelSystem(du,u,p,t) = @.(du = 0.1)
 
 u0 = [1.01,1.0]
 tspan = (0.0,10.0)
@@ -100,8 +98,14 @@ choosenSolver = SOSRI()
 # start:step:stop
 t = tspan[1]:0.2:tspan[2]
 
-prob = SDEProblem(lotka_volterra,lotka_volterra_noise,u0, tspan, p)#,seed=1234)
+# NOTE: the simulation runs better when defining the noise in the following way
+function lotka_volterra_noise(du,u,p,t)
+  du[1] = 0.3u[1]
+  du[2] = 0.3u[2]
+end
 
+prob = SDEProblem(lotka_volterra,lotka_volterra_noise,u0, tspan, p)#,seed=1234)
+# prob = SDEProblem(lotka_volterra,noiseModelSystem,u0, tspan, p)#,seed=1234)
 
 
 """Initial Parameter Vector 
@@ -147,13 +151,13 @@ loss_fd_sde() = sum(abs2,hcat((predict_fd_sde() - testSol)))
 # loss(x,y) = Flux.mse(predict_fd_sde(),testSol)
 
 # run n iteration
-data = Iterators.repeated((), 100)
+data = Iterators.repeated((), 10)
 
 opt = ADAM(0.1)
 
 # callback function to observe training
 cb = function ()
-  @show loss_fd_sde()
+  # @show loss_fd_sde()
 
   """ Infos about the solver
 

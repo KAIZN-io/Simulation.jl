@@ -34,7 +34,7 @@ services:
           - "db_postgres"
 
   web:
-    image: janpiotraschke/projectq:0.2.2-task-queue-tmp
+    image: janpiotraschke/projectq:0.2.2
 
     # was sdtm braucht: ein hochgefahrene Datenbank (in diesem Beispiel)
     # wie Verzweigungen zwischen Programmen auslegen
@@ -68,7 +68,7 @@ services:
     command: ["-m", "flask", "run", "--host=0.0.0.0"]
 
   dbWorker:
-    image: janpiotraschke/projectq:0.2.2-task-queue-tmp
+    image: janpiotraschke/projectq:0.2.2
     depends_on:
       db:
         condition: service_healthy
@@ -81,7 +81,7 @@ services:
     command: ["-u", "-m", "dbWorker"]
 
   simulationWorker:
-    image: janpiotraschke/projectq:0.2.2-task-queue-tmp
+    image: janpiotraschke/projectq:0.2.2
     depends_on:
       task-queue:
         condition: service_healthy

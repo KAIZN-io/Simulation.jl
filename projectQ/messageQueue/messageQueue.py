@@ -21,7 +21,7 @@ def enqueue(msg, queue):
     assert isinstance(queue, str)
 
     # open a connection to the RabbitMQ server
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='task-queue'))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host='taskQueue'))
     # get a channel, this can be used for multiplexing the connection, but that is
     # something we don't need rightnow
     channel = connection.channel()
@@ -44,7 +44,7 @@ def enqueue(msg, queue):
     connection.close()
 
 def listen(callback, queue):
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='task-queue'))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host='taskQueue'))
     channel = connection.channel()
     channel.queue_declare(queue=queue)
 

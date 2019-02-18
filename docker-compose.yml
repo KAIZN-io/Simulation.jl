@@ -3,105 +3,120 @@ version: "2.1"
 services:
 
   db:
-    image: postgres
-    volumes:
-      - user-db:/var/lib/postgresql/data/
-
-    # environment variables which will be accessible in the running container
-    # legt Databank simulation_results an
+    # Define the environment variables for this container
     environment:
-      - POSTGRES_DB=simulation_results
-
-    # this defines how this container will be rated as "healthy"
-    # definiert, wann die Datenbank hochgefahren ist
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    # A health check is used to determine if the container is ready for the other services
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "postgres"]
+      # the command executed to test the health of the container
+      test: ["CMD", "pg_isready", "-U", "${DB_USER}", "-d", "${DB_NAME}"]
       # the time between the checks
       interval: 15s
       # the timeout after which a check will be considered failed
       timeout: 3s
       # the amount of retries until the container will be marked unhelthy
       retries: 8
-
-    # erstellt Portmapping; wenn Rechner angesprochen wird, reicht er es ihn den
-    # Container weiter
-    # <Port am PC>:<Port am Container>
+    # the image to use for this service
+    image: postgres:11.2-alpine
+    # the networks this service is connected to. Networks are defined at the bottom of the file
+    networks:
+      - db
+    # Portmapping for accessing this service from your host machine. <host-port>:<container-port>
     ports:
       - "5433:5432"
-    networks:
-      default:
-        aliases:
-          - "db_postgres"
+    # Defining volumes to persist specific data from within the container
+    # This way data will remain throughout restarts of the service
+    volumes:
+      - userDb:/var/lib/postgresql/data/
 
   web:
-    image: janpiotraschke/projectq:0.2.2
-
-    # was sdtm braucht: ein hochgefahrene Datenbank (in diesem Beispiel)
-    # wie Verzweigungen zwischen Programmen auslegen
+    # The command is appended to the entrypoint specified in the Dockerfile
+    command: ["-m", "flask", "run", "--host=0.0.0.0"]
+    # Defining which other services are needed for this service to work
+    # This will automatically start all dependencies when running `dc up web`
     depends_on:
-      # the status of the api-db needs to be healthy (see above)
       db:
         condition: service_healthy
-      taskQueue:
+      messageBroker:
         condition: service_healthy
       simulationWorker:
         condition: service_started
       dbWorker:
         condition: service_started
-
+    environment:
+      - DEBUG
+      - FLASK_DEBUG=${DEBUG}
+      - FLASK_ENV
+      - FLASK_APP
+      - DB_NAME
+      - DB_USER
+      - DB_PASSWORD
+      - QUEUE_SCHEDULED_SIMULATIONS
+    image: janpiotraschke/projectq:0.3.0
+    networks:
+      - db
+      - messageBroker
     ports:
       - "8080:5000"
-
-    environment:
-      - FLASK_ENV=develompent
-      - FLASK_DEBUG=1
-      - FLASK_APP=web/init.py
-      - QUEUE_SCHEDULED_SIMULATIONS
-
-    # for development we mount the api-server-code into the container,
-    # this way changes made to the code are directly synced with the container
+    # Mount the project code into the container, so the container can run it. <host-path>:<container-path>
     volumes:
-      # in welchen Pfad ich mich befinde : WORKDIR von Dockerfile
       - ./projectQ/:/ProjektQ/
 
-    # Befehl der and ENTRYPOINT aus dem Image dran gehangen wird.
-    command: ["-m", "flask", "run", "--host=0.0.0.0"]
-
   dbWorker:
-    image: janpiotraschke/projectq:0.2.2
+    command: ["-u", "-m", "dbWorker"]
     depends_on:
       db:
         condition: service_healthy
-      taskQueue:
+      messageBroker:
         condition: service_healthy
     environment:
+      - DEBUG
+      - DB_NAME
+      - DB_USER
+      - DB_PASSWORD
       - QUEUE_SIMULATION_RESULTS
+    image: janpiotraschke/projectq:0.3.0
+    networks:
+      - db
+      - messageBroker
     volumes:
       - ./projectQ/:/ProjektQ/
-    command: ["-u", "-m", "dbWorker"]
 
   simulationWorker:
-    image: janpiotraschke/projectq:0.2.2
+    command: ["-u", "-m", "simulationWorker"]
     depends_on:
-      taskQueue:
+      messageBroker:
         condition: service_healthy
     environment:
+      - DEBUG
       - QUEUE_SCHEDULED_SIMULATIONS
       - QUEUE_SIMULATION_RESULTS
+    image: janpiotraschke/projectq:0.3.0
+    networks:
+      - messageBroker
     volumes:
       - ./projectQ/:/ProjektQ/
-    working_dir: /ProjektQ
-    command: ["-u", "-m", "simulationWorker"]
 
-  taskQueue:
-    image: rabbitmq:3.7.11-rc.2-alpine
+  messageBroker:
     healthcheck:
       test: ["CMD", "rabbitmqctl", "status"]
       interval: 15s
       timeout: 3s
       retries: 8
+    image: rabbitmq:3.7.11-rc.2-alpine
+    networks:
+      - messageBroker
 
-# Eigenart von docker-compose file; hier nochmal die verwendeten volumes angeben
+# Define named volumes for use in the service definitions
 volumes:
-  user-db:
+  userDb:
+
+# Define the networks, so we can assign services to them
+networks:
+  # The network used for communicating with the database
+  db:
+  # Network used for communication with the message broker
+  messageBroker:
 

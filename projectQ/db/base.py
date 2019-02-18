@@ -4,6 +4,14 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.ext.declarative import declarative_base
 from contextlib import contextmanager
 
+from values import DB_NAME, DB_USER, DB_PASSWORD, HN_DB
+
+dbURL = 'postgresql://{user}:{password}@{host}/{dbName}'.format(
+    host = HN_DB,
+    dbName = DB_NAME,
+    user = DB_USER,
+    password = DB_PASSWORD
+)
 
 # create the base for all database classes to inherit from
 base = declarative_base()
@@ -47,7 +55,7 @@ class ThreadScopedSession:
         def __init__(self, pid):
             self.pid = pid
             # create a new database engine that has no inherited connections from the parent process
-            self.engine = create_engine('postgresql://postgres@db_postgres/simulation_results')
+            self.engine = create_engine(dbURL)
             # create a session registry to create usable session instances to query the database with
             self.sessionRegistry = scoped_session(sessionmaker(bind=self.engine))
 

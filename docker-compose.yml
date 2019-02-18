@@ -55,6 +55,7 @@ services:
       - "8080:5000"
 
     environment:
+      - DEBUG
       - FLASK_DEBUG=${DEBUG}
       - FLASK_ENV
       - FLASK_APP
@@ -80,6 +81,7 @@ services:
       taskQueue:
         condition: service_healthy
     environment:
+      - DEBUG
       - DB_NAME
       - DB_USER
       - DB_PASSWORD
@@ -94,6 +96,7 @@ services:
       taskQueue:
         condition: service_healthy
     environment:
+      - DEBUG
       - QUEUE_SCHEDULED_SIMULATIONS
       - QUEUE_SIMULATION_RESULTS
     volumes:

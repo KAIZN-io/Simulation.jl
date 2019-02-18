@@ -1,6 +1,8 @@
 from flask import Flask
 from logging.config import dictConfig
 
+from values import DEBUG
+
 """Configure logging"""
 dictConfig({
     'version': 1,
@@ -13,7 +15,7 @@ dictConfig({
         'formatter': 'default'
     }},
     'root': {
-        'level': 'INFO',
+        'level': 'DEBUG' if DEBUG else 'INFO',
         'handlers': ['wsgi']
     }
 })

@@ -4,10 +4,10 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.ext.declarative import declarative_base
 from contextlib import contextmanager
 
-from values import DB_NAME, DB_USER, DB_PASSWORD
+from values import DB_NAME, DB_USER, DB_PASSWORD, HN_DB
 
 dbURL = 'postgresql://{user}:{password}@{host}/{dbName}'.format(
-    host = 'db',
+    host = HN_DB,
     dbName = DB_NAME,
     user = DB_USER,
     password = DB_PASSWORD

@@ -31,7 +31,7 @@ services:
     volumes:
       - userDb:/var/lib/postgresql/data/
 
-  web:
+  server:
     # The command is appended to the entrypoint specified in the Dockerfile
     command: ["-m", "flask", "run", "--host=0.0.0.0"]
     # Defining which other services are needed for this service to work

@@ -25,8 +25,8 @@ dictConfig({
 app = Flask(
     'ProjectQ',
     template_folder='server/templates',
-    static_url_path='/pictures',
-    static_folder='SimulationPictures'
+    static_folder='server/static',
+    static_url_path='/static'
 )
 
 # initialize logger

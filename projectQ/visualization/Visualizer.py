@@ -127,7 +127,7 @@ class Visualizer:
             """"save the plot"""
 
             pictureName = '{0}_{1}.png'.format(simulationData['type'], SEQ)
-            plt.savefig('SimulationPictures/{0}'.format(pictureName),
+            plt.savefig('projectQ/server/static/{0}'.format(pictureName),
                         dpi=360,
                         format='png',
                         bbox_inches='tight'

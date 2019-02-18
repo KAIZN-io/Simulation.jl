@@ -30,10 +30,9 @@ services:
     # <Port am PC>:<Port am Container>
     ports:
       - "5433:5432"
+
     networks:
-      default:
-        aliases:
-          - "db_postgres"
+      - db
 
   web:
     image: janpiotraschke/projectq:0.2.2
@@ -73,6 +72,10 @@ services:
     # Befehl der and ENTRYPOINT aus dem Image dran gehangen wird.
     command: ["-m", "flask", "run", "--host=0.0.0.0"]
 
+    networks:
+      - db
+      - message
+
   dbWorker:
     image: janpiotraschke/projectq:0.2.2
     depends_on:
@@ -89,6 +92,9 @@ services:
     volumes:
       - ./projectQ/:/ProjektQ/
     command: ["-u", "-m", "dbWorker"]
+    networks:
+      - db
+      - message
 
   simulationWorker:
     image: janpiotraschke/projectq:0.2.2
@@ -103,6 +109,8 @@ services:
       - ./projectQ/:/ProjektQ/
     working_dir: /ProjektQ
     command: ["-u", "-m", "simulationWorker"]
+    networks:
+      - message
 
   taskQueue:
     image: rabbitmq:3.7.11-rc.2-alpine
@@ -111,8 +119,14 @@ services:
       interval: 15s
       timeout: 3s
       retries: 8
+    networks:
+      - message
 
 # Eigenart von docker-compose file; hier nochmal die verwendeten volumes angeben
 volumes:
   user-db:
+
+networks:
+  db:
+  message:
 

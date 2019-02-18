@@ -10,7 +10,7 @@ services:
     # environment variables which will be accessible in the running container
     # legt Databank simulation_results an
     environment:
-      - POSTGRES_DB=simulation_results
+      - POSTGRES_DB=${DB_NAME}
 
     # this defines how this container will be rated as "healthy"
     # definiert, wann die Datenbank hochgefahren ist
@@ -53,9 +53,9 @@ services:
       - "8080:5000"
 
     environment:
-      - FLASK_ENV=develompent
-      - FLASK_DEBUG=1
-      - FLASK_APP=web/init.py
+      - FLASK_DEBUG=${DEBUG}
+      - FLASK_ENV
+      - FLASK_APP
       - QUEUE_SCHEDULED_SIMULATIONS
 
     # for development we mount the api-server-code into the container,

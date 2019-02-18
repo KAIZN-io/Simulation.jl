@@ -34,7 +34,7 @@ services:
           - "db_postgres"
 
   web:
-    image: janpiotraschke/projectq:0.2.2-task-queue-tmp
+    image: janpiotraschke/projectq:0.2.2
 
     # was sdtm braucht: ein hochgefahrene Datenbank (in diesem Beispiel)
     # wie Verzweigungen zwischen Programmen auslegen
@@ -42,7 +42,7 @@ services:
       # the status of the api-db needs to be healthy (see above)
       db:
         condition: service_healthy
-      task-queue:
+      taskQueue:
         condition: service_healthy
       simulationWorker:
         condition: service_started
@@ -68,11 +68,11 @@ services:
     command: ["-m", "flask", "run", "--host=0.0.0.0"]
 
   dbWorker:
-    image: janpiotraschke/projectq:0.2.2-task-queue-tmp
+    image: janpiotraschke/projectq:0.2.2
     depends_on:
       db:
         condition: service_healthy
-      task-queue:
+      taskQueue:
         condition: service_healthy
     environment:
       - QUEUE_SIMULATION_RESULTS
@@ -81,9 +81,9 @@ services:
     command: ["-u", "-m", "dbWorker"]
 
   simulationWorker:
-    image: janpiotraschke/projectq:0.2.2-task-queue-tmp
+    image: janpiotraschke/projectq:0.2.2
     depends_on:
-      task-queue:
+      taskQueue:
         condition: service_healthy
     environment:
       - QUEUE_SCHEDULED_SIMULATIONS
@@ -93,7 +93,7 @@ services:
     working_dir: /ProjektQ
     command: ["-u", "-m", "simulationWorker"]
 
-  task-queue:
+  taskQueue:
     image: rabbitmq:3.7.11-rc.2-alpine
     healthcheck:
       test: ["CMD", "rabbitmqctl", "status"]

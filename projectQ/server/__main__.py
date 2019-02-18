@@ -1,9 +1,11 @@
 import os
 import logging
+from flask_socketio import SocketIO
 
-from app import app
+from server.app import app
+from server.routings import routes
+from values import DEBUG
 from db.base import base, ThreadScopedSession
-from routings import routes
 
 
 logger = logging.getLogger(__name__)
@@ -20,11 +22,20 @@ if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
     if not os.path.isdir('SimulationPictures'):
         logger.info("Created folder `SimulationPictures`")
         os.mkdir('SimulationPictures')
-
-    # add routes to the flask app
-    logger.info("Registering routes")
-    app.register_blueprint(routes)
-
-    logger.info("App initialized")
 else:
     logger.debug("Not main thread, skipping initialization")
+
+# add routes to the flask app
+logger.info("Registering routes")
+app.register_blueprint(routes)
+
+# reset the PYTHONPATH. This is a workaround to make importing modules work again when using the reloader
+os.environ['PYTHONPATH'] = os.getcwd()
+
+# actually start the server
+socket = SocketIO(app, logger=logger)
+socket.run(app, host='0.0.0.0', debug=DEBUG)
+
+
+logger.info("Server initialized")
+

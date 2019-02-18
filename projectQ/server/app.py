@@ -3,6 +3,7 @@ from logging.config import dictConfig
 
 from values import DEBUG
 
+
 """Configure logging"""
 dictConfig({
     'version': 1,
@@ -32,5 +33,5 @@ app = Flask(
 # initialize logger
 app.logger
 
-app.logger.info("Logger initialized")
+app.logger.debug("Logger initialized")
 

@@ -25,7 +25,7 @@ the structural relations between the inputs and outputs.
 # import Pkg; Pkg.add("Logging")
 
 using DifferentialEquations, BenchmarkTools
-using Plots; plotly()
+using Plots#; plotly()
 using Logging
 
 # The DEDataArray{T} type allows one to add other "non-continuous" variables to an array
@@ -103,16 +103,46 @@ termMatrix = fillTermMatrix(emptyTermMatrix,inputTermArray)
 # create the neuronal network matrix filled with ones
 neuronalNetworkMatrix = ones(myArraySize,maxTermCount)
 
+# create the parameters of the neural network
+neuronalNetworkMatrixVariable = Array{String}(undef, myArraySize,maxTermCount)
+
 # create activated term matrix 
 activatedTermMatrix = fill("",size(termMatrix)[1])
 for row in 1:myArraySize
   for column in 1:maxTermCount
+    # set the NN matrix element to 0 / undef if term matrix does not hold any 
+    # string in the same place
+    if termMatrix[row,column] == ""
+      neuronalNetworkMatrix[row,column] = 0
+    end
+
     if neuronalNetworkMatrix[row,column] == 1
       # add strings with '*' together
-      activatedTermMatrix[row,1] *= termMatrix[row,column]
+      neuronalNetworkMatrixVariable[row,column] = "m"*string(column)*string(row)
+      
+      activatedTermMatrix[row,1] *= termMatrix[row,column] * "*"* neuronalNetworkMatrixVariable[row,column]
+    else
+       neuronalNetworkMatrixVariable[row,column] = ""
     end
   end
 end  
+
+# create the raw vectors for the NN matrix as the NN layer 
+rawValuesForNN = vcat(neuronalNetworkMatrix...)
+rawVariablesForNN = vcat(neuronalNetworkMatrixVariable...)
+
+# initialize the vectors for NN for value == 0 
+valuesForNN = zeros(0)
+variablesForNN = String[]
+
+# reduce the vectors for NN for value == 0 
+for i in 1:size(rawValuesForNN)[1]
+  if rawValuesForNN[i] == 1
+    append!(valuesForNN,rawValuesForNN[i])
+    push!(variablesForNN,rawVariablesForNN[i])
+  end
+end
+
 
 # re-unite the variable matrix with their terms and precompile the equations
 expressionMatrix = [Meta.parse(string(variableMatrix[i], "=" ,activatedTermMatrix[i])) for i in 1:myArraySize]

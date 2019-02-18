@@ -8,8 +8,9 @@ from server.form import SimulationForm
 
 routes = Blueprint('routes', __name__)
 
-@routes.route('/app',  methods=['GET', 'POST'])
-def app():
+@routes.route('/app/',  methods=['GET'])
+@routes.route('/app/<path:path>',  methods=['GET'])
+def app( path='' ):
     return render_template('app.html')
 
 @routes.route('/',  methods=['GET', 'POST'])

@@ -18,6 +18,7 @@
     "react-dom": "^16.6.3",
     "react-i18next": "^10.1.2",
     "react-jss": "^8.6.1",
+    "react-router-dom": "^4.3.1",
     "webfontloader": "^1.6.28"
   },
   "devDependencies": {

@@ -1,6 +1,18 @@
 {
     "projectQ": {
-        "title": "ProjectQ Web-App"
+        "title": "ProjectQ Web-App",
+        "navbar": {
+            "new-simulation": "Neue Simulation",
+            "simulation-overview": "Simulationen"
+        },
+        "home":{
+            "lead": "Willkommen bei ProjectQ.",
+            "try-it": "Probieren Sie ihn aus:",
+            "try-it-button": "Neue Simulation erstellen"
+        },
+        "footer": {
+            "copyright": "Jan Piotraschke. Web-Design by Jan-Luca Klees"
+        }
     }
 }
 

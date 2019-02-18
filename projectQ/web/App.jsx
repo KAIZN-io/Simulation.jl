@@ -1,40 +1,38 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import injectSheet from 'react-jss';
-import { withTranslation } from 'react-i18next';
-import moment from  'moment';
-import WebFont from 'webfontloader';
+import { BrowserRouter, Route } from 'react-router-dom'
 
 import './i18n';
+import Navbar from './Navbar.jsx'
+import Footer from './Footer.jsx'
+import Home from './Home.jsx'
+import Simulation from './Simulation/Simulation.jsx'
 
 
-// WebFont.load({
-//   google: {
-//     families: ['Noto Sans', 'Noto Serif'],
-//   }
-// });
-
-
-const styles = {
-}
-
-class _App extends React.PureComponent {
+class App extends React.Component {
   render() {
     let { t, classes } = this.props;
     return (
-      <div>
-        <h1>
-          {t('title')}
-        </h1>
-      </div>
+      <>
+        <Navbar />
+        <main className="main">
+          <Route exact path="/app" component={Home} />
+          <div className="container mt-5">
+            <Route path="/app/simulation" component={Simulation} />
+          </div>
+        </main>
+        <Footer />
+      </>
     );
   }
 }
-const App = withTranslation()( injectSheet( styles )( _App ) );
-
 
 ReactDOM.render(
-  <App />,
+  (
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  ),
   document.getElementById('react-root')
 );
 

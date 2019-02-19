@@ -127,21 +127,7 @@ for row in 1:myArraySize
   end
 end  
 
-# create the raw vectors for the NN matrix as the NN layer 
-rawValuesForNN = vcat(neuronalNetworkMatrix...)
-rawVariablesForNN = vcat(neuronalNetworkMatrixVariable...)
 
-# initialize the vectors for NN for value == 0 
-valuesForNN = zeros(0)
-variablesForNN = String[]
-
-# reduce the vectors for NN for value == 0 
-for i in 1:size(rawValuesForNN)[1]
-  if rawValuesForNN[i] == 1
-    append!(valuesForNN,rawValuesForNN[i])
-    push!(variablesForNN,rawVariablesForNN[i])
-  end
-end
 
 
 # re-unite the variable matrix with their terms and precompile the equations

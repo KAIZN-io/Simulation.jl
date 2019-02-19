@@ -1,5 +1,6 @@
 """learn from experimental data --> DoE with simulation and experimental data"""
 
+using Pkg
 
 # include("/Users/janpiotraschke/GithubRepository/ProjectQ/test.jl")
 # import Pkg; Pkg.add("Flux")
@@ -7,11 +8,25 @@
 # import Pkg; Pkg.add("DifferentialEquations")
 # import Pkg; Pkg.add("Plots")
 # import Pkg; Pkg.add("BSON")
-
+# Pkg.add("Documenter")
 # Flux is the neural network framework
 # Flux finds the parameters of the neural network (p) which minimize the cost function
-using Flux, DiffEqFlux, DifferentialEquations, Plots, Logging
+
+"""for LoadError --> rebuild Package / GR"""
+# ENV["GRDIR"]=""
+# Pkg.build("GR")
+
+using Flux, DiffEqFlux, DifferentialEquations, Plots, Logging, Documenter
 # using BSON: @save
+
+"""intresting julia package
+
+JuMP --> Modeling language for Mathematical Optimization; for constraints
+Documenter --> A documentation generator for Julia.
+Optim --> Optimization functions for Julia
+StaticArrays --> Statically sized arrays for Julia
+"""
+
 
 solTest =[[1.01, 1.0], 
  [1.15528, 0.680492],
@@ -98,6 +113,8 @@ choosenSolver = SOSRI()
 # start:step:stop
 t = tspan[1]:0.2:tspan[2]
 
+
+
 # NOTE: the simulation runs better when defining the noise in the following way
 function lotka_volterra_noise(du,u,p,t)
   du[1] = 0.3u[1]
@@ -151,7 +168,7 @@ loss_fd_sde() = sum(abs2,hcat((predict_fd_sde() - testSol)))
 # loss(x,y) = Flux.mse(predict_fd_sde(),testSol)
 
 # run n iteration
-data = Iterators.repeated((), 10)
+data = Iterators.repeated((), 100)
 
 opt = ADAM(0.1)
 
@@ -166,8 +183,8 @@ cb = function ()
   maxiters: Maximum number of iterations before stopping. Defaults to 1e5.
   """
   # using `remake` to re-create our `prob` with current parameters `p`
-  odeData = solve(remake(prob,p=Flux.data(neuralParameter)),choosenSolver,saveat=t,maxiters = 1e5)
-
+  # odeData = solve(remake(prob,p=Flux.data(neuralParameter)),choosenSolver,saveat=t,maxiters = 1e5)
+  odeData = solve(prob,p=Flux.data(neuralParameter),choosenSolver,saveat=t,maxiters = 1e5)
   # display only the first ODE in the same figure as the data
   scatter(t,testSol,color=[1],label = "first ODE data")
 

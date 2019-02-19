@@ -23,8 +23,10 @@ using Pkg
 
 # Pkg.add("DifferentialEquations")
 # Pkg.add("Plots")
-# Pkg.add("BenchmarkTools")
+# Pkg.add("Flux")
 # Pkg.add("Logging")
+# Pkg.add("DiffEqFlux")
+
 # Pkg.add("JuMP")
 
 # using DifferentialEquations, BenchmarkTools
@@ -258,6 +260,9 @@ choosenNoise = WienerProcess(0.0,0.0,0.0)
 problem = SDEProblem(parameterized_lorenz, noiseModelSystem, initialValues, timeRange, seed=1234)#, noise=choosenNoise)
 @info "start of the simulation"
 
+neuralParameter = param([2.2, 1.0, 2.0])
+
+
 # solve the problem
 # sol = solve(problem)
 sol = solve(problem,Tsit5(),callback = cbs, tstops=tstop)
@@ -268,4 +273,4 @@ sol = solve(problem,Tsit5(),callback = cbs, tstops=tstop)
 # @benchmark sol = solve(problem)
 
 # plot the solution
-plot(sol, linewidth=3,title="Solution of the SDE system")
+plot!(sol, linewidth=3,title="Solution of the SDE system")

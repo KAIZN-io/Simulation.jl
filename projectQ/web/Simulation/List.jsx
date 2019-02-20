@@ -42,13 +42,11 @@ class _ListItem extends React.PureComponent {
     let { simulation, expanded, onClick, classes, t } = this.props;
     let createdAt = moment.utc( simulation.created_at )
 
-    let humanizedDuration;
+    let duration;
     if ( simulation.finished_at ) {
       let startedAt = moment.utc( simulation.started_at );
       let finishedAt = moment.utc( simulation.finished_at );
-      humanizedDuration = moment.duration( finishedAt.diff( startedAt ) ).humanize();
-    } else {
-      humanizedDuration = '-';
+      duration = moment.duration( finishedAt.diff( startedAt ) );
     }
 
     return (
@@ -70,7 +68,7 @@ class _ListItem extends React.PureComponent {
             { simulation.name }
           </div>
 
-          <div className="small text-secondary">
+          <div className="small text-secondary" title={ createdAt.format("DD.MM.YYYY HH:mm:ss") }>
             { createdAt.fromNow() }
           </div>
 
@@ -91,7 +89,11 @@ class _ListItem extends React.PureComponent {
                 </tr>
                 <tr>
                   <th scope="row">{ t( 'simulation.list.duration' ) }</th>
-                  <td>{ humanizedDuration }</td>
+                  { simulation.finished_at ? (
+                    <td><span title={ duration.as( 's' ) + 's' }>{ duration.humanize() }</span></td>
+                  ) : (
+                    <td>-</td>
+                  )}
                 </tr>
               </tbody>
             </table>

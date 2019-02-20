@@ -10,8 +10,38 @@
             "try-it": "Probieren Sie ihn aus:",
             "try-it-button": "Neue Simulation erstellen"
         },
+        "simulation": {
+            "list": {
+                "scheduled": "Geplante Simulationen",
+                "finished": "Beendete Simulationen",
+                "emptyScheduled": "Es laufen derzeit keine Simulationen.",
+                "emptyFinished": "Es wurden noch keine Simulationen beendet.",
+                "loading": "Lade Simulationene...",
+                "timeRange": "Simulierter Zeitraum",
+                "stepSize": "Schrittgröße",
+                "duration": "Laufzeit"
+            }
+        },
         "footer": {
             "copyright": "Jan Piotraschke. Web-Design by Jan-Luca Klees"
+        }
+    },
+    "misc": {
+        "relativeTime": {
+            "future": "in %s",
+            "past":   "vor %s",
+            "s":      "ein paar Sekunden",
+            "ss":     "%d Sekunden",
+            "m":      "einer Minute",
+            "mm":     "%d Minuten",
+            "h":      "einer Stunde",
+            "hh":     "%d Stunden",
+            "d":      "einem Tag",
+            "dd":     "%d Tage",
+            "M":      "einem Monat",
+            "MM":     "%d Monaten",
+            "y":      "einem Jahr",
+            "yy":     "%d Jahren"
         }
     }
 }

@@ -52,7 +52,7 @@ services:
       - DB_USER
       - DB_PASSWORD
       - QUEUE_SCHEDULED_SIMULATIONS
-    image: janpiotraschke/projectq:0.3.2
+    image: janpiotraschke/projectq:0.3.2_web-app
     networks:
       - db
       - messageBroker
@@ -75,7 +75,7 @@ services:
       - DB_USER
       - DB_PASSWORD
       - QUEUE_SIMULATION_RESULTS
-    image: janpiotraschke/projectq:0.3.2
+    image: janpiotraschke/projectq:0.3.2_web-app
     networks:
       - db
       - messageBroker
@@ -91,7 +91,7 @@ services:
       - DEBUG
       - QUEUE_SCHEDULED_SIMULATIONS
       - QUEUE_SIMULATION_RESULTS
-    image: janpiotraschke/projectq:0.3.2
+    image: janpiotraschke/projectq:0.3.2_web-app
     networks:
       - messageBroker
     volumes:

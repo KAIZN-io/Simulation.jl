@@ -1,3 +1,4 @@
+import json
 from flask import Blueprint, render_template, redirect
 
 import messageQueue as mq
@@ -26,7 +27,10 @@ def start():
         with sessionScope() as session:
             simulation = getSimulationFromFormData(session, form.data)
             session.commit()
-            mq.scheduleSimulation(simulation)
+
+            # emit event that the simulations ist started
+            event_name = 'simulation.' + simulation.getTypeAsString() + '.scheduled'
+            mq.emit(event_name, simulation.to_dict(json_ready=True))
 
         return redirect('/simulation')
 

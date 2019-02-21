@@ -51,6 +51,7 @@ services:
       - DB_NAME
       - DB_USER
       - DB_PASSWORD
+      - EXCHANGE_EVENTS
       - QUEUE_SCHEDULED_SIMULATIONS
     image: janpiotraschke/projectq:0.3.2_web-app
     networks:
@@ -74,6 +75,7 @@ services:
       - DB_NAME
       - DB_USER
       - DB_PASSWORD
+      - EXCHANGE_EVENTS
       - QUEUE_SIMULATION_RESULTS
     image: janpiotraschke/projectq:0.3.2_web-app
     networks:
@@ -89,6 +91,7 @@ services:
         condition: service_healthy
     environment:
       - DEBUG
+      - EXCHANGE_EVENTS
       - QUEUE_SCHEDULED_SIMULATIONS
       - QUEUE_SIMULATION_RESULTS
     image: janpiotraschke/projectq:0.3.2_web-app

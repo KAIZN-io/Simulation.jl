@@ -50,15 +50,25 @@ os.environ['PYTHONPATH'] = os.getcwd()
 # actually start the server
 socket = SocketIO(app, logger=logger)
 
-def globaltime():
-    @mq.on('simulation.*.results-persisted')
+def notifySimulationScheduled():
+    @mq.on('simulation.*.scheduled')
+    def notify_clients(ch, method, properties, body):
+        socket.emit( "simulation.scheduled", json.loads(body))
+eventlet.spawn(notifySimulationScheduled)
+
+def notifySimulationStarted():
+    @mq.on('simulation.*.started')
+    def notify_clients(ch, method, properties, body):
+        socket.emit( "simulation.started", json.loads(body))
+eventlet.spawn(notifySimulationStarted)
+
+def notifySimulationFinished():
+    @mq.on('simulation.*.finished')
     def notify_clients(ch, method, properties, body):
         socket.emit( "simulation.finished", json.loads(body))
-
-eventlet.spawn(globaltime)
+eventlet.spawn(notifySimulationFinished)
 
 socket.run(app, host='0.0.0.0', debug=DEBUG)
-
 
 logger.info("Server initialized")
 

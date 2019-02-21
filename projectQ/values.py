@@ -15,6 +15,7 @@ DB_USER = os.environ.get('DB_USER')
 DB_PASSWORD = os.environ.get('DB_PASSWORD')
 
 # Get queue names
+EXCHANGE_EVENTS = os.environ.get('EXCHANGE_EVENTS')
 QUEUE_SCHEDULED_SIMULATIONS = os.environ.get('QUEUE_SCHEDULED_SIMULATIONS')
 QUEUE_SIMULATION_RESULTS    = os.environ.get('QUEUE_SIMULATION_RESULTS')
 

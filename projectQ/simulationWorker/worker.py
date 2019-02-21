@@ -7,19 +7,35 @@ from simulationWorker.simulate import simulate
 
 
 print("Waiting for simulations")
-@mq.listen(QUEUE_SCHEDULED_SIMULATIONS)
+@mq.on('simulation.*.scheduled')
 def processSimulation(ch, method, properties, body):
     simulationData = json.loads(body)
     print('Simulation received, id: ' + str(simulationData['id']))
 
     print('Simulating...')
+
+    # save the started at time
     started_at = datetime.utcnow()
+
+    # emit event that the simulations ist started
+    event_name = 'simulation.' + simulationData['type'] + '.started'
+    mq.emit(event_name, {
+        'id': simulationData['id'],
+        'started_at': started_at.strftime(RFC3339_DATE_FORMAT),
+    })
+
+    # simulate
     result = simulate(simulationData)
+
+    # note time when the simulation was finished
     finished_at = datetime.utcnow()
 
     print('Publishing results...')
-    mq.publishSimulationResult({
-        'simulation_id': simulationData['id'],
+
+    # emit event that the simulations ist started
+    event_name = 'simulation.' + simulationData['type'] + '.finished'
+    mq.emit(event_name, {
+        'id': simulationData['id'],
         'started_at': started_at.strftime(RFC3339_DATE_FORMAT),
         'finished_at': finished_at.strftime(RFC3339_DATE_FORMAT),
         'extrt': result['extrt'],

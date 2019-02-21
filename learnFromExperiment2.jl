@@ -1,12 +1,16 @@
 """learn from experimental data --> DoE with simulation and experimental data"""
 
+"""You can remove all the package stuff with `rm -fr .julia`"""
+
 using Pkg
 
 # include("/Users/janpiotraschke/GithubRepository/ProjectQ/learnFromExperiment2.jl")
-# import Pkg; Pkg.add("Flux")
-# import Pkg; Pkg.add("DiffEqFlux")
-# import Pkg; Pkg.add("DifferentialEquations")
-# import Pkg; Pkg.add("Plots")
+# Pkg.add("Flux")
+# Pkg.add("DiffEqFlux")
+# Pkg.add("DifferentialEquations")
+# Pkg.add("Plots")
+# Pkg.add("Logging")
+
 # import Pkg; Pkg.add("BSON")
 # Pkg.add("ForwardDiff")
 # Pkg.add("Documenter")
@@ -17,8 +21,9 @@ using Pkg
 # ENV["GRDIR"]=""
 # Pkg.build("GR")
 
-using Flux, DiffEqFlux, DifferentialEquations, Plots, Logging, Documenter
-using ForwardDiff, LinearAlgebra
+using Flux, DiffEqFlux, DifferentialEquations, Plots,ForwardDiff,LinearAlgebra, Logging
+
+# using ForwardDiff, LinearAlgebra
 # using BSON: @save
 
 """intresting julia package
@@ -180,7 +185,8 @@ neuronalNetworkMatrix = ones(myArraySize,maxTermCount)
 neuronalNetworkMatrixVariable = Array{String}(undef, myArraySize,maxTermCount)
 
 # create activated term matrix 
-activatedTermMatrix = fill("",size(termMatrix)[1])
+activatedTermMatrix = fill("",size(termMatrix))
+
 for row in 1:myArraySize
   for column in 1:maxTermCount
     # set the NN matrix element to 0 / undef if term matrix does not hold any 
@@ -191,14 +197,26 @@ for row in 1:myArraySize
 
     if neuronalNetworkMatrix[row,column] == 1
       # add strings with '*' together
-      neuronalNetworkMatrixVariable[row,column] = "m"*string(column)*string(row)
+      neuronalNetworkMatrixVariable[row,column] = "m"*string(row)*string(column)
       
-      activatedTermMatrix[row,1] *= termMatrix[row,column] * "*"* neuronalNetworkMatrixVariable[row,column]
+      activatedTermMatrix[row,column] *= "xPlace" * "=" * termMatrix[row,column] #* "*"* neuronalNetworkMatrixVariable[row,column]
     else
        neuronalNetworkMatrixVariable[row,column] = ""
     end
   end
 end  
+
+
+
+
+# A = variablesForNN
+# sizeA = size(rawValuesForNN)[1]
+# B = resize!(A, sizeA)
+# C = reshape(B, myArraySize, maxTermCount)
+
+
+
+
 
 # create the raw vectors for the NN matrix as the NN layer 
 rawValuesForNN = vcat(neuronalNetworkMatrix...)
@@ -216,25 +234,100 @@ for i in 1:size(rawValuesForNN)[1]
   end
 end
 
+# turn matrix into a vector 
+a = vcat(activatedTermMatrix...)
+
+# reduce activatedTermMatrix
+reducedTermMatrix = String[]
+for i in 1:size(a)[1]
+  if a[i] != ""
+    push!(reducedTermMatrix,a[i])
+  end
+end
 
 # re-unite the variable matrix with their terms and precompile the equations
-expressionMatrix = [Meta.parse(string(variableMatrix[i], "=" ,activatedTermMatrix[i])) for i in 1:myArraySize]
+# # expressionMatrix = [Meta.parse(string(variableMatrix[i], "=" ,activatedTermMatrix[i])) for i in 1:myArraySize]
 
 @info "expression matrix for terms is created successfully"
 
-function evalExpressionForSolver(u,du,p)
-  
-  for i = 1:size(valuesForNN)[1]
+function evalExpressionForSolver(u,du,placeHolder)
 
-    # assign the NN parameter to their values
-    eval(Meta.parse(string(variablesForNN[i], "=", p[i])))
+  A = placeHolder
+  sizeA = size(rawValuesForNN)[1]
+  B = resize!(A, sizeA)
+  C = reshape(B, myArraySize, maxTermCount)
 
+
+  # iteration number for parameter Placeholder vector 
+  iterNum = 1
+
+  # fill the neuronalNetworkMatrixVariable with the correct placeholder
+  for j = 1:size(neuronalNetworkMatrixVariable,2)
+    for i = 1:size(neuronalNetworkMatrixVariable,1)
+        if neuronalNetworkMatrixVariable[i,j] != ""
+          C[i,j] = placeHolder[iterNum]
+          iterNum += 1
+        end
+    end
   end
+  @info "hat die Matrix Zuweisung geklappt?"
+  @show C[1,1]
+  @info size(C)
+  iterNum = 1
 
+  # create an empty dict for the variables
+  variableDict = Dict()
+
+  # next: sort C that the values are on the same place as in activatedTermMatrix
+  # note: C == array from Flux package
+  for j = 1:size(neuronalNetworkMatrixVariable,2)
+    for i = 1:size(neuronalNetworkMatrixVariable,1)
+      if iterNum <= size(variablesForNN)[1]
+        if neuronalNetworkMatrixVariable[i,j] == variablesForNN[iterNum]
+          variableDict[variablesForNN[iterNum]] = C[i,j]
+          iterNum +=1
+        end
+      end
+    end
+  end
+  
+  @info "variableDict successfully created"
+  @info "keys of the dict"
+  @show keys(variableDict)
+
+  # for i = 1:size(valuesForNN)[1]
+  #   # eval the term
+  #   variablePlaceHolder = eval()
+
+  #   # add the NN variable to the term
+  #   variablePlaceHolder *= placeHolder[i]
+
+  #   # append it to the variableDict 
+  #   variableDict[variablesForNN[i]] = variablePlaceHolder
+
+  # end 
+
+  # for i = 1:size(placeHolder)[1]
+  #   @show placeHolder[i]
+  # end
+  @info "u"
+  @show u[2]
+  @info "du"
+  @show du[2]
+  @info "p"
+  @show placeHolder[2]
+  # for i = 1:size(valuesForNN)[1]
+  #   eval(Meta.parse(string(variablesForNN[i]))) = 2# placeHolder[i]
+  #   # ex = Meta.parse(string(variablesForNN[i], "=", 1))    
+  # end
+
+
+  # eval(Meta.parse(string("m"))) = 0
   for i = 1:size(odeNames)[1]
     # convert the ODE names
+    @info "before ODE eval "
     eval(Meta.parse(string(odeNames[i], "=", du[i])))
-
+    @info "after ODE eval "
     # assign the initial values to their ODEs
     eval(Meta.parse(string(odeVariable[i], "=", u[i])))
 
@@ -256,7 +349,9 @@ end
 
 # the function for solving the SDE
 function lotka_volterra(du,u,p,t)
-    evalExpressionForSolver(u,du,p)
+  
+    placeHolder = p
+    evalExpressionForSolver(u,du,placeHolder)
 end
 
 
@@ -390,7 +485,7 @@ once every timeout seconds.
 Flux.train!(loss_fd_sde, [neuralParameter], data, opt, cb = cb)
 
 
-# @info "trained parameters:" neuralParameter
+@info "trained parameters:" neuralParameter
 
 
 # # # # You may wish to save models so that they can be loaded and run in a later 

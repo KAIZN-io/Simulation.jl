@@ -6,6 +6,8 @@ import json
 from values import HN_MESSAGE_BROKER, QUEUE_SCHEDULED_SIMULATIONS, QUEUE_SIMULATION_RESULTS
 
 
+EXCHANGE_EVENTS = 'events'
+
 logger = logging.getLogger(__name__)
 
 def scheduleSimulation(simulation):
@@ -43,13 +45,67 @@ def enqueue(msg, queue):
     # close the connection to make sure the message gets flushed to the server
     connection.close()
 
-def listen(callback, queue):
+def listen(queue):
+    print(queue)
+    def decorator(callback):
+        print(callback)
+
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host=HN_MESSAGE_BROKER))
+        channel = connection.channel()
+        channel.queue_declare(queue=queue)
+
+        channel.basic_qos(prefetch_count=1)
+        channel.basic_consume(callback, queue=queue)
+
+        channel.start_consuming()
+
+    return decorator
+
+def on(event_name):
+    print(event_name)
+    def decorator(callback):
+        print(callback)
+
+        def callback_wrapper(ch, method, properties, body):
+            data = json.loads(body)
+            logger.info("Event \"" + event_name + "\" received, data: \"" + str(data) + "\"")
+            print("Event \"" + event_name + "\" received, data: \"" + str(data) + "\"")
+            callback(ch, method, properties, body)
+
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host=HN_MESSAGE_BROKER))
+        channel = connection.channel()
+
+        channel.exchange_declare(exchange=EXCHANGE_EVENTS, exchange_type='topic')
+
+        result = channel.queue_declare(exclusive=True)
+        queue_name = result.method.queue
+
+        channel.queue_bind(
+            exchange=EXCHANGE_EVENTS,
+            queue=queue_name,
+            routing_key=event_name
+        )
+
+        channel.basic_consume(callback_wrapper, queue=queue_name)
+
+        channel.start_consuming()
+
+    return decorator
+
+def emit(event_name, data):
     connection = pika.BlockingConnection(pika.ConnectionParameters(host=HN_MESSAGE_BROKER))
     channel = connection.channel()
-    channel.queue_declare(queue=queue)
 
-    channel.basic_qos(prefetch_count=1)
-    channel.basic_consume(callback, queue=queue)
+    channel.exchange_declare(exchange=EXCHANGE_EVENTS, exchange_type='topic')
 
-    channel.start_consuming()
+    channel.basic_publish(
+        exchange=EXCHANGE_EVENTS,
+        routing_key=event_name,
+        body=data
+    )
+
+    logger.info("Emitted event \"" + event_name + "\" with data \"" + data + "\"")
+    print("Emitted event \"" + event_name + "\" with data \"" + data + "\"")
+
+    connection.close()
 

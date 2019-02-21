@@ -1,13 +1,21 @@
+import eventlet
+eventlet.monkey_patch()
+
 import os
+import threading
+import time
+import datetime
 import logging
+import json
 from flask_socketio import SocketIO
 from flask_restful import Api
 
 from server.app import app
 from server.routings import routes
 from server.api import Simulation, SimulationList
-from values import DEBUG
+from values import DEBUG, RFC3339_DATE_FORMAT
 from db.base import base, ThreadScopedSession
+import messageQueue as mq
 
 
 logger = logging.getLogger(__name__)
@@ -41,6 +49,14 @@ os.environ['PYTHONPATH'] = os.getcwd()
 
 # actually start the server
 socket = SocketIO(app, logger=logger)
+
+def globaltime():
+    @mq.on('simulation.*.results-persisted')
+    def notify_clients(ch, method, properties, body):
+        socket.emit( "simulation.finished", json.loads(body))
+
+eventlet.spawn(globaltime)
+
 socket.run(app, host='0.0.0.0', debug=DEBUG)
 
 

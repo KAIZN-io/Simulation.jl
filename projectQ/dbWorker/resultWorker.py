@@ -7,6 +7,8 @@ from db import sessionScope, Ex, Pd
 from values import RFC3339_DATE_FORMAT, QUEUE_SIMULATION_RESULTS
 
 
+print("Waiting for simulation results...")
+@mq.listen(QUEUE_SIMULATION_RESULTS)
 def processSimulationResult(ch, method, properties, body):
     # parse the JSON to python dict, so one can work with it
     simulation_result = json.loads(body)
@@ -32,10 +34,10 @@ def processSimulationResult(ch, method, properties, body):
         for pd in simulation_result['pds']:
             ex.pds.append(Pd.from_dict(pd))
 
+        event_name = 'simulation.' + ex.getTypeAsString() + '.results-persisted'
+        mq.emit(event_name, json.dumps(ex.to_brief_dict(True)))
+
     # confirm that the message was received and processed
     print('Acknowledging that the results were received and processed...')
     ch.basic_ack(delivery_tag = method.delivery_tag)
-
-print("Waiting for simulation results...")
-mq.listen(processSimulationResult, QUEUE_SIMULATION_RESULTS)
 

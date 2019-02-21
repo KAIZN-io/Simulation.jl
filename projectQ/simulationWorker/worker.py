@@ -6,6 +6,8 @@ from values import RFC3339_DATE_FORMAT, QUEUE_SCHEDULED_SIMULATIONS, QUEUE_SIMUL
 from simulationWorker.simulate import simulate
 
 
+print("Waiting for simulations")
+@mq.listen(QUEUE_SCHEDULED_SIMULATIONS)
 def processSimulation(ch, method, properties, body):
     simulationData = json.loads(body)
     print('Simulation received, id: ' + str(simulationData['id']))
@@ -32,8 +34,4 @@ def processSimulation(ch, method, properties, body):
     ch.basic_ack(delivery_tag = method.delivery_tag)
 
     print('Done')
-
-print("Waiting for simulations")
-mq.listen(processSimulation, QUEUE_SCHEDULED_SIMULATIONS)
-
 

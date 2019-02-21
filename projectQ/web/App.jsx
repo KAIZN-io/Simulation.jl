@@ -23,6 +23,9 @@ const socket = io('http://localhost:8080/');
 socket.on('connect', function(){
   console.log('connected!')
 });
+socket.on('simulation.finished', data => {
+  console.log( data )
+})
 
 moment.updateLocale('en', {
     relativeTime: i18n.t( 'misc:relativeTime', { returnObjects: true })

@@ -10,48 +10,26 @@ import ListItem from './ListItem.jsx';
 
 
 const List = withTranslation()( ({ simulations, toggleExpandSimulation, t }) => {
-  let scheduledSimulations = [];
-  let finishedSimulations = [];
-  simulations.map( simulation => {
-    let listItem = (
+  let simulationList = simulations.map( simulation => {
+    return (
       <ListItem key={ simulation.id }
         simulation={ simulation }
         onClick={ () => toggleExpandSimulation( simulation.id ) } />
     );
-
-    if ( simulation.finished_at === null ) {
-      scheduledSimulations.push( listItem )
-    } else {
-      finishedSimulations.push( listItem )
-    }
   });
 
   return (
     <ContainerLayout>
-      <h2>{ t( 'simulation.list.scheduled' ) }</h2>
+      <h2>{ t( 'simulation.list.overview' ) }</h2>
 
-      { scheduledSimulations.length > 0 ? (
-        <div id="scheduled-simulations" className="mb-5">
-          { scheduledSimulations }
+      { simulationList.length > 0 ? (
+        <div className="accordion mb-5">
+          { simulationList }
         </div>
       ) : (
         <div className="card mb-5">
           <div className="card-body">
-            { t( 'simulation.list.emptyScheduled' ) }
-          </div>
-        </div>
-      )}
-
-      <h2>{ t( 'simulation.list.finished' ) }</h2>
-
-      { finishedSimulations.length > 0 ? (
-        <div id="finished-simulations" className="mb-5">
-          { finishedSimulations }
-        </div>
-      ) : (
-        <div className="card mb-5">
-          <div className="card-body">
-            { t( 'simulation.list.emptyFinished' ) }
+            { t( 'simulation.list.empty' ) }
           </div>
         </div>
       )}

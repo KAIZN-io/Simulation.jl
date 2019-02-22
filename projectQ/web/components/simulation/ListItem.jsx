@@ -9,6 +9,24 @@ import { typeColorMapping } from '../../values.js';
 import * as CustomPropTypes from '../../customPropTypes.js';
 
 
+const simulationStatus = {
+  SCHEDULED: 'scheduled',
+  RUNNING: 'running',
+  FINISHED: 'finished'
+};
+
+function getSimulationStatus( simulation ) {
+  let status = simulationStatus.SCHEDULED;
+
+  if ( simulation.started_at && !simulation.finished_at ) {
+    status = simulationStatus.RUNNING;
+  } else if ( simulation.started_at && simulation.finished_at ) {
+    status = simulationStatus.FINISHED;
+  }
+
+  return status;
+}
+
 const ListItem = withStyles({
   typeBadge: {
     fontFamily: 'Share Tech Mono',
@@ -16,9 +34,12 @@ const ListItem = withStyles({
   },
   cardHeader: {
     cursor: 'pointer'
-  }
+  },
 })( withTranslation()( ({ simulation, onClick, classes, t }) => {
-  let createdAt = moment.utc( simulation.created_at )
+  let status = getSimulationStatus( simulation );
+  let color = typeColorMapping[ simulation.type ];
+
+  let createdAt = moment.utc( simulation.created_at );
 
   let duration;
   if ( simulation.finished_at ) {
@@ -27,29 +48,46 @@ const ListItem = withStyles({
     duration = moment.duration( finishedAt.diff( startedAt ) );
   }
 
+  let statusIndicator;
+  switch( status ) {
+    case simulationStatus.SCHEDULED:
+      statusIndicator = <i className="fas fa-calendar-day text-secondary"></i>;
+      break;
+    case simulationStatus.RUNNING:
+      statusIndicator = <span className="spinner-grow spinner-grow-sm text-info" role="status"></span>;
+      break;
+    case simulationStatus.FINISHED:
+      statusIndicator = <i className="fas fa-check text-success"></i>;
+      break;
+  }
+
+
   return (
     <div className={ c( "card", simulation.expanded ? 'expanded' : 'collapsed' ) } onClick={ onClick }>
       <div className={ c(
-        "card-header simulation-card-header d-flex align-items-stretch justify-content-between",
+        "card-header simulation-card-header d-flex justify-content-between",
         classes.cardHeader )
       }>
 
-      <div className="d-flex align-items-stretch">
-        <span
-          className={ c(
-            'badge d-inline-flex align-items-center mr-2 pt-1',
-            `badge-${ typeColorMapping[ simulation.type ] }`,
+      <div className="d-flex align-items-baseline">
+        <span className={ c(
+            'badge align-self-stretch d-inline-flex align-items-center mr-2 pt-1 px-2',
+            `badge-${ color }`,
             classes.typeBadge
           ) }>
           { simulation.type.substring( 0, 3 ) }
         </span>
-        { simulation.name }
+
+        <h5 className="d-inline mb-0 mr-2"> { simulation.name } </h5>
+
+        <small className="text-secondary" title={ createdAt.format("DD.MM.YYYY HH:mm:ss") }>
+          { t( 'simulation.list.createdAt', { time: createdAt.fromNow() } ) }
+        </small>
       </div>
 
-      <div className="small text-secondary" title={ createdAt.format("DD.MM.YYYY HH:mm:ss") }>
-        { createdAt.fromNow() }
+      <div className="d-flex align-items-center" title={ t( `simulation.list.status.${ status }` ) }>
+          { statusIndicator }
       </div>
-
     </div>
 
     { simulation.expanded && (

@@ -12,14 +12,18 @@
         },
         "simulation": {
             "list": {
-                "scheduled": "Geplante Simulationen",
-                "finished": "Beendete Simulationen",
-                "emptyScheduled": "Es laufen derzeit keine Simulationen.",
-                "emptyFinished": "Es wurden noch keine Simulationen beendet.",
+                "overview": "Simulationsübersicht",
+                "empty": "Es sind noch keine Simulationen vorhanden.",
                 "loading": "Lade Simulationene...",
                 "timeRange": "Simulierter Zeitraum",
                 "stepSize": "Schrittgröße",
-                "duration": "Laufzeit"
+                "duration": "Laufzeit",
+                "createdAt": "erstellt {{time}}",
+                "status": {
+                    "scheduled": "Simulation wartet auf Ausführung",
+                    "running": "Wird Simuliert...",
+                    "finished": "Simulation fertiggestellt"
+                }
             }
         },
         "footer": {

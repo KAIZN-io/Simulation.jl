@@ -5,8 +5,8 @@ import withStyles from 'react-jss'
 import c from 'classnames/bind';
 import moment from 'moment';
 
-import { typeColorMapping } from '../values.js';
-import * as CustomPropTypes from '../customPropTypes.js';
+import { typeColorMapping } from '../../values.js';
+import * as CustomPropTypes from '../../customPropTypes.js';
 
 
 const ListItem = withStyles({

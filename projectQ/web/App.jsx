@@ -6,10 +6,10 @@ import { Provider } from 'react-redux';
 
 import './init.js';
 import store from './redux/store.js';
-import Navbar from './Navbar.jsx';
-import Footer from './Footer.jsx';
-import Home from './Home.jsx';
-import SimulationRouter from './Simulation/Router.jsx';
+import Navbar from './components/Navbar.jsx';
+import Footer from './components/Footer.jsx';
+import Home from './components/Home.jsx';
+import SimulationRouter from './components/simulation/Router.jsx';
 
 
 const App = withStyles({

@@ -3,8 +3,8 @@ import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
 import { connect } from 'react-redux'
 
-import * as CustomPropTypes from '../customPropTypes.js';
-import { toggleExpandSimulation } from '../redux/actionCreators.js';
+import * as CustomPropTypes from '../../customPropTypes.js';
+import { toggleExpandSimulation } from '../../redux/actionCreators.js';
 import { CenterLayout, ContainerLayout } from '../Layouts.jsx';
 import ListItem from './ListItem.jsx';
 

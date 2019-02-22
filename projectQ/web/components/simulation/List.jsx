@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
-import { connect } from 'react-redux'
+import { connect } from 'react-redux';
+import { OrderedMap } from 'immutable';
 
 import * as CustomPropTypes from '../../customPropTypes.js';
 import { toggleExpandSimulation } from '../../redux/actionCreators.js';
@@ -12,9 +13,9 @@ import ListItem from './ListItem.jsx';
 const List = withTranslation()( ({ simulations, toggleExpandSimulation, t }) => {
   let simulationList = simulations.map( simulation => {
     return (
-      <ListItem key={ simulation.id }
+      <ListItem key={ simulation.get( 'id' ) }
         simulation={ simulation }
-        onClick={ () => toggleExpandSimulation( simulation.id ) } />
+        onClick={ () => toggleExpandSimulation( simulation.get( 'id' ) ) } />
     );
   });
 
@@ -22,9 +23,9 @@ const List = withTranslation()( ({ simulations, toggleExpandSimulation, t }) => 
     <ContainerLayout>
       <h2>{ t( 'simulation.list.overview' ) }</h2>
 
-      { simulationList.length > 0 ? (
+      { simulationList.size > 0 ? (
         <div className="accordion mb-5">
-          { simulationList }
+          { simulationList.toList() }
         </div>
       ) : (
         <div className="card mb-5">
@@ -36,14 +37,12 @@ const List = withTranslation()( ({ simulations, toggleExpandSimulation, t }) => 
     </ContainerLayout>
   )
 });
-List.propTypes = {
-  simulations: PropTypes.arrayOf( CustomPropTypes.simulation.isRequired )
-};
+List.propTypes = {};
 
 const ConnectedList = connect(
   state => {
     return {
-      simulations: Object.values( state.simulations )
+      simulations: state.simulations.sortBy( simulation => simulation.created_at ).reverse()
     }
   },
   dispatch => {

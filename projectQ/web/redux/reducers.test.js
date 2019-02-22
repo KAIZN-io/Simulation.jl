@@ -1,3 +1,7 @@
+import moment from 'moment';
+import { OrderedMap, Map } from 'immutable';
+
+
 import * as types from './actionTypes.js'
 import reducer from './reducers.js'
 
@@ -6,7 +10,7 @@ describe('reducer', () => {
   it('should return the initial state', () => {
     expect(reducer(undefined, {})).toEqual({
       initialized: false,
-      simulations: {}
+      simulations: new OrderedMap()
     })
   })
 
@@ -17,26 +21,38 @@ describe('reducer', () => {
       payload: {
         simulations: [
           {
-            id: 1
+            id: 1,
+            created_at: '2019-02-22T01:17:03-08:00',
+            started_at: null,
+            finished_at: null
           },
           {
-            id: 2
+            id: 2,
+            created_at: '2019-02-22T01:17:03-08:00',
+            started_at: '2019-02-22T01:17:52-08:00',
+            finished_at: '2019-02-22T01:18:05-08:00'
           }
         ]
       }
     };
     let nextState = {
       initialized: true,
-      simulations: {
-        1: {
+      simulations: new OrderedMap({
+        1: new Map({
           id: 1,
+          created_at: moment.utc( '2019-02-22T01:17:03-08:00' ),
+          started_at: null,
+          finished_at: null,
           expanded: false
-        },
-        2: {
+        }),
+        2: new Map({
           id: 2,
+          created_at: moment.utc( '2019-02-22T01:17:03-08:00' ),
+          started_at: moment.utc( '2019-02-22T01:17:52-08:00' ),
+          finished_at: moment.utc( '2019-02-22T01:18:05-08:00' ),
           expanded: false
-        }
-      }
+        })
+      })
     }
     expect( reducer( state, action ) ).toEqual( nextState );
   });
@@ -44,12 +60,12 @@ describe('reducer', () => {
   it('should handle TOGGLE_EXPAND_SIMULATION', () => {
     let state = {
       initialized: true,
-      simulations: {
-        1: {
+      simulations: new OrderedMap({
+        1: new Map({
           id: 1,
           expanded: false
-        }
-      }
+        })
+      })
     };
     let action = {
       type: types.TOGGLE_EXPAND_SIMULATION,
@@ -59,12 +75,12 @@ describe('reducer', () => {
     };
     let nextState = {
       initialized: true,
-      simulations: {
-        1: {
+      simulations: new OrderedMap({
+        1: new Map({
           id: 1,
           expanded: true
-        }
-      }
+        })
+      })
     }
     expect( reducer( state, action ) ).toEqual( nextState );
   });
@@ -72,28 +88,43 @@ describe('reducer', () => {
   it('should handle ADD_SCHEDULED_SIMULATION', () => {
     let state = {
       initialized: true,
-      simulations: {
-        1: {
-          id: 1
-        }
-      }
+      simulations: new OrderedMap({
+        1: new Map({
+          id: 1,
+          created_at: moment.utc( '2019-02-22T01:17:03-08:00' ),
+          started_at: moment.utc( '2019-02-22T01:17:52-08:00' ),
+          finished_at: moment.utc( '2019-02-22T01:18:05-08:00' ),
+          expanded: false
+        })
+      })
     };
     let action = {
       type: types.ADD_SCHEDULED_SIMULATION,
       payload: {
         id: 2,
+        created_at: '2019-02-22T01:17:03-08:00',
+        started_at: null,
+        finished_at: null,
       }
     };
     let nextState = {
       initialized: true,
-      simulations: {
-        1: {
+      simulations: new OrderedMap({
+        1: new Map({
           id: 1,
-        },
-        2: {
+          created_at: moment.utc( '2019-02-22T01:17:03-08:00' ),
+          started_at: moment.utc( '2019-02-22T01:17:52-08:00' ),
+          finished_at: moment.utc( '2019-02-22T01:18:05-08:00' ),
+          expanded: false
+        }),
+        2: new Map({
           id: 2,
-        }
-      }
+          created_at: moment.utc( '2019-02-22T01:17:03-08:00' ),
+          started_at: null,
+          finished_at: null,
+          expanded: false
+        })
+      })
     };
     expect( reducer( state, action ) ).toEqual( nextState );
   });
@@ -101,15 +132,15 @@ describe('reducer', () => {
   it('should handle MARK_SIMULATION_AS_STARTED', () => {
     let state = {
       initialized: true,
-      simulations: {
-        1: {
+      simulations: new OrderedMap({
+        1: new Map({
           id: 1,
           started_at: null
-        }
-      }
+        })
+      })
     };
     let action = {
-      type: types.MARK_SIMULATION_AS_FINISHED,
+      type: types.MARK_SIMULATION_AS_STARTED,
       payload: {
         id: 1,
         started_at: '2019-02-21T15:21:29-08:00'
@@ -117,12 +148,12 @@ describe('reducer', () => {
     };
     let nextState = {
       initialized: true,
-      simulations: {
-        1: {
+      simulations: new OrderedMap({
+        1: new Map({
           id: 1,
-          started_at: '2019-02-21T15:21:29-08:00'
-        }
-      }
+          started_at: moment.utc( '2019-02-21T15:21:29-08:00' )
+        })
+      })
     };
     expect( reducer( state, action ) ).toEqual( nextState );
   });
@@ -130,29 +161,33 @@ describe('reducer', () => {
   it('should handle MARK_SIMULATION_AS_FINISHED', () => {
     let state = {
       initialized: true,
-      simulations: {
-        1: {
+      simulations: new OrderedMap({
+        1: new Map({
           id: 1,
-          started_at: '2019-02-21T15:21:29-08:00'
-        }
-      }
+          started_at: moment.utc( '2019-02-21T15:21:29-08:00' ),
+          finished_at: null,
+          image_path: null
+        })
+      })
     };
     let action = {
       type: types.MARK_SIMULATION_AS_FINISHED,
       payload: {
         id: 1,
-        finished_at: '2019-02-21T15:23:03-08:00'
+        finished_at: '2019-02-21T15:23:03-08:00',
+        image_path: 'ion_3.png'
       }
     };
     let nextState = {
       initialized: true,
-      simulations: {
-        1: {
+      simulations: new OrderedMap({
+        1: new Map({
           id: 1,
-          started_at: '2019-02-21T15:21:29-08:00',
-          finished_at: '2019-02-21T15:23:03-08:00'
-        }
-      }
+          started_at: moment.utc( '2019-02-21T15:21:29-08:00' ),
+          finished_at: moment.utc( '2019-02-21T15:23:03-08:00' ),
+          image_path: 'ion_3.png'
+        })
+      })
     };
     expect( reducer( state, action ) ).toEqual( nextState );
   });

@@ -18,9 +18,9 @@ const simulationStatus = {
 function getSimulationStatus( simulation ) {
   let status = simulationStatus.SCHEDULED;
 
-  if ( simulation.started_at && !simulation.finished_at ) {
+  if ( simulation.get( 'started_at' ) && !simulation.get( 'finished_at' ) ) {
     status = simulationStatus.RUNNING;
-  } else if ( simulation.started_at && simulation.finished_at ) {
+  } else if ( simulation.get( 'started_at' ) && simulation.get( 'finished_at' ) ) {
     status = simulationStatus.FINISHED;
   }
 
@@ -37,14 +37,14 @@ const ListItem = withStyles({
   },
 })( withTranslation()( ({ simulation, onClick, classes, t }) => {
   let status = getSimulationStatus( simulation );
-  let color = typeColorMapping[ simulation.type ];
+  let color = typeColorMapping[ simulation.get( 'type' ) ];
 
-  let createdAt = moment.utc( simulation.created_at );
+  let createdAt = moment.utc( simulation.get( 'created_at' ) );
 
   let duration;
-  if ( simulation.finished_at ) {
-    let startedAt = moment.utc( simulation.started_at );
-    let finishedAt = moment.utc( simulation.finished_at );
+  if ( simulation.get( 'finished_at' ) ) {
+    let startedAt = moment.utc( simulation.get( 'started_at' ) );
+    let finishedAt = moment.utc( simulation.get( 'finished_at' ) );
     duration = moment.duration( finishedAt.diff( startedAt ) );
   }
 
@@ -63,7 +63,7 @@ const ListItem = withStyles({
 
 
   return (
-    <div className={ c( "card", simulation.expanded ? 'expanded' : 'collapsed' ) } onClick={ onClick }>
+    <div className={ c( "card", simulation.get( 'expanded' ) ? 'expanded' : 'collapsed' ) } onClick={ onClick }>
       <div className={ c(
         "card-header simulation-card-header d-flex justify-content-between",
         classes.cardHeader )
@@ -75,10 +75,10 @@ const ListItem = withStyles({
             `badge-${ color }`,
             classes.typeBadge
           ) }>
-          { simulation.type.substring( 0, 3 ) }
+          { simulation.get( 'type' ).substring( 0, 3 ) }
         </span>
 
-        <h5 className="d-inline mb-0 mr-2"> { simulation.name } </h5>
+        <h5 className="d-inline mb-0 mr-2">{ simulation.get( 'name' ) }</h5>
 
         <small className="text-secondary" title={ createdAt.format("DD.MM.YYYY HH:mm:ss") }>
           { t( 'simulation.list.createdAt', { time: createdAt.fromNow() } ) }
@@ -90,22 +90,22 @@ const ListItem = withStyles({
       </div>
     </div>
 
-    { simulation.expanded && (
+    { simulation.get( 'expanded' ) && (
       <div className="card-body">
 
         <table className="table mb-0">
           <tbody>
             <tr>
               <th scope="row">{ t( 'simulation.list.timeRange' ) }</th>
-              <td>{ simulation.start }s - { simulation.stop }s</td>
+              <td>{ simulation.get( 'start' ) }s - { simulation.get( 'stop' ) }s</td>
             </tr>
             <tr>
               <th scope="row">{ t( 'simulation.list.stepSize' ) }</th>
-              <td>{ simulation.step_size }s</td>
+              <td>{ simulation.get( 'step_size' ) }s</td>
             </tr>
             <tr>
               <th scope="row">{ t( 'simulation.list.duration' ) }</th>
-              { simulation.finished_at ? (
+              { simulation.get( 'finished_at' ) ? (
                 <td><span title={ duration.as( 's' ) + 's' }>{ duration.humanize() }</span></td>
               ) : (
                 <td>-</td>
@@ -114,9 +114,9 @@ const ListItem = withStyles({
           </tbody>
         </table>
 
-        { simulation.finished_at && (
-          <a href={ `/static/images/${ simulation.image_path }` } target="_blank">
-            <img className="img-fluid mt-4" src={ `/static/images/${ simulation.image_path }` } />
+        { simulation.get( 'finished_at' ) && (
+          <a href={ `/static/images/${ simulation.get( 'image_path' ) }` } target="_blank">
+            <img className="img-fluid mt-4" src={ `/static/images/${ simulation.get( 'image_path' ) }` } />
           </a>
         )}
 
@@ -127,8 +127,6 @@ const ListItem = withStyles({
   )
 }));
 ListItem.propTypes = {
-  simulation: CustomPropTypes.simulation.isRequired,
-  expanded: PropTypes.bool
 };
 
 export default ListItem

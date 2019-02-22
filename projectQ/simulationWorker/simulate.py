@@ -213,7 +213,6 @@ def simulate(simulationData):
 
     the actual simulation begins
     """
-    print('Simulation Type: ' + simulationData['type'])
     for simulationSettingsForTimeRange in runningChit:
 
         """initialize an empty DataFrame for each time value"""
@@ -311,8 +310,6 @@ def simulate(simulationData):
         )
 
         EX_dict['image_path'] = pictureName
-
-        print('Simulation id: ' + str(simulationData['id']))
 
         """last step before pushing results to database
         

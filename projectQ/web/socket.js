@@ -6,15 +6,15 @@ import * as actions from './redux/actionCreators.js';
 
 const socket = io('http://localhost:8080/');
 
-socket.on('simulation.scheduled', data => {
-  store.dispatch( actions.addScheduledSimulation( data ) );
+socket.on('simulation.scheduled', event => {
+  store.dispatch( actions.addScheduledSimulation( event.payload ) );
 });
 
-socket.on('simulation.started', data => {
-  store.dispatch( actions.markSimulationAsStarted( data ) );
+socket.on('simulation.started', event => {
+  store.dispatch( actions.markSimulationAsStarted( event.payload ) );
 });
 
-socket.on('simulation.finished', data => {
-  store.dispatch( actions.markSimulationAsFinished( data ) );
+socket.on('simulation.finished', event => {
+  store.dispatch( actions.markSimulationAsFinished( event.payload ) );
 });
 

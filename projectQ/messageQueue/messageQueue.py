@@ -1,8 +1,12 @@
+import eventlet
+eventlet.monkey_patch()
+
 import logging
 import json
 import pika
+import datetime
 
-from values import HN_MESSAGE_BROKER, EXCHANGE_EVENTS
+from values import HN_MESSAGE_BROKER, EXCHANGE_EVENTS, RFC3339_DATE_FORMAT
 
 
 logger = logging.getLogger(__name__)
@@ -30,11 +34,17 @@ def on(event_name):
 
         channel.basic_consume(callback_wrapper, queue=queue_name)
 
-        channel.start_consuming()
+        eventlet.spawn(channel.start_consuming)
 
     return decorator
 
 def emit(event_name, data):
+
+    event = {
+        'emitted_at': datetime.datetime.utcnow().strftime(RFC3339_DATE_FORMAT),
+        'payload': data
+    }
+
     connection = pika.BlockingConnection(pika.ConnectionParameters(host=HN_MESSAGE_BROKER))
     channel = connection.channel()
 
@@ -43,7 +53,7 @@ def emit(event_name, data):
     channel.basic_publish(
         exchange=EXCHANGE_EVENTS,
         routing_key=event_name,
-        body=json.dumps(data)
+        body=json.dumps(event)
     )
 
     connection.close()

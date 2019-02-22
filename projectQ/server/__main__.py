@@ -1,6 +1,3 @@
-import eventlet
-eventlet.monkey_patch()
-
 import os
 import threading
 import time
@@ -50,23 +47,17 @@ os.environ['PYTHONPATH'] = os.getcwd()
 # actually start the server
 socket = SocketIO(app, logger=logger)
 
-def notifySimulationScheduled():
-    @mq.on('simulation.*.scheduled')
-    def notify_clients(ch, method, properties, body):
-        socket.emit( "simulation.scheduled", json.loads(body))
-eventlet.spawn(notifySimulationScheduled)
+@mq.on('simulation.*.scheduled')
+def notify_clients(ch, method, properties, body):
+    socket.emit( "simulation.scheduled", json.loads(body))
 
-def notifySimulationStarted():
-    @mq.on('simulation.*.started')
-    def notify_clients(ch, method, properties, body):
-        socket.emit( "simulation.started", json.loads(body))
-eventlet.spawn(notifySimulationStarted)
+@mq.on('simulation.*.started')
+def notify_clients(ch, method, properties, body):
+    socket.emit( "simulation.started", json.loads(body))
 
-def notifySimulationFinished():
-    @mq.on('simulation.*.finished')
-    def notify_clients(ch, method, properties, body):
-        socket.emit( "simulation.finished", json.loads(body))
-eventlet.spawn(notifySimulationFinished)
+@mq.on('simulation.*.finished')
+def notify_clients(ch, method, properties, body):
+    socket.emit( "simulation.finished", json.loads(body))
 
 socket.run(app, host='0.0.0.0', debug=DEBUG)
 

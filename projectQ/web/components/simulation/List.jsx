@@ -19,21 +19,35 @@ const List = withTranslation()( ({ simulations, toggleExpandSimulation, t }) => 
     );
   });
 
-  return (
-    <ContainerLayout>
-      <h2>{ t( 'simulation.list.overview' ) }</h2>
-
-      { simulationList.size > 0 ? (
-        <div className="accordion mb-5">
-          { simulationList.toList() }
-        </div>
-      ) : (
+  let content;
+  switch( simulationList.size ) {
+    case 0:
+      content = (
         <div className="card mb-5">
           <div className="card-body">
             { t( 'simulation.list.empty' ) }
           </div>
         </div>
-      )}
+      );
+      break;
+
+    case 1:
+      content =  simulationList.toList();
+      break;
+
+    default:
+      content = (
+        <div className="accordion mb-5">
+          { simulationList.toList() }
+        </div>
+      );
+      break;
+  }
+
+  return (
+    <ContainerLayout>
+      <h2>{ t( 'simulation.list.overview' ) }</h2>
+      { content }
     </ContainerLayout>
   )
 });

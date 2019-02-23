@@ -8,6 +8,32 @@ but the code is accessible.
 
 ### Requirements
 - Download and install [docker](https://hub.docker.com/search/?type=edition&offering=community).
+- Have an `.env` file placed in the projects root, it must look something like this:
+```
+### General ###
+# Debug option for more detailed logging and code reloading in Flask
+# 1 = enabled, 0 = disabled
+DEBUG=0
+
+### Database Settings ###
+# Name of the database
+DB_NAME=simulation_results
+# Postgres username
+DB_USER=postgres
+# Postgres password
+DB_PASSWORD=password
+
+# Web settings
+FLASK_ENV=develompent
+
+# exchange names
+EXCHANGE_EVENTS=events
+
+# service names
+SERVICE_SIMULATION_WORKER=service.simulation-worker
+SERVICE_DB_WORKER=service.db-worker
+
+```
 
 ### Starting the project
 To start the project, you jsut need to:

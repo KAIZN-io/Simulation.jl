@@ -2,10 +2,19 @@ import io from 'socket.io-client';
 
 import store from './redux/store.js';
 import * as actions from './redux/actionCreators.js';
+import { HOST } from './values.js';
 
 
-const socket = io('http://localhost:8080/');
+// define the sockets options
+// When being served from the dev server, only use polling
+let options = DEV_SERVER ? {
+  transports: ['polling']
+} : {};
 
+// create the socket
+const socket = io( HOST, options );
+
+// define listener
 socket.on('simulation.scheduled', event => {
   store.dispatch( actions.addScheduledSimulation( event.payload ) );
 });

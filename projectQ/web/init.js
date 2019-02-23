@@ -5,9 +5,10 @@ import i18n from './i18n.js';
 import './socket.js';
 import store from './redux/store.js';
 import { initialize } from './redux/actionCreators.js';
+import { HOST } from './values.js';
 
 
-fetch('http://localhost:8081/api/simulation/list')
+fetch( HOST + '/api/simulation/list')
   .then( response => response.json() )
   .then( jsonData => {
     store.dispatch( initialize( jsonData ) )

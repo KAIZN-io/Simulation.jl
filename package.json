@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "main": "index.html",
   "scripts": {
-    "dev": "webpack-dev-server --config ./webpack.config.js --mode development --devtool source-map",
+    "dev-server": "webpack-dev-server --config ./webpack.config.js --mode development --devtool source-map",
+    "dev": "webpack --watch --config ./webpack.config.js --mode development --devtool source-map",
     "test": "jest --watch",
     "build": "webpack --config ./webpack.config.js --mode production"
   },

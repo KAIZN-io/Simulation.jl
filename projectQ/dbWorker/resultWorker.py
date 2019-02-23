@@ -3,12 +3,12 @@ from datetime import datetime
 import eventlet
 
 import messageQueue as mq
-from values import RFC3339_DATE_FORMAT, QUEUE_SIMULATION_RESULTS
+from values import RFC3339_DATE_FORMAT, SERVICE_DB_WORKER
 from db import sessionScope, Ex, Pd
 
 
-@mq.on('simulation.*.scheduled')
-def processSimulationResult(ch, method, properties, body):
+@mq.on('simulation.*.scheduled', SERVICE_DB_WORKER)
+def processSimulationScheduled(ch, method, properties, body):
     event = json.loads(body)
     simulation = event['payload']
 
@@ -26,8 +26,8 @@ def processSimulationResult(ch, method, properties, body):
 
     print(str(simulation['id']) + ' - Done persisting scheduled.')
 
-@mq.on('simulation.*.started')
-def processSimulationResult(ch, method, properties, body):
+@mq.on('simulation.*.started', SERVICE_DB_WORKER)
+def processSimulationStart(ch, method, properties, body):
     event = json.loads(body)
     simulation = event['payload']
 
@@ -45,8 +45,8 @@ def processSimulationResult(ch, method, properties, body):
 
     print(str(simulation['id']) + ' - Done persisting started.')
 
-@mq.on('simulation.*.finished')
-def processSimulationResult(ch, method, properties, body):
+@mq.on('simulation.*.finished', SERVICE_DB_WORKER)
+def processSimulationFinished(ch, method, properties, body):
     event = json.loads(body)
     simulation = event['payload']
 

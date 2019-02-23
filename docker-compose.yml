@@ -52,7 +52,6 @@ services:
       - DB_USER
       - DB_PASSWORD
       - EXCHANGE_EVENTS
-      - QUEUE_SCHEDULED_SIMULATIONS
     image: janpiotraschke/projectq:0.3.2_web-app
     networks:
       - db
@@ -76,7 +75,7 @@ services:
       - DB_USER
       - DB_PASSWORD
       - EXCHANGE_EVENTS
-      - QUEUE_SIMULATION_RESULTS
+      - SERVICE_DB_WORKER
     image: janpiotraschke/projectq:0.3.2_web-app
     networks:
       - db
@@ -92,8 +91,7 @@ services:
     environment:
       - DEBUG
       - EXCHANGE_EVENTS
-      - QUEUE_SCHEDULED_SIMULATIONS
-      - QUEUE_SIMULATION_RESULTS
+      - SERVICE_SIMULATION_WORKER
     image: janpiotraschke/projectq:0.3.2_web-app
     networks:
       - messageBroker

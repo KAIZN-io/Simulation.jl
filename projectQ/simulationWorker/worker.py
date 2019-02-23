@@ -2,12 +2,12 @@ import eventlet
 import json
 
 import messageQueue as mq
-from values import RFC3339_DATE_FORMAT, QUEUE_SCHEDULED_SIMULATIONS, QUEUE_SIMULATION_RESULTS
+from values import RFC3339_DATE_FORMAT, SERVICE_SIMULATION_WORKER
 from simulationWorker.simulate import simulate
 
 
-@mq.on('simulation.*.scheduled')
-def processSimulation(ch, method, properties, body):
+@mq.on('simulation.*.scheduled', SERVICE_SIMULATION_WORKER)
+def processSimulationScheduled(ch, method, properties, body):
     event = json.loads(body)
     simulation = event['payload']
 

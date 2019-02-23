@@ -14,10 +14,12 @@ DB_NAME = os.environ.get('DB_NAME')
 DB_USER = os.environ.get('DB_USER')
 DB_PASSWORD = os.environ.get('DB_PASSWORD')
 
-# Get queue names
+# get exchages
 EXCHANGE_EVENTS = os.environ.get('EXCHANGE_EVENTS')
-QUEUE_SCHEDULED_SIMULATIONS = os.environ.get('QUEUE_SCHEDULED_SIMULATIONS')
-QUEUE_SIMULATION_RESULTS    = os.environ.get('QUEUE_SIMULATION_RESULTS')
+
+# get the service names
+SERVICE_SIMULATION_WORKER = os.environ.get('SERVICE_SIMULATION_WORKER')
+SERVICE_DB_WORKER = os.environ.get('SERVICE_DB_WORKER')
 
 # set the root dir
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))

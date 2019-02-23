@@ -45,6 +45,8 @@ services:
         condition: service_started
       dbWorker:
         condition: service_started
+      bundler:
+        condition: service_started
     environment:
       - DEBUG
       - FLASK_ENV
@@ -107,6 +109,13 @@ services:
     image: rabbitmq:3.7.11-rc.2-alpine
     networks:
       - messageBroker
+
+  bundler:
+    command: 'npm run build'
+    image: node:11.10.0-alpine
+    volumes:
+      - ./:/ProjektQ/
+    working_dir: /ProjektQ/
 
 # Define named volumes for use in the service definitions
 volumes:

@@ -12,7 +12,7 @@ from server.routings import routes
 from server.api import Simulation, SimulationList
 from values import DEBUG, RFC3339_DATE_FORMAT
 from db.base import base, ThreadScopedSession
-import messageQueue as mq
+from messageQueue import mq, eventTypes
 
 
 logger = logging.getLogger(__name__)
@@ -48,24 +48,24 @@ os.environ['PYTHONPATH'] = os.getcwd()
 socket = SocketIO(app, logger=logger)
 
 # Map serverside events to the socket so that the web app will receive them as well
-@mq.on('simulation.*.scheduled')
+@mq.on(eventTypes.SIMULATION_SCHEDULED)
 def notify_clients(ch, method, properties, event):
-    socket.emit( "simulation.scheduled", event)
+    socket.emit( eventTypes.SIMULATION_SCHEDULED, event)
     ch.basic_ack(delivery_tag = method.delivery_tag)
 
-@mq.on('simulation.*.started')
+@mq.on(eventTypes.SIMULATION_STARTED)
 def notify_clients(ch, method, properties, event):
-    socket.emit( "simulation.started", event)
+    socket.emit( eventTypes.SIMULATION_STARTED, event)
     ch.basic_ack(delivery_tag = method.delivery_tag)
 
-@mq.on('simulation.*.finished')
+@mq.on(eventTypes.SIMULATION_FINISHED)
 def notify_clients(ch, method, properties, event):
-    socket.emit( "simulation.finished", event)
+    socket.emit( eventTypes.SIMULATION_FINISHED, event)
     ch.basic_ack(delivery_tag = method.delivery_tag)
 
-@mq.on('simulation.*.failed')
+@mq.on(eventTypes.SIMULATION_FAILED)
 def notify_clients(ch, method, properties, event):
-    socket.emit( "simulation.failed", event)
+    socket.emit( eventTypes.SIMULATION_FAILED, event)
     ch.basic_ack(delivery_tag = method.delivery_tag)
 
 # actually start the server

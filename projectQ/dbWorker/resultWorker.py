@@ -2,12 +2,12 @@ import json
 from datetime import datetime
 import eventlet
 
-import messageQueue as mq
+from messageQueue import mq, eventTypes
 from values import RFC3339_DATE_FORMAT, SERVICE_DB_WORKER
 from db import sessionScope, Ex, Pd
 
 
-@mq.on('simulation.*.scheduled', SERVICE_DB_WORKER)
+@mq.on(eventTypes.SIMULATION_SCHEDULED, SERVICE_DB_WORKER)
 def processSimulationScheduled(ch, method, properties, event):
     simulation = event['payload']
 
@@ -25,8 +25,8 @@ def processSimulationScheduled(ch, method, properties, event):
 
     print(str(simulation['id']) + ' - Done persisting scheduled.')
 
-@mq.on('simulation.*.started', SERVICE_DB_WORKER)
-def processSimulationStart(ch, method, properties, event):
+@mq.on(eventTypes.SIMULATION_STARTED, SERVICE_DB_WORKER)
+def processSimulationStarted(ch, method, properties, event):
     simulation = event['payload']
 
     print(str(simulation['id']) + ' - Persisting started...')
@@ -43,7 +43,7 @@ def processSimulationStart(ch, method, properties, event):
 
     print(str(simulation['id']) + ' - Done persisting started.')
 
-@mq.on('simulation.*.finished', SERVICE_DB_WORKER)
+@mq.on(eventTypes.SIMULATION_FINISHED, SERVICE_DB_WORKER)
 def processSimulationFinished(ch, method, properties, event):
     simulation = event['payload']
 
@@ -72,8 +72,8 @@ def processSimulationFinished(ch, method, properties, event):
 
     print(str(simulation['id']) + ' - Done persisting finished.')
 
-@mq.on('simulation.*.failed', SERVICE_DB_WORKER)
-def processSimulationFinished(ch, method, properties, event):
+@mq.on(eventTypes.SIMULATION_FAILED, SERVICE_DB_WORKER)
+def processSimulationFailed(ch, method, properties, event):
     simulation = event['payload']
 
     print(str(simulation['id']) + ' - Persisting failed...')

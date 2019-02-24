@@ -94,7 +94,7 @@ def on(event_name, durable_for_service_name = None):
     # We need to return the decorator, otherwise nothing will work
     return decorator
 
-def emit(event_name, data):
+def emit(event):
     """
     Emit an event via the RabbitMQ message broker
 
@@ -106,11 +106,6 @@ def emit(event_name, data):
     All data must be JSON serializeable.
     """
 
-    event = {
-        'emitted_at': datetime.datetime.utcnow().strftime(RFC3339_DATE_FORMAT),
-        'payload': data
-    }
-
     connection = pika.BlockingConnection(pika.ConnectionParameters(host=HN_MESSAGE_BROKER))
     channel = connection.channel()
 
@@ -118,7 +113,7 @@ def emit(event_name, data):
 
     channel.basic_publish(
         exchange=EXCHANGE_EVENTS,
-        routing_key=event_name,
+        routing_key=event['type'],
         body=json.dumps(event)
     )
 

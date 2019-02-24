@@ -15,6 +15,8 @@ let options = DEV_SERVER ? {
 const socket = io( HOST, options );
 
 // define listener
+// We just map the socket events to changes in our apps state (redux store)
+// You would probably don't need to do anything else with these socket events
 socket.on('simulation.scheduled', event => {
   store.dispatch( actions.addScheduledSimulation( event.payload ) );
 });

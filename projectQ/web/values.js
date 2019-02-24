@@ -1,9 +1,7 @@
-console.log( 'Running in ' + MODE + ' mode.');
-console.log( 'Served from webpack dev server: ' + DEV_SERVER );
-
+// create the HOST constant to be used for connecting to the server throughout the app
 export const HOST = window.location.protocol + '//' + window.location.host;
-console.log( 'Using host name:' + HOST );
 
+// Define which simulations types have which colour
 export const typeColorMapping = {
   combined_models: 'primary',
   hog: 'danger',

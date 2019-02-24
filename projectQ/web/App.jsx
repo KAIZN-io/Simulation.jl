@@ -12,6 +12,8 @@ import Home from './components/Home.jsx';
 import SimulationRouter from './components/simulation/Router.jsx';
 
 
+// Define our root component
+// It serves as a router and adds basic layout Components
 const App = withStyles({
   '@global': {
     body: {
@@ -32,6 +34,9 @@ const App = withStyles({
   );
 });
 
+// Render the root component to the actual DOM
+// We wrap the component in our redux store provider as well as our routing provider.
+// This way we can work with routing and our state in all other components
 ReactDOM.render(
   (
     <Provider store={ store }>
@@ -43,5 +48,8 @@ ReactDOM.render(
   document.getElementById('react-root')
 );
 
-module.hot.accept();
+// If the app is served from the webpack dev server, we can enable hot reloading
+if( DEV_SERVER ) {
+  module.hot.accept();
+}
 

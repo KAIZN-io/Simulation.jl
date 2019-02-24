@@ -21,6 +21,7 @@ function initializeSimulation( simulation ) {
     created_at: simulation.created_at ? moment.utc( simulation.created_at ) : null,
     started_at: simulation.started_at ? moment.utc( simulation.started_at ) : null,
     finished_at: simulation.finished_at ? moment.utc( simulation.finished_at ) : null,
+    failed_at: simulation.failed_at ? moment.utc( simulation.failed_at ) : null,
     expanded: false,
   });
 }
@@ -72,6 +73,12 @@ function simulations( state = new OrderedMap(), action ) {
             .set( 'finished_at', moment.utc( action.payload.finished_at ) )
             .set( 'image_path', action.payload.image_path )
         )
+      );
+
+    case types.MARK_SIMULATION_AS_FAILED:
+      return state.update(
+        `${ action.payload.id }`,
+        simulation => simulation.set( 'failed_at', moment.utc( action.payload.failed_at ) )
       );
 
     default:

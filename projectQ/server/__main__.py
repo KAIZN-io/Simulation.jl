@@ -63,6 +63,11 @@ def notify_clients(ch, method, properties, body):
     socket.emit( "simulation.finished", json.loads(body))
     ch.basic_ack(delivery_tag = method.delivery_tag)
 
+@mq.on('simulation.*.failed')
+def notify_clients(ch, method, properties, body):
+    socket.emit( "simulation.failed", json.loads(body))
+    ch.basic_ack(delivery_tag = method.delivery_tag)
+
 # actually start the server
 socket.run(app, host='0.0.0.0', debug=DEBUG)
 

@@ -21,6 +21,7 @@ class Ex(base):
     image_path = Column(String)
     started_at = Column(DateTime)
     finished_at = Column(DateTime)
+    failed_at = Column(DateTime)
 
     # every ex has exactly one model
     model_id = Column(Integer, ForeignKey('model.id'), nullable=False)
@@ -124,6 +125,7 @@ class Ex(base):
             'image_path': self.image_path,
             'started_at': self.started_at.strftime(RFC3339_DATE_FORMAT) if self.started_at and json_ready else self.started_at,
             'finished_at': self.finished_at.strftime(RFC3339_DATE_FORMAT) if self.finished_at and json_ready else self.finished_at,
+            'failed_at': self.failed_at.strftime(RFC3339_DATE_FORMAT) if self.failed_at and json_ready else self.failed_at,
 
             'model_id': self.model_id,
             'initial_value_set_id': self.initial_value_set_id,

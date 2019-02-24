@@ -27,13 +27,15 @@ describe( 'reducer', () => {
             id: 1,
             created_at: '2019-02-22T01:17:03-08:00',
             started_at: null,
-            finished_at: null
+            finished_at: null,
+            failed_at: null,
           },
           {
             id: 2,
             created_at: '2019-02-22T01:17:03-08:00',
             started_at: '2019-02-22T01:17:52-08:00',
-            finished_at: '2019-02-22T01:18:05-08:00'
+            finished_at: '2019-02-22T01:18:05-08:00',
+            failed_at: null,
           }
         ]
       }
@@ -49,6 +51,7 @@ describe( 'reducer', () => {
           created_at: moment.utc( '2019-02-22T01:17:03-08:00' ),
           started_at: null,
           finished_at: null,
+          failed_at: null,
           expanded: false
         }),
         2: new Map({
@@ -56,6 +59,7 @@ describe( 'reducer', () => {
           created_at: moment.utc( '2019-02-22T01:17:03-08:00' ),
           started_at: moment.utc( '2019-02-22T01:17:52-08:00' ),
           finished_at: moment.utc( '2019-02-22T01:18:05-08:00' ),
+          failed_at: null,
           expanded: false
         })
       })
@@ -140,6 +144,7 @@ describe( 'reducer', () => {
           created_at: moment.utc( '2019-02-22T01:17:03-08:00' ),
           started_at: moment.utc( '2019-02-22T01:17:52-08:00' ),
           finished_at: moment.utc( '2019-02-22T01:18:05-08:00' ),
+          failed_at: null,
           expanded: false
         })
       })
@@ -164,6 +169,7 @@ describe( 'reducer', () => {
           created_at: moment.utc( '2019-02-22T01:17:03-08:00' ),
           started_at: moment.utc( '2019-02-22T01:17:52-08:00' ),
           finished_at: moment.utc( '2019-02-22T01:18:05-08:00' ),
+          failed_at: null,
           expanded: false
         }),
         2: new Map({
@@ -171,6 +177,7 @@ describe( 'reducer', () => {
           created_at: moment.utc( '2019-02-22T01:17:03-08:00' ),
           started_at: null,
           finished_at: null,
+          failed_at: null,
           expanded: false
         })
       })
@@ -184,7 +191,9 @@ describe( 'reducer', () => {
       simulations: new OrderedMap({
         1: new Map({
           id: 1,
-          started_at: null
+          started_at: null,
+          finished_at: null,
+          failed_at: null,
         })
       })
     };
@@ -203,7 +212,9 @@ describe( 'reducer', () => {
       simulations: new OrderedMap({
         1: new Map({
           id: 1,
-          started_at: moment.utc( '2019-02-21T15:21:29-08:00' )
+          started_at: moment.utc( '2019-02-21T15:21:29-08:00' ),
+          finished_at: null,
+          failed_at: null,
         })
       })
     };
@@ -218,6 +229,7 @@ describe( 'reducer', () => {
           id: 1,
           started_at: moment.utc( '2019-02-21T15:21:29-08:00' ),
           finished_at: null,
+          failed_at: null,
           image_path: null
         })
       })
@@ -240,7 +252,44 @@ describe( 'reducer', () => {
           id: 1,
           started_at: moment.utc( '2019-02-21T15:21:29-08:00' ),
           finished_at: moment.utc( '2019-02-21T15:23:03-08:00' ),
+          failed_at: null,
           image_path: 'ion_3.png'
+        })
+      })
+    };
+    expect( reducer( state, action ) ).toEqual( nextState );
+  });
+
+  it('should handle MARK_SIMULATION_AS_FAILED', () => {
+    let state = {
+      initialized: true,
+      simulations: new OrderedMap({
+        1: new Map({
+          id: 1,
+          started_at: moment.utc( '2019-02-21T15:21:29-08:00' ),
+          finished_at: null,
+          failed_at: null
+        })
+      })
+    };
+    let action = {
+      type: types.MARK_SIMULATION_AS_FAILED,
+      payload: {
+        id: 1,
+        failed_at: '2019-02-21T15:23:03-08:00',
+      }
+    };
+    let nextState = {
+      initialized: true,
+      navbar: {
+        expanded: false
+      },
+      simulations: new OrderedMap({
+        1: new Map({
+          id: 1,
+          started_at: moment.utc( '2019-02-21T15:21:29-08:00' ),
+          finished_at: null,
+          failed_at: moment.utc( '2019-02-21T15:23:03-08:00' ),
         })
       })
     };

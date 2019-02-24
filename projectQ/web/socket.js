@@ -29,3 +29,7 @@ socket.on('simulation.finished', event => {
   store.dispatch( actions.markSimulationAsFinished( event.payload ) );
 });
 
+socket.on('simulation.failed', event => {
+  store.dispatch( actions.markSimulationAsFailed( event.payload ) );
+});
+

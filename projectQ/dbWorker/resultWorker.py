@@ -75,6 +75,28 @@ def processSimulationFinished(ch, method, properties, body):
 
     print(str(simulation['id']) + ' - Done persisting finished.')
 
+@mq.on('simulation.*.failed', SERVICE_DB_WORKER)
+def processSimulationFinished(ch, method, properties, body):
+    event = json.loads(body)
+    simulation = event['payload']
+
+    print(str(simulation['id']) + ' - Persisting failed...')
+
+    # store the received simulations results in the database
+    with sessionScope() as session:
+        # fetching original simulation
+        ex = session.query(Ex) \
+                .filter(Ex.id == simulation['id']) \
+                .one()
+
+        # adding data
+        ex.failed_at = datetime.strptime(event['emitted_at'], RFC3339_DATE_FORMAT)
+
+    # confirm that the message was received and processed
+    ch.basic_ack(delivery_tag = method.delivery_tag)
+
+    print(str(simulation['id']) + ' - Done persisting failed.')
+
 print( 'Worker initialized, waiting for events...' )
 
 # Do something to prevent the process from ending...

@@ -20,7 +20,17 @@ def processSimulationScheduled(ch, method, properties, body):
     })
 
     # simulate
-    result = simulate(simulation)
+    try:
+        result = simulate(simulation)
+    except Exception:
+        print(str(simulation['id']) + ' - Simulation failed!')
+        event_name = 'simulation.' + simulation['type'] + '.failed'
+        mq.emit(event_name, {
+            'id': simulation['id'],
+        })
+        # discard the message from the queue
+        ch.basic_nack(delivery_tag = method.delivery_tag, requeue = False)
+        return
 
     print(str(simulation['id']) + ' - Simulation finished.')
 

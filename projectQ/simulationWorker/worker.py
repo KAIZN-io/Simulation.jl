@@ -41,6 +41,8 @@ def processSimulationScheduled(ch, method, properties, body):
 
 print( 'Worker initialized, waiting for simulation...' )
 
+# Do something to prevent the process from ending...
+# With the asynchronous listeners from messageQueue, nothing else will keep the process open
 while True:
     eventlet.sleep(1)
 

@@ -44,9 +44,10 @@ api.add_resource(SimulationList, '/api/simulation/list')
 # reset the PYTHONPATH. This is a workaround to make importing modules work again when using the reloader
 os.environ['PYTHONPATH'] = os.getcwd()
 
-# actually start the server
+# create the SocketIO socket for live communication with the web app
 socket = SocketIO(app, logger=logger)
 
+# Map serverside events to the socket so that the web app will receive them as well
 @mq.on('simulation.*.scheduled')
 def notify_clients(ch, method, properties, body):
     socket.emit( "simulation.scheduled", json.loads(body))
@@ -62,6 +63,7 @@ def notify_clients(ch, method, properties, body):
     socket.emit( "simulation.finished", json.loads(body))
     ch.basic_ack(delivery_tag = method.delivery_tag)
 
+# actually start the server
 socket.run(app, host='0.0.0.0', debug=DEBUG)
 
 logger.info("Server initialized")

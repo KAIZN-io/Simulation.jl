@@ -50,14 +50,17 @@ socket = SocketIO(app, logger=logger)
 @mq.on('simulation.*.scheduled')
 def notify_clients(ch, method, properties, body):
     socket.emit( "simulation.scheduled", json.loads(body))
+    ch.basic_ack(delivery_tag = method.delivery_tag)
 
 @mq.on('simulation.*.started')
 def notify_clients(ch, method, properties, body):
     socket.emit( "simulation.started", json.loads(body))
+    ch.basic_ack(delivery_tag = method.delivery_tag)
 
 @mq.on('simulation.*.finished')
 def notify_clients(ch, method, properties, body):
     socket.emit( "simulation.finished", json.loads(body))
+    ch.basic_ack(delivery_tag = method.delivery_tag)
 
 socket.run(app, host='0.0.0.0', debug=DEBUG)
 

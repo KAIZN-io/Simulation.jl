@@ -1,12 +1,18 @@
+import json
 from flask import Blueprint, render_template, redirect
 
 import messageQueue as mq
 from db import sessionScope
-from web.simulation import getSimulationFromFormData, getScheduledSimulations, getFinishedSimulations
-from web.form import SimulationForm
+from server.simulation import getSimulationFromFormData, getScheduledSimulations, getFinishedSimulations
+from server.form import SimulationForm
 
 
 routes = Blueprint('routes', __name__)
+
+@routes.route('/app/',  methods=['GET'])
+@routes.route('/app/<path:path>',  methods=['GET'])
+def app( path='' ):
+    return render_template('app.html')
 
 @routes.route('/',  methods=['GET', 'POST'])
 def home():
@@ -21,7 +27,10 @@ def start():
         with sessionScope() as session:
             simulation = getSimulationFromFormData(session, form.data)
             session.commit()
-            mq.scheduleSimulation(simulation)
+
+            # emit event that the simulations ist started
+            event_name = 'simulation.' + simulation.getTypeAsString() + '.scheduled'
+            mq.emit(event_name, simulation.to_dict(json_ready=True))
 
         return redirect('/simulation')
 

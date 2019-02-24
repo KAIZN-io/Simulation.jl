@@ -3,6 +3,7 @@ from logging.config import dictConfig
 
 from values import DEBUG
 
+
 """Configure logging"""
 dictConfig({
     'version': 1,
@@ -24,13 +25,13 @@ dictConfig({
 # setup flask
 app = Flask(
     'ProjectQ',
-    template_folder='web/templates',
-    static_url_path='/pictures',
-    static_folder='SimulationPictures'
+    template_folder='server/templates',
+    static_folder='server/static',
+    static_url_path='/static'
 )
 
 # initialize logger
 app.logger
 
-app.logger.info("Logger initialized")
+app.logger.debug("Logger initialized")
 

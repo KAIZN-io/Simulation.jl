@@ -1,0 +1,55 @@
+{
+    "projectQ": {
+        "title": "ProjectQ Web-App",
+        "navbar": {
+            "new-simulation": "Neue Simulation",
+            "simulation-overview": "Simulationen"
+        },
+        "home":{
+            "lead": "Willkommen bei ProjectQ.",
+            "try-it": "Probieren Sie ihn aus:",
+            "try-it-button": "Neue Simulation erstellen"
+        },
+        "simulation": {
+            "form": {
+                "wipMessage": "Hier entseht ein neues, tolles Formular um Simulationen zu starten. Bis dahin benutzen Sie doch bitte das alte Formular im Web-Interface."
+            },
+            "list": {
+                "overview": "Simulationsübersicht",
+                "empty": "Es sind noch keine Simulationen vorhanden.",
+                "loading": "Lade Simulationene...",
+                "timeRange": "Simulierter Zeitraum",
+                "stepSize": "Schrittgröße",
+                "duration": "Laufzeit",
+                "createdAt": "erstellt {{time}}",
+                "status": {
+                    "scheduled": "Simulation wartet auf Ausführung",
+                    "running": "Wird Simuliert...",
+                    "finished": "Simulation fertiggestellt"
+                }
+            }
+        },
+        "footer": {
+            "copyright": "Jan Piotraschke. Web-Design by Jan-Luca Klees"
+        }
+    },
+    "misc": {
+        "relativeTime": {
+            "future": "in %s",
+            "past":   "vor %s",
+            "s":      "ein paar Sekunden",
+            "ss":     "%d Sekunden",
+            "m":      "einer Minute",
+            "mm":     "%d Minuten",
+            "h":      "einer Stunde",
+            "hh":     "%d Stunden",
+            "d":      "einem Tag",
+            "dd":     "%d Tage",
+            "M":      "einem Monat",
+            "MM":     "%d Monaten",
+            "y":      "einem Jahr",
+            "yy":     "%d Jahren"
+        }
+    }
+}
+

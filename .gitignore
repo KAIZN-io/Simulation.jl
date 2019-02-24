@@ -115,7 +115,7 @@ dmypy.json
 .pyre/
 
 # simulated pictures
-/projectQ/SimulationPictures
+/projectQ/server/static
 
 # MAC OS X
 .DS_Store
@@ -125,3 +125,27 @@ test.py
 
 # vscode
 .vscode
+
+# npm / react
+node_modules
+scripts/flow/*/.flowconfig
+*~
+*.pyc
+.grunt
+_SpecRunner.html
+__benchmarks__
+build/
+remote-repo/
+coverage/
+.module-cache
+fixtures/dom/public/react-dom.js
+fixtures/dom/public/react.js
+test/the-files-to-test.generated.js
+*.log*
+chrome-user-data
+*.sublime-project
+*.sublime-workspace
+.idea
+*.iml
+*.swp
+*.swo

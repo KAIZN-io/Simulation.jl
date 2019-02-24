@@ -6,7 +6,7 @@ import uuid
 import json
 
 from db.base import base
-from values import SimulationTypes
+from values import SimulationTypes, RFC3339_DATE_FORMAT
 
 
 # Ex stands for 'Exposure' of an organism with a substance
@@ -114,19 +114,26 @@ class Ex(base):
             'specificParameterVersionSEQ': [self.parameter_set.version]
         }
 
-    def to_dict(self):
+    def to_brief_dict(self, json_ready=False):
         d = {
             'id': self.id,
             'uuid': str(self.uuid),
-            'type': self.getTypeAsString(),
+            'created_at': self.created_at.strftime(RFC3339_DATE_FORMAT) if json_ready else self.created_at,
+
+            'name': self.name,
+            'image_path': self.image_path,
+            'started_at': self.started_at.strftime(RFC3339_DATE_FORMAT) if self.started_at and json_ready else self.started_at,
+            'finished_at': self.finished_at.strftime(RFC3339_DATE_FORMAT) if self.finished_at and json_ready else self.finished_at,
+
+            'model_id': self.model_id,
+            'initial_value_set_id': self.initial_value_set_id,
+            'parameter_set_id': self.parameter_set_id,
+            'type': self.getTypeAsString() if json_ready else self.type,
+
             'start': self.start,
             'stop': self.stop,
             'step_size': self.step_size,
-            'impulses': [impulse.to_dict() for impulse in self.impulses],
-            'stimuli': [stimulus.to_dict() for stimulus in self.stimuli],
-            'model': self.model.json,
-            'initial_value_set': [initial_value.to_dict() for initial_value in self.initial_value_set.values],
-            'parameter_set': [parameter.to_dict() for parameter in self.parameter_set.values],
+            'co': self.co,
         }
 
         if self.isOfType(SimulationTypes.hog):
@@ -135,6 +142,17 @@ class Ex(base):
 
         return d
 
+    def to_dict(self, json_ready=False):
+        d = self.to_brief_dict(json_ready)
+
+        d['impulses']          = [impulse.to_dict() for impulse in self.impulses]
+        d['stimuli']           = [stimulus.to_dict() for stimulus in self.stimuli]
+        d['model']             = self.model.json
+        d['initial_value_set'] = [initial_value.to_dict() for initial_value in self.initial_value_set.values]
+        d['parameter_set']     = [parameter.to_dict() for parameter in self.parameter_set.values]
+
+        return d
+
     def to_json_str(self):
-        return json.dumps(self.to_dict())
+        return json.dumps(self.to_dict(True))
 

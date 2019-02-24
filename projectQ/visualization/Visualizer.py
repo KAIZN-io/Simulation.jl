@@ -3,6 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+from values import ROOT_DIR
+
 
 NOT_TO_VISUALIZE = [
     'Yt', 'z1', 'z2', 'z3', 'z4', 'L_ArH', 'L_HH', 'Na_in', 'Na_out', 'K_out', 'K_in', 'Cl_out',
@@ -127,7 +129,7 @@ class Visualizer:
             """"save the plot"""
 
             pictureName = '{0}_{1}.png'.format(simulationData['type'], SEQ)
-            plt.savefig('SimulationPictures/{0}'.format(pictureName),
+            plt.savefig( ROOT_DIR + '/server/static/images/{0}'.format(pictureName),
                         dpi=360,
                         format='png',
                         bbox_inches='tight'

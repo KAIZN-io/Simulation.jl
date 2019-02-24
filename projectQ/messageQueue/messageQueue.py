@@ -1,55 +1,118 @@
-import os
-import logging
-import pika
-import json
+import eventlet
+eventlet.monkey_patch()
 
-from values import HN_MESSAGE_BROKER, QUEUE_SCHEDULED_SIMULATIONS, QUEUE_SIMULATION_RESULTS
+import logging
+import json
+import pika
+import datetime
+
+from values import HN_MESSAGE_BROKER, EXCHANGE_EVENTS, RFC3339_DATE_FORMAT
 
 
 logger = logging.getLogger(__name__)
 
-def scheduleSimulation(simulation):
-    enqueue(simulation.to_json_str(), QUEUE_SCHEDULED_SIMULATIONS)
-    logger.info("Simulation scheduled, id: " + str(simulation.id))
+def on(event_name, durable_for_service_name = None):
+    """
+    The `on` decorator for listening to events
 
-def publishSimulationResult(result):
-    enqueue(json.dumps(result), QUEUE_SIMULATION_RESULTS)
-    logger.info("Published simulation results for id: " + str(result['simulation_id']))
+    This function should be used as a decorator to execute the decorated function, whenever
+    the passed event occurs.
 
-def enqueue(msg, queue):
-    assert isinstance(msg, str)
-    assert isinstance(queue, str)
+    It serves just to collect the event name and the service name.
 
-    # open a connection to the RabbitMQ server
+    The actual decorator is defined below and will just be returned by this function.
+    """
+
+    def decorator(callback):
+        """
+        The actual decorating function
+
+        This function takes another function `callback` and decorates it.
+        We open an connection to our message broker, set up a queue and then start and
+        async `basic_consume`.
+        The event name will be used as the routing key for binding the setup queue to the
+        `events` exchange.
+
+        When passed `durable_for_service_name` we do not create an anonymous queue, but a
+        named one. The name will be the passed service name plus the event name. This way
+        we make sure other containers of the same service can connect to the same queue,
+        while still having separated queues for each event and thus no need to manually
+        distinguish the events here.
+        This might not be the most efficient solution, but a robust one. With a selfmade
+        event mapper the potential for errors rises significantly. I might add such code in
+        the future, but only with intensive testing.
+        """
+
+        # The callback executet when we receive a message from the broker
+        def callback_wrapper(ch, method, properties, body):
+            # I think the plan was to do some logging here, but at the moment we just esecute
+            # the passed `callback`
+            callback(ch, method, properties, body)
+
+        # Establish connection to the message broker
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host=HN_MESSAGE_BROKER))
+        channel = connection.channel()
+
+        # Declare the one and only `events` exchange
+        channel.exchange_declare(exchange=EXCHANGE_EVENTS, exchange_type='topic')
+
+        if durable_for_service_name:
+            # When passed a service name, create a name for the queue and create it
+            service_scoped_queue_name = durable_for_service_name + '_' + event_name
+            result = channel.queue_declare(queue=service_scoped_queue_name)
+
+            # Also tweak the qos to make sure every worker gets a piece of the cake
+            channel.basic_qos(prefetch_count=1)
+        else:
+            # When no service name is specified, we just create an anonymous and exclusive queue
+            result = channel.queue_declare(exclusive=True)
+
+        # Either way, we get the name of the queue like this
+        queue_name = result.method.queue
+
+        # We bind the queue to the `events` exchange using the event name as routing key
+        channel.queue_bind(
+            exchange=EXCHANGE_EVENTS,
+            queue=queue_name,
+            routing_key=event_name
+        )
+
+        # Set the callback and for the queue and start to consume asynchronously
+        channel.basic_consume(callback_wrapper, queue=queue_name)
+        eventlet.spawn(channel.start_consuming)
+
+        print('Registered function \'' + callback.__name__ + '\' as listener for event \'' + event_name + '\' on queue \'' + result.method.queue + '\'')
+
+    # We need to return the decorator, otherwise nothing will work
+    return decorator
+
+def emit(event_name, data):
+    """
+    Emit an event via the RabbitMQ message broker
+
+    Calling this function connects to the mesage broker and emits the data unter the specified
+    event name. The event name is used as a routing key for the `events` exchange.
+    The passed data will be wrapped in a dict that contains some additional informations about
+    the event.
+
+    All data must be JSON serializeable.
+    """
+
+    event = {
+        'emitted_at': datetime.datetime.utcnow().strftime(RFC3339_DATE_FORMAT),
+        'payload': data
+    }
+
     connection = pika.BlockingConnection(pika.ConnectionParameters(host=HN_MESSAGE_BROKER))
-    # get a channel, this can be used for multiplexing the connection, but that is
-    # something we don't need rightnow
     channel = connection.channel()
 
-    # create a queue on the server. Theoretically we wouldn't need to do this everytime,
-    # but this way we make sure the queue exists
-    channel.queue_declare(queue=queue)
+    channel.exchange_declare(exchange=EXCHANGE_EVENTS, exchange_type='topic')
 
-    # Send a message to the 'hello' queue
     channel.basic_publish(
-        exchange='',
-        routing_key=queue,
-        body=msg
+        exchange=EXCHANGE_EVENTS,
+        routing_key=event_name,
+        body=json.dumps(event)
     )
 
-    logger.info("Sent message \"" + msg + "\" to queue \"" + queue + "\"")
-
-
-    # close the connection to make sure the message gets flushed to the server
     connection.close()
-
-def listen(callback, queue):
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host=HN_MESSAGE_BROKER))
-    channel = connection.channel()
-    channel.queue_declare(queue=queue)
-
-    channel.basic_qos(prefetch_count=1)
-    channel.basic_consume(callback, queue=queue)
-
-    channel.start_consuming()
 

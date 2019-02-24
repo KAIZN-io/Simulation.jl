@@ -1,25 +1,32 @@
+import eventlet
 import json
-from datetime import datetime
 
 import messageQueue as mq
-from values import RFC3339_DATE_FORMAT, QUEUE_SCHEDULED_SIMULATIONS, QUEUE_SIMULATION_RESULTS
+from values import RFC3339_DATE_FORMAT, SERVICE_SIMULATION_WORKER
 from simulationWorker.simulate import simulate
 
 
-def processSimulation(ch, method, properties, body):
-    simulationData = json.loads(body)
-    print('Simulation received, id: ' + str(simulationData['id']))
+@mq.on('simulation.*.scheduled', SERVICE_SIMULATION_WORKER)
+def processSimulationScheduled(ch, method, properties, body):
+    event = json.loads(body)
+    simulation = event['payload']
 
-    print('Simulating...')
-    started_at = datetime.utcnow()
-    result = simulate(simulationData)
-    finished_at = datetime.utcnow()
+    print(str(simulation['id']) + ' - Starting simulation, type: ' + simulation['type'])
 
-    print('Publishing results...')
-    mq.publishSimulationResult({
-        'simulation_id': simulationData['id'],
-        'started_at': started_at.strftime(RFC3339_DATE_FORMAT),
-        'finished_at': finished_at.strftime(RFC3339_DATE_FORMAT),
+    # emit event that the simulations ist started
+    event_name = 'simulation.' + simulation['type'] + '.started'
+    mq.emit(event_name, {
+        'id': simulation['id'],
+    })
+
+    # simulate
+    result = simulate(simulation)
+
+    print(str(simulation['id']) + ' - Simulation finished.')
+
+    event_name = 'simulation.' + simulation['type'] + '.finished'
+    mq.emit(event_name, {
+        'id': simulation['id'],
         'extrt': result['extrt'],
         'exdose': result['exdose'],
         'exstdtc_array': result['exstdtc_array'],
@@ -28,12 +35,14 @@ def processSimulation(ch, method, properties, body):
     })
 
     # confirm that the message was received and processed
-    print('Acknowledging that the simulation was received and processed...')
     ch.basic_ack(delivery_tag = method.delivery_tag)
 
-    print('Done')
+    print(str(simulation['id']) + ' - Done.')
 
-print("Waiting for simulations")
-mq.listen(processSimulation, QUEUE_SCHEDULED_SIMULATIONS)
+print( 'Worker initialized, waiting for simulation...' )
 
+# Do something to prevent the process from ending...
+# With the asynchronous listeners from messageQueue, nothing else will keep the process open
+while True:
+    eventlet.sleep(1)
 

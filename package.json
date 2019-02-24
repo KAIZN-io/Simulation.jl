@@ -1,0 +1,41 @@
+{
+  "name": "ProjectQ-web-app",
+  "version": "0.1.0",
+  "main": "index.html",
+  "scripts": {
+    "dev-server": "webpack-dev-server --config ./webpack.config.js --mode development --devtool source-map",
+    "dev": "webpack --watch --config ./webpack.config.js --mode development --devtool source-map",
+    "test": "jest --watch",
+    "build": "webpack --config ./webpack.config.js --mode production"
+  },
+  "author": "Jan-Luca Klees",
+  "license": "ISC",
+  "dependencies": {
+    "classnames": "^2.2.6",
+    "detect-browser": "^4.1.0",
+    "i18next": "^15.0.4",
+    "immutable": "^4.0.0-rc.12",
+    "moment": "^2.24.0",
+    "prop-types": "^15.6.2",
+    "react": "^16.6.3",
+    "react-dom": "^16.6.3",
+    "react-i18next": "^10.1.2",
+    "react-jss": "^8.6.1",
+    "react-redux": "^6.0.1",
+    "react-router-dom": "^4.3.1",
+    "redux": "^4.0.1",
+    "socket.io-client": "^2.2.0",
+    "webfontloader": "^1.6.28"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.2.0",
+    "@babel/preset-react": "^7.0.0",
+    "babel-loader": "^8.0.4",
+    "jest": "^24.1.0",
+    "react-hot-loader": "^4.6.0",
+    "webpack": "^4.27.1",
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-server": "^3.1.10"
+  }
+}

@@ -8,8 +8,7 @@ from db import sessionScope, Ex, Pd
 
 
 @mq.on('simulation.*.scheduled', SERVICE_DB_WORKER)
-def processSimulationScheduled(ch, method, properties, body):
-    event = json.loads(body)
+def processSimulationScheduled(ch, method, properties, event):
     simulation = event['payload']
 
     print(str(simulation['id']) + ' - Persisting scheduled...')
@@ -27,8 +26,7 @@ def processSimulationScheduled(ch, method, properties, body):
     print(str(simulation['id']) + ' - Done persisting scheduled.')
 
 @mq.on('simulation.*.started', SERVICE_DB_WORKER)
-def processSimulationStart(ch, method, properties, body):
-    event = json.loads(body)
+def processSimulationStart(ch, method, properties, event):
     simulation = event['payload']
 
     print(str(simulation['id']) + ' - Persisting started...')
@@ -46,8 +44,7 @@ def processSimulationStart(ch, method, properties, body):
     print(str(simulation['id']) + ' - Done persisting started.')
 
 @mq.on('simulation.*.finished', SERVICE_DB_WORKER)
-def processSimulationFinished(ch, method, properties, body):
-    event = json.loads(body)
+def processSimulationFinished(ch, method, properties, event):
     simulation = event['payload']
 
     print(str(simulation['id']) + ' - Persisting finished...')
@@ -76,8 +73,7 @@ def processSimulationFinished(ch, method, properties, body):
     print(str(simulation['id']) + ' - Done persisting finished.')
 
 @mq.on('simulation.*.failed', SERVICE_DB_WORKER)
-def processSimulationFinished(ch, method, properties, body):
-    event = json.loads(body)
+def processSimulationFinished(ch, method, properties, event):
     simulation = event['payload']
 
     print(str(simulation['id']) + ' - Persisting failed...')

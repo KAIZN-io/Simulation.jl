@@ -7,8 +7,7 @@ from simulationWorker.simulate import simulate
 
 
 @mq.on('simulation.*.scheduled', SERVICE_SIMULATION_WORKER)
-def processSimulationScheduled(ch, method, properties, body):
-    event = json.loads(body)
+def processSimulationScheduled(ch, method, properties, event):
     simulation = event['payload']
 
     print(str(simulation['id']) + ' - Starting simulation, type: ' + simulation['type'])

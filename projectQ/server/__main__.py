@@ -49,23 +49,23 @@ socket = SocketIO(app, logger=logger)
 
 # Map serverside events to the socket so that the web app will receive them as well
 @mq.on('simulation.*.scheduled')
-def notify_clients(ch, method, properties, body):
-    socket.emit( "simulation.scheduled", json.loads(body))
+def notify_clients(ch, method, properties, event):
+    socket.emit( "simulation.scheduled", event)
     ch.basic_ack(delivery_tag = method.delivery_tag)
 
 @mq.on('simulation.*.started')
-def notify_clients(ch, method, properties, body):
-    socket.emit( "simulation.started", json.loads(body))
+def notify_clients(ch, method, properties, event):
+    socket.emit( "simulation.started", event)
     ch.basic_ack(delivery_tag = method.delivery_tag)
 
 @mq.on('simulation.*.finished')
-def notify_clients(ch, method, properties, body):
-    socket.emit( "simulation.finished", json.loads(body))
+def notify_clients(ch, method, properties, event):
+    socket.emit( "simulation.finished", event)
     ch.basic_ack(delivery_tag = method.delivery_tag)
 
 @mq.on('simulation.*.failed')
-def notify_clients(ch, method, properties, body):
-    socket.emit( "simulation.failed", json.loads(body))
+def notify_clients(ch, method, properties, event):
+    socket.emit( "simulation.failed", event)
     ch.basic_ack(delivery_tag = method.delivery_tag)
 
 # actually start the server

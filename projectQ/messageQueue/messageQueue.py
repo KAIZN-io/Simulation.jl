@@ -45,9 +45,17 @@ def on(event_name, durable_for_service_name = None):
 
         # The callback executet when we receive a message from the broker
         def callback_wrapper(ch, method, properties, body):
-            # I think the plan was to do some logging here, but at the moment we just esecute
-            # the passed `callback`
-            callback(ch, method, properties, body)
+
+            # try to parse the message as JSON, if it fails, discard
+            try:
+                data = json.loads(body)
+            except ValueError as e:
+                # discard the message from the queue
+                ch.basic_nack(delivery_tag = method.delivery_tag, requeue = False)
+                print(str(e))
+                return
+
+            callback(ch, method, properties, data)
 
         # Establish connection to the message broker
         connection = pika.BlockingConnection(pika.ConnectionParameters(host=HN_MESSAGE_BROKER))

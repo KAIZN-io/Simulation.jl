@@ -11,6 +11,9 @@
             "try-it-button": "Neue Simulation erstellen"
         },
         "simulation": {
+            "form": {
+                "wipMessage": "Hier entseht ein neues, tolles Formular um Simulationen zu starten. Bis dahin benutzen Sie doch bitte das alte Formular im Web-Interface."
+            },
             "list": {
                 "overview": "Simulationsübersicht",
                 "empty": "Es sind noch keine Simulationen vorhanden.",

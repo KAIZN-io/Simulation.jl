@@ -1,17 +1,14 @@
 import React from 'react';
+import { withTranslation } from 'react-i18next';
 
 import { ContainerLayout } from '../Layouts.jsx';
 
 
-class New extends React.PureComponent {
-  render() {
-    return (
-      <ContainerLayout>
-        Here will be the form to start a new simulation.
-      </ContainerLayout>
-    );
-  }
-}
+const New = withTranslation()( ({ t }) => (
+  <ContainerLayout>
+    { t( 'simulation.form.wipMessage' ) }
+  </ContainerLayout>
+));
 
 export default New;
 

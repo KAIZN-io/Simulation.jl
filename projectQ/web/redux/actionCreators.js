@@ -10,6 +10,12 @@ export function initialize( simulations ) {
   };
 }
 
+export function toggleExpandNavbar( simulationId ) {
+  return {
+    type: types.TOGGLE_EXPAND_NAVBAR,
+  };
+}
+
 export function toggleExpandSimulation( simulationId ) {
   return {
     type: types.TOGGLE_EXPAND_SIMULATION,

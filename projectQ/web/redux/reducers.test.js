@@ -6,10 +6,13 @@ import * as types from './actionTypes.js'
 import reducer from './reducers.js'
 
 
-describe('reducer', () => {
-  it('should return the initial state', () => {
-    expect(reducer(undefined, {})).toEqual({
+describe( 'reducer', () => {
+  it( 'should return the initial state', () => {
+    expect( reducer( undefined, {} ) ).toEqual({
       initialized: false,
+      navbar: {
+        expanded: false
+      },
       simulations: new OrderedMap()
     })
   })
@@ -37,6 +40,9 @@ describe('reducer', () => {
     };
     let nextState = {
       initialized: true,
+      navbar: {
+        expanded: false
+      },
       simulations: new OrderedMap({
         1: new Map({
           id: 1,
@@ -53,6 +59,43 @@ describe('reducer', () => {
           expanded: false
         })
       })
+    }
+    expect( reducer( state, action ) ).toEqual( nextState );
+  });
+
+  it('should handle TOGGLE_EXPAND_NAVBAR', () => {
+    let state = {
+      initialized: true,
+      navbar: {
+        expanded: true
+      },
+      simulations: new OrderedMap(),
+    };
+    let action = {
+      type: types.TOGGLE_EXPAND_NAVBAR,
+    };
+    let nextState = {
+      initialized: true,
+      navbar: {
+        expanded: false
+      },
+      simulations: new OrderedMap()
+    }
+    expect( reducer( state, action ) ).toEqual( nextState );
+
+    state = {
+      initialized: true,
+      navbar: {
+        expanded: false
+      },
+      simulations: new OrderedMap(),
+    };
+    nextState = {
+      initialized: true,
+      navbar: {
+        expanded: true
+      },
+      simulations: new OrderedMap()
     }
     expect( reducer( state, action ) ).toEqual( nextState );
   });
@@ -75,6 +118,9 @@ describe('reducer', () => {
     };
     let nextState = {
       initialized: true,
+      navbar: {
+        expanded: false
+      },
       simulations: new OrderedMap({
         1: new Map({
           id: 1,
@@ -109,6 +155,9 @@ describe('reducer', () => {
     };
     let nextState = {
       initialized: true,
+      navbar: {
+        expanded: false
+      },
       simulations: new OrderedMap({
         1: new Map({
           id: 1,
@@ -148,6 +197,9 @@ describe('reducer', () => {
     };
     let nextState = {
       initialized: true,
+      navbar: {
+        expanded: false
+      },
       simulations: new OrderedMap({
         1: new Map({
           id: 1,
@@ -180,6 +232,9 @@ describe('reducer', () => {
     };
     let nextState = {
       initialized: true,
+      navbar: {
+        expanded: false
+      },
       simulations: new OrderedMap({
         1: new Map({
           id: 1,

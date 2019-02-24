@@ -88,9 +88,24 @@ function simulations( state = new OrderedMap(), action ) {
 function initialized( state = false, action ) {
   switch (action.type) {
 
-    case types.INITIALIZE: {
+    case types.INITIALIZE:
       return true
-    }
+
+    default:
+      return state
+  }
+}
+
+/**
+ * Navbar reducer
+ *
+ * This reducer handles the navbar state. At the moment it can just collapse and uncollapse the navbar.
+ */
+function navbar( state = { expanded: false }, action ) {
+  switch ( action.type ) {
+
+    case types.TOGGLE_EXPAND_NAVBAR:
+      return Object.assign( {}, state, { expanded: !state.expanded } )
 
     default:
       return state
@@ -99,10 +114,11 @@ function initialized( state = false, action ) {
 
 // Combine multiple functions into one reducer
 // The functions will only handle the part of the state that they are named after
-const reduce = combineReducers({
-  simulations,
-  initialized
-})
+const reducer = combineReducers({
+  initialized,
+  navbar,
+  simulations
+});
 
-export default reduce
+export default reducer
 

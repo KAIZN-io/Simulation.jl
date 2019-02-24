@@ -54,7 +54,7 @@ services:
       - DB_USER
       - DB_PASSWORD
       - EXCHANGE_EVENTS
-    image: janpiotraschke/projectq:0.3.2_web-app
+    image: janpiotraschke/projectq:0.3.2
     networks:
       - db
       - messageBroker
@@ -78,7 +78,7 @@ services:
       - DB_PASSWORD
       - EXCHANGE_EVENTS
       - SERVICE_DB_WORKER
-    image: janpiotraschke/projectq:0.3.2_web-app
+    image: janpiotraschke/projectq:0.3.2
     networks:
       - db
       - messageBroker
@@ -94,7 +94,7 @@ services:
       - DEBUG
       - EXCHANGE_EVENTS
       - SERVICE_SIMULATION_WORKER
-    image: janpiotraschke/projectq:0.3.2_web-app
+    image: janpiotraschke/projectq:0.3.2
     networks:
       - messageBroker
     volumes:

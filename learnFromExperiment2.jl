@@ -2,6 +2,13 @@
 
 """You can remove all the package stuff with `rm -fr .julia`"""
 
+"""
+By convention, function names ending with an exclamation point (!) modify 
+their arguments. Some functions have both modifying (e.g., sort!) 
+"""
+
+
+
 using Pkg
 
 # include("/Users/janpiotraschke/GithubRepository/ProjectQ/learnFromExperiment2.jl")
@@ -100,6 +107,16 @@ testSol = hcat(solTest...)[1,:]
 # solTesttracked =hcat(solTest...)'
 
 # The DEDataArray{T} type allows one to add other "non-continuous" variables to an array
+"""A struct can declare an abstract super type via <: syntax
+Subtype operator: returns true if and only if all values of type T1 are also of type T2.
+
+julia> Float64 <: AbstractFloat
+true
+
+Use mutable struct to declare a type whose instances can be modified
+
+type restrictions with '::'
+"""
 mutable struct SimType{T} <: DEDataVector{T}
     x::Array{T,1}
     f1::T
@@ -116,13 +133,14 @@ variableMatrix = ["e"; "d"; "dx"; "dy"; "dz"]
 
 # array of arrays 
 inputTermArray = Array[["+3*x", "-2*y"], ["+4*y", "-x"], ["+σ*y", "-σ*x"], ["+x*ρ" ,"-x*z" ,"- y"], ["+x*y" ,"- β*z"]]
+# inputTermArray = Array[[4,5], ...]
 
 # array with the ODEs
 odeNames = ["dx", "dy", "dz"]
 odeVariable = ["x", "y", "z"]
 
 # define the initial Values --> [1*m] vector 
-initialValuesList=[1.0;1.0;1.0]
+initialValuesList=[2.0;1.0;1.0]
 initialValues = SimType(initialValuesList, 0.0)
 
 # time array (must be a tuple)
@@ -137,7 +155,14 @@ tstop = [5.0;6.0]
 # apply a stimulus value
 stimulus = 10.5
 
-# # # # # # # # # # # # 
+# # # # # # # # # # # #
+
+# preperation --> assign the equations to a dict 
+equationDict = Dict()
+for i = 1:size(variableMatrix)[1]
+  equationDict[variableMatrix[i]] = inputTermArray[i]
+end
+
 
 # make the parameter global 
 for i = 1:size(myParameterList)[1]
@@ -252,66 +277,164 @@ end
 
 function evalExpressionForSolver(u,du,placeHolder)
 
+  # TEMP: dummie 
+  x,y,z = u
+
   A = placeHolder
   sizeA = size(rawValuesForNN)[1]
   B = resize!(A, sizeA)
-  C = reshape(B, myArraySize, maxTermCount)
+  NNMatrix = reshape(B, myArraySize, maxTermCount)
 
+  """# initiale werte
+  Na_in = 45 mM
+
+  # model definition
+  
+  dNa_in = - (J_Na * Surf) / V_in + k_s0Yt
+  dK_in = - (J_K * Surf) / V_in + k_s0Yt - x
+  
+
+  # vorbereitung
+  werte = {
+    "dNa_in": ["- (J_Na * Surf) / V_in", "+ k_s0Yt"],
+    "dK_in": ["- (J_K * Surf) / V_in", "+ k_s0Yt", "- dNa_in"],
+  }
+
+  matrixDimensions = {
+      rows: coutn( werte ),
+      colums: maxTermLength( werte )
+  }
+
+  # pro simulationsschritt
+  for varName, terms in werte:
+      eval( varName + " = " + str( sum( [ eval( term ) for term in terms ] ) ) )
+
+  vordefinierteMatrix = []
+  i = 1
+  for varName, terms in werte:
+      vordefinierteMatrix[ i ] = fillRowToLenth( [ eval( terms ) for term in terms ], matrixDimensions['colums'] )
+      
+  vordefinierteMatrix =
+  2×2 Array{String,2}:
+  eval("- (J_Na * Surf) / V_in") eval("+ k_s0Yt")
+  eval("- (J_K * Surf) / V_in") eval("+ k_s0Yt") eval("- dNa_in")
+
+  vordefinierteMatrix =
+  2×2 Array{String,2}:
+  4 5 None
+  3 7 6
+
+  m =[
+    1: [ 0.1, 0.5, 0 ]
+    2: [ 0.6, 0.24, 0.4 ]
+  ]
+
+  NNMatrix = 
+  2×2 Array{String,2}:
+  m[1][1] m[1][2] m[1][3]
+  m[2][1] m[2][2] m[2][3]
+  """
+
+  # transform variable into a string
+  # varString = string(y)
+  # @show varString
+  strPosition = findlast("(", string(x))
+
+  stringTuple = string(x)[strPosition[1]:end]
+  ex = Meta.parse(stringTuple)
+  testEval = eval(ex)
+
+  @show testEval
+
+
+  """
+  ForwardDiff.Dual is of type UnionAll.
+
+  Summary
+  ≡≡≡≡≡≡≡≡≡
+
+  struct UnionAll <: Type{T}
+
+  Fields
+  ≡≡≡≡≡≡≡≡
+
+  var  :: TypeVar
+  body :: Any
+
+  Supertype Hierarchy
+  ≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡
+
+  UnionAll <: Type{T} <: Any
+  """
+
+  # @show Flux.data(y)
 
   # iteration number for parameter Placeholder vector 
   iterNum = 1
 
+  @info "beginne Evalution der Gleichungen" 
+  for (key,value) in equationDict
+    # @show key,value
+    # @show [Meta.parse(iterator) for iterator in value]
+    ex = Meta.parse(string(key, "=",sum([eval(Meta.parse(iterator)) for iterator in value])))
+    eval(ex)
+  end
+
+  @info "Gleichungen evaluiert"
+  vordefinierteMatrix = Matrix(undef,myArraySize,maxTermCount)
+  evalMatrix = zeros(myArraySize,maxTermCount)
   # fill the neuronalNetworkMatrixVariable with the correct placeholder
+  # first eval of the equations
   for j = 1:size(neuronalNetworkMatrixVariable,2)
     for i = 1:size(neuronalNetworkMatrixVariable,1)
         if neuronalNetworkMatrixVariable[i,j] != ""
-          C[i,j] = placeHolder[iterNum]
-          iterNum += 1
+          ex =  Meta.parse(termMatrix[i,j])
+          vordefinierteMatrix[i,j] = eval(ex)
+          evalMatrix[i,j] += eval(ex)
+          # NNMatrix[i,j] = placeHolder[iterNum]
+          # iterNum += 1
+        # else 
+        #   evalMatrix[i,j] = nothing
         end
     end
   end
+
+  solutionsOfEquations = sum(evalMatrix, dims=2)
+
   @info "hat die Matrix Zuweisung geklappt?"
-  @show C[1,1]
-  @info size(C)
+
   iterNum = 1
 
   # create an empty dict for the variables
+  testDict = Dict{Symbol, typeof(NNMatrix[1,1])}()
+
   variableDict = Dict()
 
   # next: sort C that the values are on the same place as in activatedTermMatrix
-  # note: C == array from Flux package
+  # note: NNMatrix == array from Flux package
   for j = 1:size(neuronalNetworkMatrixVariable,2)
     for i = 1:size(neuronalNetworkMatrixVariable,1)
       if iterNum <= size(variablesForNN)[1]
         if neuronalNetworkMatrixVariable[i,j] == variablesForNN[iterNum]
-          variableDict[variablesForNN[iterNum]] = C[i,j]
+          variableDict[Meta.parse(variablesForNN[iterNum])] = NNMatrix[i,j]
+
+          testDict[Meta.parse(variablesForNN[iterNum])] = NNMatrix[i,j]
           iterNum +=1
         end
       end
     end
   end
-  
   @info "variableDict successfully created"
   @info "keys of the dict"
-  @show keys(variableDict)
 
-  # for i = 1:size(valuesForNN)[1]
-  #   # eval the term
-  #   variablePlaceHolder = eval()
+  # transform the NN variables into a expression
+  
 
-  #   # add the NN variable to the term
-  #   variablePlaceHolder *= placeHolder[i]
 
-  #   # append it to the variableDict 
-  #   variableDict[variablesForNN[i]] = variablePlaceHolder
 
-  # end 
+  
 
-  # for i = 1:size(placeHolder)[1]
-  #   @show placeHolder[i]
-  # end
-  @info "u"
-  @show u[2]
+
   @info "du"
   @show du[2]
   @info "p"

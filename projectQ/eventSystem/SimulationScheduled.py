@@ -1,4 +1,4 @@
-from messageQueue.events import Event
+from eventSystem.Event import Event
 from db import Ex
 
 class SimulationScheduled(Event):

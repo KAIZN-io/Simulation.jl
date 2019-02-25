@@ -1,7 +1,7 @@
 import json
 from flask import Blueprint, render_template, redirect
 
-from messageQueue import mq, SimulationScheduled
+from eventSystem import emit, SimulationScheduled
 from db import sessionScope
 from server.simulation import getSimulationFromFormData, getScheduledSimulations, getFinishedSimulations
 from server.form import SimulationForm
@@ -29,7 +29,7 @@ def start():
             session.commit()
 
             # emit event that the simulations ist started
-            mq.emit(SimulationScheduled.create(simulation))
+            emit(SimulationScheduled.create(simulation))
 
         return redirect('/simulation')
 

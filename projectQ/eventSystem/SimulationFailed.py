@@ -1,6 +1,6 @@
 from schema import Schema, Use, Optional
 
-from messageQueue.events import Event
+from eventSystem.Event import Event
 
 
 class SimulationFailed(Event):

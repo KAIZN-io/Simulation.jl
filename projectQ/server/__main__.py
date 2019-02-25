@@ -12,7 +12,7 @@ from server.routings import routes
 from server.api import Simulation, SimulationList
 from values import DEBUG, RFC3339_DATE_FORMAT
 from db.base import base, ThreadScopedSession
-from messageQueue import mq, SimulationScheduled, SimulationStarted, SimulationFinished, SimulationFailed
+from eventSystem import on, SimulationScheduled, SimulationStarted, SimulationFinished, SimulationFailed
 
 
 logger = logging.getLogger(__name__)
@@ -48,24 +48,24 @@ os.environ['PYTHONPATH'] = os.getcwd()
 socket = SocketIO(app, logger=logger)
 
 # Map serverside events to the socket so that the web app will receive them as well
-@mq.on(SimulationScheduled)
+@on(SimulationScheduled)
 def notify_clients(ch, method, properties, event, payload):
-    socket.emit(event.get_routing_key(), event.to_dict())
+    socket.emit(event.get_routing_key(), event.to_dict(json_ready=True))
     ch.basic_ack(delivery_tag = method.delivery_tag)
 
-@mq.on(SimulationStarted)
+@on(SimulationStarted)
 def notify_clients(ch, method, properties, event, payload):
-    socket.emit(event.get_routing_key(), event.to_dict())
+    socket.emit(event.get_routing_key(), event.to_dict(json_ready=True))
     ch.basic_ack(delivery_tag = method.delivery_tag)
 
-@mq.on(SimulationFinished)
+@on(SimulationFinished)
 def notify_clients(ch, method, properties, event, payload):
-    socket.emit(event.get_routing_key(), event.to_dict())
+    socket.emit(event.get_routing_key(), event.to_dict(json_ready=True))
     ch.basic_ack(delivery_tag = method.delivery_tag)
 
-@mq.on(SimulationFailed)
+@on(SimulationFailed)
 def notify_clients(ch, method, properties, event, payload):
-    socket.emit(event.get_routing_key(), event.to_dict())
+    socket.emit(event.get_routing_key(), event.to_dict(json_ready=True))
     ch.basic_ack(delivery_tag = method.delivery_tag)
 
 # actually start the server

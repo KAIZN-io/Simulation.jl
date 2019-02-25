@@ -1,7 +1,7 @@
 import unittest
 import datetime
 
-from messageQueue.events import SimulationScheduled
+from eventSystem import SimulationScheduled
 from values import RFC3339_DATE_FORMAT
 
 

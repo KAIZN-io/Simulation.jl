@@ -2,12 +2,12 @@ import json
 from datetime import datetime
 import eventlet
 
-from messageQueue import mq, SimulationScheduled, SimulationStarted, SimulationFinished, SimulationFailed
+from eventSystem import on, SimulationScheduled, SimulationStarted, SimulationFinished, SimulationFailed
 from values import RFC3339_DATE_FORMAT, SERVICE_DB_WORKER
 from db import sessionScope, Ex, Pd
 
 
-@mq.on(SimulationScheduled, SERVICE_DB_WORKER)
+@on(SimulationScheduled, SERVICE_DB_WORKER)
 def processSimulationScheduled(ch, method, properties, event, payload):
 
     print(str(payload['id']) + ' - Persisting scheduled...')
@@ -24,7 +24,7 @@ def processSimulationScheduled(ch, method, properties, event, payload):
 
     print(str(payload['id']) + ' - Done persisting scheduled.')
 
-@mq.on(SimulationStarted, SERVICE_DB_WORKER)
+@on(SimulationStarted, SERVICE_DB_WORKER)
 def processSimulationStarted(ch, method, properties, event, payload):
 
     print(str(payload['id']) + ' - Persisting started...')
@@ -41,7 +41,7 @@ def processSimulationStarted(ch, method, properties, event, payload):
 
     print(str(payload['id']) + ' - Done persisting started.')
 
-@mq.on(SimulationFinished, SERVICE_DB_WORKER)
+@on(SimulationFinished, SERVICE_DB_WORKER)
 def processSimulationFinished(ch, method, properties, event, payload):
 
     print(str(payload['id']) + ' - Persisting finished...')
@@ -69,7 +69,7 @@ def processSimulationFinished(ch, method, properties, event, payload):
 
     print(str(payload['id']) + ' - Done persisting finished.')
 
-@mq.on(SimulationFailed, SERVICE_DB_WORKER)
+@on(SimulationFailed, SERVICE_DB_WORKER)
 def processSimulationFailed(ch, method, properties, event, payload):
 
     print(str(payload['id']) + ' - Persisting failed...')
@@ -92,7 +92,7 @@ def processSimulationFailed(ch, method, properties, event, payload):
 print( 'Worker initialized, waiting for events...' )
 
 # Do something to prevent the process from ending...
-# With the asynchronous listeners from messageQueue, nothing else will keep the process open
+# The event system uses ansychronous listners which wont keep the process running
 while True:
     eventlet.sleep(1)
 

@@ -1,7 +1,7 @@
 import unittest
 import datetime
 
-from messageQueue.events import SimulationFinished
+from eventSystem import SimulationFinished
 from values import RFC3339_DATE_FORMAT
 
 

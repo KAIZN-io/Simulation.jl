@@ -7,11 +7,12 @@ import pika
 import datetime
 
 from values import HN_MESSAGE_BROKER, EXCHANGE_EVENTS, RFC3339_DATE_FORMAT
+from messageQueue.events import Event
 
 
 logger = logging.getLogger(__name__)
 
-def on(event_name, durable_for_service_name = None):
+def on(event_class, durable_for_service_name = None):
     """
     The `on` decorator for listening to events
 
@@ -22,6 +23,8 @@ def on(event_name, durable_for_service_name = None):
 
     The actual decorator is defined below and will just be returned by this function.
     """
+
+    assert issubclass(event_class, Event)
 
     def decorator(callback):
         """
@@ -48,14 +51,14 @@ def on(event_name, durable_for_service_name = None):
 
             # try to parse the message as JSON, if it fails, discard
             try:
-                data = json.loads(body)
+                event = event_class.from_str(body)
             except ValueError as e:
                 # discard the message from the queue
                 ch.basic_nack(delivery_tag = method.delivery_tag, requeue = False)
                 print(str(e))
                 return
 
-            callback(ch, method, properties, data)
+            callback(ch, method, properties, event, event.get_payload())
 
         # Establish connection to the message broker
         connection = pika.BlockingConnection(pika.ConnectionParameters(host=HN_MESSAGE_BROKER))
@@ -66,7 +69,7 @@ def on(event_name, durable_for_service_name = None):
 
         if durable_for_service_name:
             # When passed a service name, create a name for the queue and create it
-            service_scoped_queue_name = durable_for_service_name + '_' + event_name
+            service_scoped_queue_name = durable_for_service_name + '_' + event_class.get_routing_key()
             result = channel.queue_declare(queue=service_scoped_queue_name)
 
             # Also tweak the qos to make sure every worker gets a piece of the cake
@@ -82,14 +85,14 @@ def on(event_name, durable_for_service_name = None):
         channel.queue_bind(
             exchange=EXCHANGE_EVENTS,
             queue=queue_name,
-            routing_key=event_name
+            routing_key=event_class.get_routing_key()
         )
 
         # Set the callback and for the queue and start to consume asynchronously
         channel.basic_consume(callback_wrapper, queue=queue_name)
         eventlet.spawn(channel.start_consuming)
 
-        print('Registered function \'' + callback.__name__ + '\' as listener for event \'' + event_name + '\' on queue \'' + result.method.queue + '\'')
+        print('Registered function \'' + callback.__name__ + '\' as listener for event \'' + event_class.get_routing_key() + '\' on queue \'' + result.method.queue + '\'')
 
     # We need to return the decorator, otherwise nothing will work
     return decorator
@@ -106,6 +109,8 @@ def emit(event):
     All data must be JSON serializeable.
     """
 
+    assert isinstance(event, Event)
+
     connection = pika.BlockingConnection(pika.ConnectionParameters(host=HN_MESSAGE_BROKER))
     channel = connection.channel()
 
@@ -113,8 +118,8 @@ def emit(event):
 
     channel.basic_publish(
         exchange=EXCHANGE_EVENTS,
-        routing_key=event['type'],
-        body=json.dumps(event)
+        routing_key=event.get_routing_key(),
+        body=event.to_str()
     )
 
     connection.close()

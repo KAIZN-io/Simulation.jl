@@ -26,6 +26,7 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # the default date format used for encoding and decoding messages
 RFC3339_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S.%f'
+RFC3339_REGEX = r'^([0-9]+)-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])[Tt]([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(\.[0-9]+)?$'
 
 # all supported models as an enum, so that our database can work with that
 class SimulationTypes(Enum):

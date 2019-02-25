@@ -3,6 +3,7 @@ import logging
 from sqlalchemy import Column, String, DateTime, Integer, Float, Enum, UniqueConstraint, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
+from schema import Schema, Use
 
 from values import SimulationTypes
 from db.base import base
@@ -90,6 +91,16 @@ class Parameter(base):
     __table_args__ = (
         UniqueConstraint('set_id', 'testcd', name='Parameter_testcd_unique_per_set'),
     )
+
+    @classmethod
+    def get_dict_schema(cls):
+        return Schema({
+            'testcd': Use(str),
+            'orres': Use(str),
+            'orresu': Use(str),
+            'precedence': Use(int),
+            'comment': Use(str),
+        })
 
     def to_dict(self):
         return {

@@ -133,6 +133,8 @@ variableMatrix = ["e"; "d"; "dx"; "dy"; "dz"]
 
 # array of arrays 
 inputTermArray = Array[["+3*x", "-2*y"], ["+4*y", "-x"], ["+σ*y", "-σ*x"], ["+x*ρ" ,"-x*z" ,"- y"], ["+x*y" ,"- β*z"]]
+odeMatrix = Array[["+σ*y", "-σ*x"], ["+x*ρ" ,"-x*z" ,"- y"], ["+x*y" ,"- β*z"]]
+
 # inputTermArray = Array[[4,5], ...]
 
 # array with the ODEs
@@ -157,7 +159,7 @@ stimulus = 10.5
 
 # # # # # # # # # # # #
 
-# preperation --> assign the equations to a dict 
+# preparation --> assign the equations to a dict 
 equationDict = Dict()
 for i = 1:size(variableMatrix)[1]
   equationDict[variableMatrix[i]] = inputTermArray[i]
@@ -199,25 +201,26 @@ maxTermCount = getMaxTermCount(inputTermArray)
 
 # create the generel term matrix
 emptyTermMatrix = fill("", myArraySize, maxTermCount)
+emptyOdeMatrix = fill("", size(odeNames)[1], maxTermCount)
 
 # fill the term matrix with the terms
 termMatrix = fillTermMatrix(emptyTermMatrix,inputTermArray)
+realOdeMatrix = fillTermMatrix(emptyOdeMatrix,odeMatrix)
 
 # create the neuronal network matrix filled with ones
-neuronalNetworkMatrix = ones(myArraySize,maxTermCount)
+neuronalNetworkMatrix = ones(size(odeNames)[1],maxTermCount)
 
 # create the parameters of the neural network
-neuronalNetworkMatrixVariable = Array{String}(undef, myArraySize,maxTermCount)
+neuronalNetworkMatrixVariable = Array{String}(undef, size(odeNames)[1],maxTermCount)
 # neuronalNetworkMatrixVariable = Array{String}(undef, size(odeNames)[1],maxTermCount)
 
-# create activated term matrix 
-activatedTermMatrix = fill("",size(termMatrix))
 
-for row in 1:myArraySize
+
+for row in 1:size(odeNames)[1]
   for column in 1:maxTermCount
     # set the NN matrix element to 0 / undef if term matrix does not hold any 
     # string in the same place
-    if termMatrix[row,column] == ""
+    if realOdeMatrix[row,column] == ""
       neuronalNetworkMatrix[row,column] = 0
     end
 
@@ -225,7 +228,6 @@ for row in 1:myArraySize
       # add strings with '*' together
       neuronalNetworkMatrixVariable[row,column] = "m"*string(row)*string(column)
       
-      activatedTermMatrix[row,column] *= "xPlace" * "=" * termMatrix[row,column] #* "*"* neuronalNetworkMatrixVariable[row,column]
     else
        neuronalNetworkMatrixVariable[row,column] = ""
     end
@@ -252,19 +254,7 @@ for i in 1:size(rawValuesForNN)[1]
   end
 end
 
-# turn matrix into a vector 
-a = vcat(activatedTermMatrix...)
 
-# reduce activatedTermMatrix
-reducedTermMatrix = String[]
-for i in 1:size(a)[1]
-  if a[i] != ""
-    push!(reducedTermMatrix,a[i])
-  end
-end
-
-# re-unite the variable matrix with their terms and precompile the equations
-# # expressionMatrix = [Meta.parse(string(variableMatrix[i], "=" ,activatedTermMatrix[i])) for i in 1:myArraySize]
 
 @info "expression matrix for terms is created successfully"
 
@@ -280,63 +270,46 @@ function evalExpressionForSolver(u,du,placeHolder)
     initPlaceHolder = eval(Meta.parse(stringTuple))
 
     eval(Meta.parse(string(odeVariable[i],"=",initPlaceHolder[1])))
-
   end
-  # @show x
 
-  # @info "beginne Evalution der Gleichungen" 
   for (key,value) in equationDict
-    # @show key,value
-    # @show [Meta.parse(iterator) for iterator in value]
     ex = Meta.parse(string(key, "=",sum([eval(Meta.parse(iterator)) for iterator in value])))
     eval(ex)
   end
-  # @show dx
 
 
   A = placeHolder
   sizeA = size(rawValuesForNN)[1]
   B = resize!(A, sizeA)
-  NNMatrix = reshape(B, myArraySize, maxTermCount)
-  # NNMatrix = reshape(B, size(odeNames)[1], maxTermCount)
+  # NNMatrix = reshape(B, myArraySize, maxTermCount)
+  
+  NNMatrix = reshape(B, size(odeNames)[1], maxTermCount)
+
 
   # iteration number for parameter Placeholder vector 
   iterNum = 1
-
-  # @info "Gleichungen evaluiert"
-  vordefinierteMatrix = Matrix(undef,myArraySize,maxTermCount)
-
-  # create correct NNMatrix and the vordefinierteMatrix
-
-  for j = 1:size(neuronalNetworkMatrixVariable,2)
-    for i = 1:size(neuronalNetworkMatrixVariable,1)
-        if neuronalNetworkMatrixVariable[i,j] != ""
-          ex =  Meta.parse(termMatrix[i,j])
-          vordefinierteMatrix[i,j] = eval(ex)
+  for j = 1:size(realOdeMatrix,2)
+    for i = 1:size(realOdeMatrix,1)
+        if realOdeMatrix[i,j] != ""
+          ex =  Meta.parse(realOdeMatrix[i,j])
 
           # calculate the solution of the NN affected Matrix 
-          NNMatrix[i,j] = placeHolder[iterNum] * vordefinierteMatrix[i,j] 
+          NNMatrix[i,j] = placeHolder[iterNum] * eval(ex)
           iterNum += 1
         end
     end
   end
 
-
-
   iterNum = 1
-  for i in odeNames
-    # get the position 
-    duVarPosition = findfirst(x -> x==i, variableMatrix)
-    
-    du[iterNum] = sum(NNMatrix[duVarPosition,:])
 
+  for i in odeNames
+
+    du[iterNum] = sum(NNMatrix[iterNum,:])
     iterNum +=1
   end
-  # @info "hat die Matrix Zuweisung geklappt?"
-  # @show du
-  # @show rdsdf 
-
+  
   return du
+
 end
 
 

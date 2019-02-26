@@ -277,8 +277,29 @@ end
 
 function evalExpressionForSolver(u,du,placeHolder)
 
-  # TEMP: dummie 
-  x,y,z = u
+  #x,y,z = u
+
+  # evaluate the initial values 
+  for i = 1:size(u)[1]
+    strPosition = findlast("(", string(u[i]))
+
+    # assumption: the initial value should always be in the first place of the tuple
+    stringTuple = string(u[i])[strPosition[1]:end]
+
+    initPlaceHolder = eval(Meta.parse(stringTuple))
+
+    eval(Meta.parse(string(odeVariable[i],"=",initPlaceHolder[1])))
+
+  end
+  @show x
+
+  @info "beginne Evalution der Gleichungen" 
+  for (key,value) in equationDict
+    # @show key,value
+    # @show [Meta.parse(iterator) for iterator in value]
+    ex = Meta.parse(string(key, "=",sum([eval(Meta.parse(iterator)) for iterator in value])))
+    eval(ex)
+  end
 
   A = placeHolder
   sizeA = size(rawValuesForNN)[1]
@@ -338,13 +359,7 @@ function evalExpressionForSolver(u,du,placeHolder)
   # transform variable into a string
   # varString = string(y)
   # @show varString
-  strPosition = findlast("(", string(x))
 
-  stringTuple = string(x)[strPosition[1]:end]
-  ex = Meta.parse(stringTuple)
-  testEval = eval(ex)
-
-  @show testEval
 
 
   """
@@ -372,13 +387,7 @@ function evalExpressionForSolver(u,du,placeHolder)
   # iteration number for parameter Placeholder vector 
   iterNum = 1
 
-  @info "beginne Evalution der Gleichungen" 
-  for (key,value) in equationDict
-    # @show key,value
-    # @show [Meta.parse(iterator) for iterator in value]
-    ex = Meta.parse(string(key, "=",sum([eval(Meta.parse(iterator)) for iterator in value])))
-    eval(ex)
-  end
+
 
   @info "Gleichungen evaluiert"
   vordefinierteMatrix = Matrix(undef,myArraySize,maxTermCount)

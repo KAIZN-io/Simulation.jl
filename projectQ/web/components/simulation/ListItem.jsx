@@ -9,19 +9,29 @@ import { typeColorMapping } from '../../values.js';
 import * as CustomPropTypes from '../../customPropTypes.js';
 
 
+// TODO: let the status be set by the reducer
 const simulationStatus = {
   SCHEDULED: 'scheduled',
   RUNNING: 'running',
-  FINISHED: 'finished'
+  FINISHED: 'finished',
+  FAILED: 'failed'
 };
 
 function getSimulationStatus( simulation ) {
   let status = simulationStatus.SCHEDULED;
 
-  if ( simulation.get( 'started_at' ) && !simulation.get( 'finished_at' ) ) {
-    status = simulationStatus.RUNNING;
-  } else if ( simulation.get( 'started_at' ) && simulation.get( 'finished_at' ) ) {
-    status = simulationStatus.FINISHED;
+  let started_at = simulation.get( 'started_at' );
+  let finished_at = simulation.get( 'finished_at' );
+  let failed_at = simulation.get( 'failed_at' );
+
+  if ( started_at ) {
+    if ( finished_at ) {
+      status = simulationStatus.FINISHED;
+    } else if ( failed_at ) {
+      status = simulationStatus.FAILED;
+    } else {
+      status = simulationStatus.RUNNING;
+    }
   }
 
   return status;
@@ -58,6 +68,9 @@ const ListItem = withStyles({
       break;
     case simulationStatus.FINISHED:
       statusIndicator = <i className="fas fa-check text-success"></i>;
+      break;
+    case simulationStatus.FAILED:
+      statusIndicator = <i className="fas fa-times text-danger"></i>;
       break;
   }
 

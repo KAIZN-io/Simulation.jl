@@ -1,17 +1,24 @@
+import logging
+from pprint import pformat
 from flask_restful import Resource
 from sqlalchemy import desc
 
 from db import sessionScope, Ex
 
 
+logger = logging.getLogger(__name__)
+
 class Simulation(Resource):
     @classmethod
     def get(cls, id):
         with sessionScope() as session:
-            return session.query(Ex) \
+            ex = session.query(Ex) \
                     .filter(Ex.id == id) \
                     .one() \
                     .to_dict(True)
+            logger.info(pformat(ex))
+
+            return ex
 
 class SimulationList(Resource):
     @classmethod

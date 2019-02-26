@@ -25,7 +25,8 @@
                 "status": {
                     "scheduled": "Simulation wartet auf Ausführung",
                     "running": "Wird Simuliert...",
-                    "finished": "Simulation fertiggestellt"
+                    "finished": "Simulation fertiggestellt",
+                    "failed": "Simulation fehlgeschlagen"
                 }
             }
         },

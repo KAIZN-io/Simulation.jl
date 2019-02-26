@@ -1,12 +1,17 @@
 from sqlalchemy import Column, String, DateTime, Integer, Float, Enum, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID, ARRAY, REAL
+from schema import Schema, Use, Regex, Optional, Or
 import datetime
 import uuid
 import json
 
 from db.base import base
-from values import SimulationTypes, RFC3339_DATE_FORMAT
+from db.Impulse import Impulse
+from db.Stimulus import Stimulus
+from db.InitialValueSet import InitialValue
+from db.ParameterSet import Parameter
+from values import SimulationTypes, RFC3339_DATE_FORMAT, RFC3339_REGEX
 
 
 # Ex stands for 'Exposure' of an organism with a substance
@@ -21,6 +26,7 @@ class Ex(base):
     image_path = Column(String)
     started_at = Column(DateTime)
     finished_at = Column(DateTime)
+    failed_at = Column(DateTime)
 
     # every ex has exactly one model
     model_id = Column(Integer, ForeignKey('model.id'), nullable=False)
@@ -59,6 +65,41 @@ class Ex(base):
     stop = Column(Float)
     step_size = Column(Float)
     co = Column(String)
+
+    @classmethod
+    def get_dict_schema(cls):
+        return Schema({
+            'id': Use(int),
+            'uuid': Use(str),
+            'created_at': Regex(RFC3339_REGEX),
+
+            'name': Use(str),
+            'image_path': Use(str),
+            'started_at': Or(Regex(RFC3339_REGEX), None),
+            'finished_at': Or(Regex(RFC3339_REGEX), None),
+            'failed_at': Or(Regex(RFC3339_REGEX), None),
+
+            'model_id': Use(id),
+            'model': Use(dict),
+
+            'initial_value_set_id': Use(id),
+            'initial_value_set': [InitialValue.get_dict_schema()],
+
+            'parameter_set_id': Use(id),
+            'parameter_set': [Parameter.get_dict_schema()],
+
+            'impulses': [Impulse.get_dict_schema()],
+            'stimuli': [Stimulus.get_dict_schema()],
+            'type': Use(str),
+
+            Optional('signal_type'): Use(int),
+            Optional('nacl_impulse'): Use(int),
+
+            'start': Use(float),
+            'stop': Use(float),
+            'step_size': Use(float),
+            'co': Use(str),
+        })
 
     def isOfType(self, otherType):
         """Checks if this model is the same type as `otherType`.
@@ -124,11 +165,12 @@ class Ex(base):
             'image_path': self.image_path,
             'started_at': self.started_at.strftime(RFC3339_DATE_FORMAT) if self.started_at and json_ready else self.started_at,
             'finished_at': self.finished_at.strftime(RFC3339_DATE_FORMAT) if self.finished_at and json_ready else self.finished_at,
+            'failed_at': self.failed_at.strftime(RFC3339_DATE_FORMAT) if self.failed_at and json_ready else self.failed_at,
 
             'model_id': self.model_id,
             'initial_value_set_id': self.initial_value_set_id,
             'parameter_set_id': self.parameter_set_id,
-            'type': self.getTypeAsString() if json_ready else self.type,
+            'type': self.getTypeAsString() if json_ready else self.getType(),
 
             'start': self.start,
             'stop': self.stop,

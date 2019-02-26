@@ -1,6 +1,7 @@
 from sqlalchemy import Column, String, DateTime, Integer, Float, UniqueConstraint, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
+from schema import Schema, Use
 import datetime
 
 from db.base import base
@@ -24,6 +25,14 @@ class Impulse(base):
     __table_args__ = (
         UniqueConstraint('ex_id', 'substance', 'start', 'stop', name='Impulse_uniqe_per_simulation'),
     )
+
+    @classmethod
+    def get_dict_schema(cls):
+        return Schema({
+            'substance': Use(str),
+            'start': Use(float),
+            'stop': Use(float),
+        })
 
     def to_dict(self):
         return {

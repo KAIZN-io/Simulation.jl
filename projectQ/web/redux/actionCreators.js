@@ -46,3 +46,10 @@ export function markSimulationAsFinished( updatedData ) {
   };
 }
 
+export function markSimulationAsFailed( updatedData ) {
+  return {
+    type: types.MARK_SIMULATION_AS_FAILED,
+    payload: updatedData
+  };
+}
+

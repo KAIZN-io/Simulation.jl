@@ -1,6 +1,7 @@
 from sqlalchemy import Column, String, DateTime, Integer, Float, UniqueConstraint, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID, ARRAY
+from schema import Schema, Use
 import datetime
 
 from db.base import base
@@ -27,6 +28,17 @@ class Stimulus(base):
     __table_args__ = (
         UniqueConstraint('ex_id', 'substance', 'amount', 'unit', 'targets', 'timings', name='Stimulus_uniqe_per_simulation'),
     )
+
+    @classmethod
+    def get_dict_schema(cls):
+        return Schema({
+            'substance': Use(str),
+            'amount': Use(float),
+            'unit': Use(str),
+            'targets': [Use(str)],
+            'timings': [Use(int)],
+            'active': Use(bool)
+        })
 
     def to_dict(self):
         return {

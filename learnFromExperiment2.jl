@@ -208,6 +208,7 @@ neuronalNetworkMatrix = ones(myArraySize,maxTermCount)
 
 # create the parameters of the neural network
 neuronalNetworkMatrixVariable = Array{String}(undef, myArraySize,maxTermCount)
+# neuronalNetworkMatrixVariable = Array{String}(undef, size(odeNames)[1],maxTermCount)
 
 # create activated term matrix 
 activatedTermMatrix = fill("",size(termMatrix))
@@ -230,14 +231,6 @@ for row in 1:myArraySize
     end
   end
 end  
-
-
-
-
-# A = variablesForNN
-# sizeA = size(rawValuesForNN)[1]
-# B = resize!(A, sizeA)
-# C = reshape(B, myArraySize, maxTermCount)
 
 
 
@@ -277,8 +270,6 @@ end
 
 function evalExpressionForSolver(u,du,placeHolder)
 
-  #x,y,z = u
-
   # evaluate the initial values 
   for i = 1:size(u)[1]
     strPosition = findlast("(", string(u[i]))
@@ -291,189 +282,59 @@ function evalExpressionForSolver(u,du,placeHolder)
     eval(Meta.parse(string(odeVariable[i],"=",initPlaceHolder[1])))
 
   end
-  @show x
+  # @show x
 
-  @info "beginne Evalution der Gleichungen" 
+  # @info "beginne Evalution der Gleichungen" 
   for (key,value) in equationDict
     # @show key,value
     # @show [Meta.parse(iterator) for iterator in value]
     ex = Meta.parse(string(key, "=",sum([eval(Meta.parse(iterator)) for iterator in value])))
     eval(ex)
   end
+  # @show dx
+
 
   A = placeHolder
   sizeA = size(rawValuesForNN)[1]
   B = resize!(A, sizeA)
   NNMatrix = reshape(B, myArraySize, maxTermCount)
-
-  """# initiale werte
-  Na_in = 45 mM
-
-  # model definition
-  
-  dNa_in = - (J_Na * Surf) / V_in + k_s0Yt
-  dK_in = - (J_K * Surf) / V_in + k_s0Yt - x
-  
-
-  # vorbereitung
-  werte = {
-    "dNa_in": ["- (J_Na * Surf) / V_in", "+ k_s0Yt"],
-    "dK_in": ["- (J_K * Surf) / V_in", "+ k_s0Yt", "- dNa_in"],
-  }
-
-  matrixDimensions = {
-      rows: coutn( werte ),
-      colums: maxTermLength( werte )
-  }
-
-  # pro simulationsschritt
-  for varName, terms in werte:
-      eval( varName + " = " + str( sum( [ eval( term ) for term in terms ] ) ) )
-
-  vordefinierteMatrix = []
-  i = 1
-  for varName, terms in werte:
-      vordefinierteMatrix[ i ] = fillRowToLenth( [ eval( terms ) for term in terms ], matrixDimensions['colums'] )
-      
-  vordefinierteMatrix =
-  2×2 Array{String,2}:
-  eval("- (J_Na * Surf) / V_in") eval("+ k_s0Yt")
-  eval("- (J_K * Surf) / V_in") eval("+ k_s0Yt") eval("- dNa_in")
-
-  vordefinierteMatrix =
-  2×2 Array{String,2}:
-  4 5 None
-  3 7 6
-
-  m =[
-    1: [ 0.1, 0.5, 0 ]
-    2: [ 0.6, 0.24, 0.4 ]
-  ]
-
-  NNMatrix = 
-  2×2 Array{String,2}:
-  m[1][1] m[1][2] m[1][3]
-  m[2][1] m[2][2] m[2][3]
-  """
-
-  # transform variable into a string
-  # varString = string(y)
-  # @show varString
-
-
-
-  """
-  ForwardDiff.Dual is of type UnionAll.
-
-  Summary
-  ≡≡≡≡≡≡≡≡≡
-
-  struct UnionAll <: Type{T}
-
-  Fields
-  ≡≡≡≡≡≡≡≡
-
-  var  :: TypeVar
-  body :: Any
-
-  Supertype Hierarchy
-  ≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡
-
-  UnionAll <: Type{T} <: Any
-  """
-
-  # @show Flux.data(y)
+  # NNMatrix = reshape(B, size(odeNames)[1], maxTermCount)
 
   # iteration number for parameter Placeholder vector 
   iterNum = 1
 
-
-
-  @info "Gleichungen evaluiert"
+  # @info "Gleichungen evaluiert"
   vordefinierteMatrix = Matrix(undef,myArraySize,maxTermCount)
-  evalMatrix = zeros(myArraySize,maxTermCount)
-  # fill the neuronalNetworkMatrixVariable with the correct placeholder
-  # first eval of the equations
+
+  # create correct NNMatrix and the vordefinierteMatrix
+
   for j = 1:size(neuronalNetworkMatrixVariable,2)
     for i = 1:size(neuronalNetworkMatrixVariable,1)
         if neuronalNetworkMatrixVariable[i,j] != ""
           ex =  Meta.parse(termMatrix[i,j])
           vordefinierteMatrix[i,j] = eval(ex)
-          evalMatrix[i,j] += eval(ex)
-          # NNMatrix[i,j] = placeHolder[iterNum]
-          # iterNum += 1
-        # else 
-        #   evalMatrix[i,j] = nothing
+
+          # calculate the solution of the NN affected Matrix 
+          NNMatrix[i,j] = placeHolder[iterNum] * vordefinierteMatrix[i,j] 
+          iterNum += 1
         end
     end
   end
 
-  solutionsOfEquations = sum(evalMatrix, dims=2)
 
-  @info "hat die Matrix Zuweisung geklappt?"
 
   iterNum = 1
+  for i in odeNames
+    # get the position 
+    duVarPosition = findfirst(x -> x==i, variableMatrix)
+    
+    du[iterNum] = sum(NNMatrix[duVarPosition,:])
 
-  # create an empty dict for the variables
-  testDict = Dict{Symbol, typeof(NNMatrix[1,1])}()
-
-  variableDict = Dict()
-
-  # next: sort C that the values are on the same place as in activatedTermMatrix
-  # note: NNMatrix == array from Flux package
-  for j = 1:size(neuronalNetworkMatrixVariable,2)
-    for i = 1:size(neuronalNetworkMatrixVariable,1)
-      if iterNum <= size(variablesForNN)[1]
-        if neuronalNetworkMatrixVariable[i,j] == variablesForNN[iterNum]
-          variableDict[Meta.parse(variablesForNN[iterNum])] = NNMatrix[i,j]
-
-          testDict[Meta.parse(variablesForNN[iterNum])] = NNMatrix[i,j]
-          iterNum +=1
-        end
-      end
-    end
+    iterNum +=1
   end
-  @info "variableDict successfully created"
-  @info "keys of the dict"
-
-  # transform the NN variables into a expression
-  
-
-
-
-  
-
-
-  @info "du"
-  @show du[2]
-  @info "p"
-  @show placeHolder[2]
-  # for i = 1:size(valuesForNN)[1]
-  #   eval(Meta.parse(string(variablesForNN[i]))) = 2# placeHolder[i]
-  #   # ex = Meta.parse(string(variablesForNN[i], "=", 1))    
-  # end
-
-
-  # eval(Meta.parse(string("m"))) = 0
-  for i = 1:size(odeNames)[1]
-    # convert the ODE names
-    @info "before ODE eval "
-    eval(Meta.parse(string(odeNames[i], "=", du[i])))
-    @info "after ODE eval "
-    # assign the initial values to their ODEs
-    eval(Meta.parse(string(odeVariable[i], "=", u[i])))
-
-  end
-
-  # calculate the equations
-  for j = 1:myArraySize
-    eval(expressionMatrix[j])
-  end
-
-  # overgive only the d_ terms 
-  for i = 1:size(odeNames)[1]
-    du[i]= eval(Meta.parse(odeNames[i]))
-  end
+  # @info "hat die Matrix Zuweisung geklappt?"
+  # @show du
+  # @show rdsdf 
 
   return du
 end

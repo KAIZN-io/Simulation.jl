@@ -1,5 +1,4 @@
 import eventlet
-import json
 
 from eventSystem import on, emit, SimulationScheduled, SimulationStarted, SimulationFinished, SimulationFailed
 from values import RFC3339_DATE_FORMAT, SERVICE_SIMULATION_WORKER

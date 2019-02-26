@@ -1,14 +1,10 @@
 import eventlet
-eventlet.monkey_patch()
-
-import logging
 import pika
 
 from values import HN_MESSAGE_BROKER, EXCHANGE_EVENTS
 from eventSystem.Event import Event
+from eventSystem.RobustConsumer import RobustConsumer
 
-
-logger = logging.getLogger(__name__)
 
 def on(event_class, durable_for_service_name = None):
     """
@@ -23,6 +19,7 @@ def on(event_class, durable_for_service_name = None):
     """
 
     assert issubclass(event_class, Event)
+    assert isinstance(durable_for_service_name, str) or durable_for_service_name is None
 
     def decorator(callback):
         """
@@ -58,39 +55,18 @@ def on(event_class, durable_for_service_name = None):
 
             callback(ch, method, properties, event, event.get_payload())
 
-        # Establish connection to the message broker
-        connection = pika.BlockingConnection(pika.ConnectionParameters(host=HN_MESSAGE_BROKER))
-        channel = connection.channel()
-
-        # Declare the one and only `events` exchange
-        channel.exchange_declare(exchange=EXCHANGE_EVENTS, exchange_type='topic')
-
         if durable_for_service_name:
             # When passed a service name, create a name for the queue and create it
-            service_scoped_queue_name = durable_for_service_name + '_' + event_class.get_routing_key()
-            result = channel.queue_declare(queue=service_scoped_queue_name)
-
-            # Also tweak the qos to make sure every worker gets a piece of the cake
-            channel.basic_qos(prefetch_count=1)
+            queue = durable_for_service_name + '_' + event_class.get_routing_key()
         else:
             # When no service name is specified, we just create an anonymous and exclusive queue
-            result = channel.queue_declare(exclusive=True)
+            queue = None
 
-        # Either way, we get the name of the queue like this
-        queue_name = result.method.queue
+        consumer = RobustConsumer(callback_wrapper, event_class, queue)
 
-        # We bind the queue to the `events` exchange using the event name as routing key
-        channel.queue_bind(
-            exchange=EXCHANGE_EVENTS,
-            queue=queue_name,
-            routing_key=event_class.get_routing_key()
-        )
+        eventlet.spawn_n(consumer.start)
 
-        # Set the callback and for the queue and start to consume asynchronously
-        channel.basic_consume(callback_wrapper, queue=queue_name)
-        eventlet.spawn(channel.start_consuming)
-
-        print('Registered function \'' + callback.__name__ + '\' as listener for event \'' + event_class.get_routing_key() + '\' on queue \'' + result.method.queue + '\'')
+        print('Registered function \'' + callback.__name__ + '\' as listener for event \'' + event_class.get_routing_key() + '\' on queue \'' + str(queue) + '\'')
 
     # We need to return the decorator, otherwise nothing will work
     return decorator

@@ -1,5 +1,3 @@
-import json
-from datetime import datetime
 import eventlet
 
 from eventSystem import on, SimulationScheduled, SimulationStarted, SimulationFinished, SimulationFailed

@@ -6,7 +6,15 @@ import pika
 from values import HN_MESSAGE_BROKER, EXCHANGE_EVENTS
 from eventSystem.Event import Event
 
+
 class RobustConsumer:
+    """
+    The RobustConsumer automatically reconnects to the message broker in case of an error.
+
+    The structure of this consumer orients itself on the async consumer example give by pika.
+    This makes the structure somewhat bloated. But you can more or less simply read it from
+    top to bottom as the data will flow this way as well.
+    """
     def __init__(self, callback, event_class, queue=None, prefetch_count=1, reconnect_timeout=5):
         assert callable(callback)
         assert issubclass(event_class, Event)

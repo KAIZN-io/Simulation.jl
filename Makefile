@@ -5,7 +5,13 @@ default: up
 
 PHONY += up
 up:
-	$(DC_CMD) up
+	$(DC_CMD) up dbWorker simulation server
+
+PHONY += test
+test: clean
+	$(DC_CMD) up test_webApp
+	$(DC_CMD) up test_python
+	$(MAKE) up
 
 PHONY += down
 down:

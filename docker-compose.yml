@@ -118,6 +118,19 @@ services:
       - ./:/ProjektQ/
     working_dir: /ProjektQ/
 
+  test_webApp:
+    command: sh -c "npm ci && npm run test"
+    image: node:11.10.0-alpine
+    volumes:
+      - ./:/ProjektQ/
+    working_dir: /ProjektQ/
+
+  test_python:
+    command: ["-u", "-m", "unittest", "discover"]
+    image: janpiotraschke/projectq:0.4.0
+    volumes:
+      - ./projectQ/:/ProjektQ/
+
 # Define named volumes for use in the service definitions
 volumes:
   userDb:

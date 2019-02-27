@@ -38,15 +38,22 @@ SERVICE_DB_WORKER=service.db-worker
 ### Starting the project
 To start the project, you jsut need to:
 - Open a terminal in the root of the project.
-- Run `docker-compose up`
+- Run `docker-compose up server`
 - Wait for everything to be up and running
 - Open your browser and go to: [localhost:8080](http://localhost:8080/)
 
 ### Develop the Web-App
 - Have [npm](https://www.npmjs.com/get-npm) installed
-- Open a terminal in the same location and run `docker-compose up`
+- Open a terminal in the same location and run `docker-compose up server`
 - After the project is running, open **another** terminal in the root of the project and run `npm run dev-server`
 - Open your browser and go to: [localhost:808**1**](http://localhost:8081/)
+
+### Running tests
+To run the unit tests for the web app, execute: `docker-compose up test_webApp`; To run them locally: `npm run test`
+To run the unit tests for the python code, execute: `docker-compose up test_python`; To run them locally: `python -m unittest discover projectQ`
+
+### Using `make`
+The project contains a make file that offers some targets for easier interaction with the project. Run `make help` to see which actions are supported.
 
 This will automatically rebuild the code for the Web-App on changes and even hot-swap changed components and reload your browser automatically.
 

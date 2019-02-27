@@ -3,9 +3,11 @@
   "version": "0.1.0",
   "main": "index.html",
   "scripts": {
-    "dev-server": "webpack-dev-server --config ./webpack.config.js --mode development --devtool source-map",
-    "dev": "webpack --watch --config ./webpack.config.js --mode development --devtool source-map",
-    "test": "jest --watch",
+    "dev:serve": "webpack-dev-server --config ./webpack.config.js --mode development --devtool source-map",
+    "dev:watch": "npm run dev -- --watch",
+    "dev": "webpack --config ./webpack.config.js --mode development --devtool source-map",
+    "test:watch": "npm run test -- --watch",
+    "test": "jest",
     "build": "webpack --config ./webpack.config.js --mode production"
   },
   "author": "Jan-Luca Klees",

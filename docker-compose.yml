@@ -42,7 +42,7 @@ services:
         condition: service_healthy
       messageBroker:
         condition: service_healthy
-      simulation:
+      julia_simulation:
         condition: service_started
       dbWorker:
         condition: service_started
@@ -86,8 +86,8 @@ services:
     volumes:
       - ./projectQ/:/ProjektQ/
 
-  simulation:
-    command: ["-u", "-m", "simulation"]
+  py_simulation:
+    command: ["-u", "-m", "py_simulation"]
     depends_on:
       messageBroker:
         condition: service_healthy
@@ -100,6 +100,22 @@ services:
       - messageBroker
     volumes:
       - ./projectQ/:/ProjektQ/
+
+  julia_simulation:
+    command: ["julia", "worker.jl"]
+    depends_on:
+      messageBroker:
+        condition: service_healthy
+    environment:
+      - DEBUG
+      - EXCHANGE_EVENTS
+      - SERVICE_SIMULATION_WORKER
+    image: julia
+    networks:
+      - messageBroker
+    volumes:
+      - ./projectQ/julia_simulation/:/ProjektQ/
+    working_dir: /ProjektQ
 
   messageBroker:
     healthcheck:

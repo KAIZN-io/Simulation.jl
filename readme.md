@@ -36,9 +36,17 @@ SERVICE_DB_WORKER=service.db-worker
 ```
 
 ### Starting the project
-To start the project, you jsut need to:
+To start the project, you just need to:
 - Open a terminal in the root of the project.
 - Run `docker-compose up server`
+- Wait for everything to be up and running
+- Open your browser and go to: [localhost:8080](http://localhost:8080/)
+
+### Starting the old python simulation worker
+To start the project with the old simulation worker, do the following:
+- Open a terminal in the root of the project.
+- Run `docker-compose up -d bundler dbWorker py_simulation`
+- Run `docker-compose up --no-deps server`
 - Wait for everything to be up and running
 - Open your browser and go to: [localhost:8080](http://localhost:8080/)
 

@@ -11,7 +11,7 @@ import itertools
 
 from visualization import Visualizer
 from values import SimulationTypes
-from simulation.Solver import Solver
+from py_simulation.Solver import Solver
 
 
 STUDYID = 'Yeast_BSc'

@@ -5,7 +5,12 @@ default: up
 
 PHONY += up
 up:
-	$(DC_CMD) up dbWorker simulation server
+	$(DC_CMD) up dbWorker julia_simulation server
+
+PHONY += py_up
+py_up:
+	$(DC_CMD) up -d bundler dbWorker py_simulation
+	$(DC_CMD) up --no-deps server
 
 PHONY += test
 test: clean

@@ -3,7 +3,7 @@ import traceback
 
 from eventSystem import on, emit, SimulationScheduled, SimulationStarted, SimulationFinished, SimulationFailed
 from values import RFC3339_DATE_FORMAT, SERVICE_SIMULATION_WORKER
-from simulation import simulate
+from py_simulation import simulate
 
 
 def run():

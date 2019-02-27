@@ -10,7 +10,7 @@ from flask_restful import Api
 from server.app import app
 from server.routings import routes
 from server.api import Simulation, SimulationList
-from values import DEBUG, RFC3339_DATE_FORMAT
+from values import DEBUG, RFC3339_DATE_FORMAT, RESULT_IMAGE_DIR
 from db.base import base, ThreadScopedSession
 from eventSystem import on, SimulationScheduled, SimulationStarted, SimulationFinished, SimulationFailed
 
@@ -26,9 +26,9 @@ if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
     base.metadata.create_all(session.getEngine())
 
     """Create folders"""
-    if not os.path.isdir('SimulationPictures'):
-        logger.info("Created folder `SimulationPictures`")
-        os.mkdir('SimulationPictures')
+    if not os.path.isdir(RESULT_IMAGE_DIR):
+        os.mkdir(RESULT_IMAGE_DIR)
+        logger.info('Created folder ' + RESULT_IMAGE_DIR)
 else:
     logger.debug("Not main thread, skipping initialization")
 

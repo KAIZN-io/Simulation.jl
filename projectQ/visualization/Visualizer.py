@@ -127,13 +127,16 @@ class Visualizer:
                                 frameon = True,loc='center left',fontsize=fontSize)")
 
             """"save the plot"""
+            if not os.path.isdir(RESULT_IMAGE_DIR):
+                os.mkdir(RESULT_IMAGE_DIR)
 
             pictureName = '{0}_{1}.png'.format(simulationData['type'], SEQ)
-            plt.savefig( ROOT_DIR + '/server/static/images/{0}'.format(pictureName),
-                        dpi=360,
-                        format='png',
-                        bbox_inches='tight'
-                        )
+            plt.savefig(
+                RESULT_IMAGE_DIR + '/' + pictureName,
+                dpi=360,
+                format='png',
+                bbox_inches='tight'
+            )
 
             # """pre check if picture is already saved in database"""
             # cur.execute(sql.SQL("""

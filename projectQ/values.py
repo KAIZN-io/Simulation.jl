@@ -23,6 +23,9 @@ SERVICE_DB_WORKER = os.environ.get('SERVICE_DB_WORKER')
 
 # set the root dir
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+STATIC_DIR = ROOT_DIR + '/server/static'
+TEMPLATE_DIR = ROOT_DIR + '/server/templates'
+RESULT_IMAGE_DIR = STATIC_DIR + '/images'
 
 # the default date format used for encoding and decoding messages
 RFC3339_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S.%f'

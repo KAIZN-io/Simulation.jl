@@ -41,7 +41,7 @@ services:
         condition: service_healthy
       messageBroker:
         condition: service_healthy
-      simulationWorker:
+      simulation:
         condition: service_started
       dbWorker:
         condition: service_started
@@ -85,8 +85,8 @@ services:
     volumes:
       - ./projectQ/:/ProjektQ/
 
-  simulationWorker:
-    command: ["-u", "-m", "simulationWorker"]
+  simulation:
+    command: ["-u", "-m", "simulation"]
     depends_on:
       messageBroker:
         condition: service_healthy

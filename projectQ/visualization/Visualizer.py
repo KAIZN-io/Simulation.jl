@@ -1,9 +1,10 @@
+import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from values import ROOT_DIR
+from values import RESULT_IMAGE_DIR
 
 
 NOT_TO_VISUALIZE = [

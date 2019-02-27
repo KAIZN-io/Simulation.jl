@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from values import RESULT_IMAGE_DIR
+from values import RESULT_IMAGE_DIR, STATIC_DIR
 
 
 NOT_TO_VISUALIZE = [
@@ -128,6 +128,8 @@ class Visualizer:
                                 frameon = True,loc='center left',fontsize=fontSize)")
 
             """"save the plot"""
+            if not os.path.isdir(STATIC_DIR):
+                os.mkdir(STATIC_DIR)
             if not os.path.isdir(RESULT_IMAGE_DIR):
                 os.mkdir(RESULT_IMAGE_DIR)
 

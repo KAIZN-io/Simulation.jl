@@ -112,7 +112,7 @@ services:
       - messageBroker
 
   bundler:
-    command: 'npm run build'
+    command: sh -c "npm ci && npm run build"
     image: node:11.10.0-alpine
     volumes:
       - ./:/ProjektQ/

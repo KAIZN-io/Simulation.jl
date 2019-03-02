@@ -10,6 +10,7 @@ using Pkg
 # Pkg.add("Documenter")
 
 using Flux, DiffEqFlux, DifferentialEquations, Plots, Logging
+using Flux.Tracker
 
 mutable struct SimType{T} <: DEDataVector{T}
     x::Array{T,1}
@@ -43,11 +44,11 @@ odeNames = ["dx", "dy", "dz"]
 odeVariable = ["x", "y", "z"]
 
 # define the initial Values --> [1*m] vector 
-initialValuesList=[2.0;1.0;1.0]
+initialValuesList=[1.01;1.0;1.0]
 initialValues = SimType(initialValuesList, 0.0)
 
 # time array (must be a tuple)
-timeRange = (0.0,8.0)
+timeRange = (0.0,10.0)
 
 # start:step:stop
 t = timeRange[1]:0.2:timeRange[2]
@@ -157,7 +158,7 @@ function evalExpressionForSolver(u,du,placeHolder)
 
     eval(Meta.parse(string(odeVariable[i],"=",initPlaceHolder[1])))
   end
-  @show x
+  # @show x
 
   # eval the algebraic equations and sde
   for (key,value) in equationDict
@@ -167,13 +168,12 @@ function evalExpressionForSolver(u,du,placeHolder)
   
   # copy is important to not change the original matrix
   A = copy(placeHolder)
-  @show typeof(placeHolder)
+  # @show typeof(placeHolder)
 
   # how long the vector is
   sizeA = size(rawValuesForNN)[1]
   
   # how long the vector should be
-  # ist resize das Problem?
   B = resize!(A, sizeA)
   
   # reshape the matrix 
@@ -212,7 +212,7 @@ end
 function lotka_volterra(du,u,p,t)
       
   evalExpressionForSolver(u,du,p)
-  @show dessd
+  # @show dessd
 
 end
 
@@ -235,9 +235,10 @@ Next we define a single layer neural network that uses the diffeq_rd (for ODE)
 or a diffeq_fd (for SDE) layer function that takes the parameters and 
 returns the solution of the x(t) variable
 """
-
+  
 function predict_fd_sde()
-  diffeq_fd(neuralParameter,sol->sol[1,:],51,prob,choosenSolver,saveat=t)
+
+  diffeq_fd(neuralParameter,sol->sol[1,:],size(t)[1],prob,choosenSolver,saveat=t)
 end
 
 # cost function 
@@ -249,11 +250,13 @@ data = Iterators.repeated((), nIteration)
 # optimize function : (optimiser) update the model parameters appropriately
 opt = ADAM(0.1)
 
-# callback function to observe training
+# callback function to observe training --> after the first simulation
 cb = function ()
-  @show loss_fd_sde()
 
+  @show solve(prob,p=Flux.data(neuralParameter),choosenSolver,saveat=t,maxiters = 1e5)
   odeData = solve(remake(prob,p=Flux.data(neuralParameter)),choosenSolver,saveat=t,maxiters = 1e5)
+
+  @show odeData
 
   # display only the first ODE in the same figure as the data
   scatter(t,testSol,color=[1],label = "first ODE data")
@@ -262,13 +265,7 @@ cb = function ()
 
 end
 
-"""train function
-
-3 Steps:
-1. how good is our model with 
-2. the given data
-3. and how could we improve it by changing the parameters
-"""
+@info "alles ok vorm Flux"
 
 Flux.train!(loss_fd_sde, [neuralParameter], data, opt, cb = cb)
 

@@ -27,7 +27,7 @@ testSol = hcat(solTest...)[1,:]
 choosenSolver = SOSRI()
 
 # run n iteration
-nIteration = 100
+nIteration = 5
 
 # get the parameter for the model
 myParameterList = ["σ=10.0", "ρ=28.0", "β=8/3"]
@@ -52,6 +52,12 @@ timeRange = (0.0,10.0)
 
 # start:step:stop
 t = timeRange[1]:0.2:timeRange[2]
+
+# impuls events
+tstop = [5.0;6.0]
+
+# apply a stimulus value
+stimulus = 5.5
 
 # # # # # # # # # # # #
 
@@ -147,8 +153,6 @@ end
 
 function evalExpressionForSolver(u,du,placeHolder)
 
-  # NOTE: momentan laeuft der NN Parameter Ansatz nicht!!!
-
   # evaluate the initial values 
   for i = 1:size(u)[1]
     strPosition = findlast("(", string(u[i]))
@@ -167,7 +171,6 @@ function evalExpressionForSolver(u,du,placeHolder)
   
   # copy is important to not change the original matrix
   A = copy(placeHolder)
-  # @show typeof(placeHolder)
 
   # how long the vector is
   sizeA = size(rawValuesForNN)[1]
@@ -201,8 +204,6 @@ function evalExpressionForSolver(u,du,placeHolder)
     iterNum +=1
   end
 
-  # NOTE: (typeof(du) == typeof(placeHolder)) = true
-
   return du
 end
 
@@ -211,12 +212,29 @@ end
 function lotka_volterra(du,u,p,t)
 
   evalExpressionForSolver(u,du,p)
-  # @show dessd
 
 end
 
 # define the noise
 noiseModelSystem(du,u,p,t) = @.(du = 0.01)
+
+# callbacks 
+function condition(u,t,integrator)
+    t in tstop
+end
+
+function affect!(integrator)
+    # add the term to the ode
+    integrator.u[1] += stimulus
+    
+end
+
+cb = DiscreteCallback(condition, affect!)
+# could be a set of callback
+cbs = CallbackSet(cb)
+
+# change the Gaussian white noise
+choosenNoise = WienerProcess(0.0,0.0,0.0)
 
 # define the Problem 
 prob = SDEProblem(lotka_volterra, noiseModelSystem, initialValues, timeRange, valuesForNN, seed=1234)#, noise=choosenNoise)
@@ -224,8 +242,6 @@ prob = SDEProblem(lotka_volterra, noiseModelSystem, initialValues, timeRange, va
 """Initial Parameter Vector
 which will be changed by the training algorithm.
 """
-
-
 
 neuralParameter = param(valuesForNN)
 
@@ -235,10 +251,10 @@ Next we define a single layer neural network that uses the diffeq_rd (for ODE)
 or a diffeq_fd (for SDE) layer function that takes the parameters and 
 returns the solution of the x(t) variable
 """
-  
-function predict_fd_sde()
 
-  diffeq_fd(neuralParameter,sol->sol[1,:],size(t)[1],prob,choosenSolver,saveat=t)
+function predict_fd_sde()
+  diffeq_fd(neuralParameter,sol->sol[1,:],size(t)[1] + size(tstop)[1],prob,choosenSolver,saveat=t,callback = cbs, tstops=tstop )
+  # diffeq_fd(neuralParameter,sol->sol[1,:],size(t)[1],prob,choosenSolver,saveat=t)
 end
 
 # cost function 
@@ -250,66 +266,22 @@ data = Iterators.repeated((), nIteration)
 # optimize function : (optimiser) update the model parameters appropriately
 opt = ADAM(0.1)
 
-# train! takes an additional argument, cb, that's used for callbacks so that you can observe the training process. 
-# cb = function ()
-#   @info "in the call-back function now"
-
-#   display(loss_fd_sde())
-
-#   """
-#   normal :
-#   u = ForwardDiff.Dual{ForwardDiff.Tag{getfield(DiffEqFlux, Symbol("##5#10")){SimType{Float64},Base.Iterators.Pairs{Symbol,StepRangeLen{Float64,Base.TwicePrecision{Float64},Base.TwicePrecision{Float64}},Tuple{Symbol},NamedTuple{(:saveat,),Tuple{StepRangeLen{Float64,Base.TwicePrecision{Float64},Base.TwicePrecision{Float64}}}}},getfield(Main, Symbol("##71#72")),SDEProblem{SimType{Float64},Tuple{Float64,Float64},true,Array{Float64,1},Nothing,SDEFunction{true,typeof(lotka_volterra),typeof(noiseModelSystem),LinearAlgebra.UniformScaling{Bool},Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing},typeof(noiseModelSystem),Nothing,Nothing},Tuple{SOSRI}},Float64},Float64,7}[Dual{ForwardDiff.Tag{getfield(DiffEqFlux, Symbol("##5#10")){SimType{Float64},Base.Iterators.Pairs{Symbol,StepRangeLen{Float64,Base.TwicePrecision{Float64},Base.TwicePrecision{Float64}},Tuple{Symbol},NamedTuple{(:saveat,),Tuple{StepRangeLen{Float64,Base.TwicePrecision{Float64},Base.TwicePrecision{Float64}}}}},getfield(Main, Symbol("##71#72")),SDEProblem{SimType{Float64},Tuple{Float64,Float64},true,Array{Float64,1},Nothing,SDEFunction{true,typeof(lotka_volterra),typeof(noiseModelSystem),LinearAlgebra.UniformScaling{Bool},Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing},typeof(noiseModelSystem),Nothing,Nothing},Tuple{SOSRI}},Float64}}(-4.63278,-742.021,0.0,0.0,736.434,0.0,0.0,0.0), Dual{ForwardDiff.Tag{getfield(DiffEqFlux, Symbol("##5#10")){SimType{Float64},Base.Iterators.Pairs{Symbol,StepRangeLen{Float64,Base.TwicePrecision{Float64},Base.TwicePrecision{Float64}},Tuple{Symbol},NamedTuple{(:saveat,),Tuple{StepRangeLen{Float64,Base.TwicePrecision{Float64},Base.TwicePrecision{Float64}}}}},getfield(Main, Symbol("##71#72")),SDEProblem{SimType{Float64},Tuple{Float64,Float64},true,Array{Float64,1},Nothing,SDEFunction{true,typeof(lotka_volterra),typeof(noiseModelSystem),LinearAlgebra.UniformScaling{Bool},Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing},typeof(noiseModelSystem),Nothing,Nothing},Tuple{SOSRI}},Float64}}(-4.08654,0.0,-2062.02,0.0,0.0,1982.75,0.0,74.2021), Dual{ForwardDiff.Tag{getfield(DiffEqFlux, Symbol("##5#10")){SimType{Float64},Base.Iterators.Pairs{Symbol,StepRangeLen{Float64,Base.TwicePrecision{Float64},Base.TwicePrecision{Float64}},Tuple{Symbol},NamedTuple{(:saveat,),Tuple{StepRangeLen{Float64,Base.TwicePrecision{Float64},Base.TwicePrecision{Float64}}}}},getfield(Main, Symbol("##71#72")),SDEProblem{SimType{Float64},Tuple{Float64,Float64},true,Array{Float64,1},Nothing,SDEFunction{true,typeof(lotka_volterra),typeof(noiseModelSystem),LinearAlgebra.UniformScaling{Bool},Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing},typeof(noiseModelSystem),Nothing,Nothing},Tuple{SOSRI}},Float64}}(23.4783,0.0,0.0,725.325,0.0,0.0,-702.84,0.0)]
-
-#   ┌ Info: SDEProblem with uType SimType{Float64} and tType Float64. In-place: true
-#   │ timespan: (0.0, 10.0)
-#   └ u0: [1.01, 1.0, 1.0]
-#   p = ForwardDiff.Dual(.......)
-#   du = ForwardDiff.Dual{ForwardDiff.Tag{getfield(DiffEqFlux, Symbol("##5#10")){SimType{Float64},Base.Iterators.Pairs{Symbol,StepRangeLen{Float64,Base.TwicePrecision{Float64},Base.TwicePrecision{Float64}},Tuple{Symbol},NamedTuple{(:saveat,),Tuple{StepRangeLen{Float64,Base.TwicePrecision{Float64},Base.TwicePrecision{Float64}}}}},getfield(Main, Symbol("##17#18")),SDEProblem{SimType{Float64},Tuple{Float64,Float64},true,Array{Float64,1},Nothing,SDEFunction{true,typeof(lotka_volterra),typeof(noiseModelSystem),LinearAlgebra.UniformScaling{Bool},Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing},typeof(noiseModelSystem),Nothing,Nothing},Tuple{SOSRI}},Float64},Float64,7}[Dual{ForwardDiff.Tag{getfield(DiffEqFlux, Symbol("##5#10")){SimType{Float64},Base.Iterators.Pairs{Symbol,StepRangeLen{Float64,Base.TwicePrecision{Float64},Base.TwicePrecision{Float64}},Tuple{Symbol},NamedTuple{(:saveat,),Tuple{StepRangeLen{Float64,Base.TwicePrecision{Float64},Base.TwicePrecision{Float64}}}}},getfield(Main, Symbol("##17#18")),SDEProblem{SimType{Float64},Tuple{Float64,Float64},true,Array{Float64,1},Nothing,SDEFunction{true,typeof(lotka_volterra),typeof(noiseModelSystem),LinearAlgebra.UniformScaling{Bool},Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing},typeof(noiseModelSystem),Nothing,Nothing},Tuple{SOSRI}},Float64}}(6.01445,-112.855,0.0,0.0,97.8038,0.0,0.0,0.0), Dual{ForwardDiff.Tag{getfield(DiffEqFlux, Symbol("##5#10")){SimType{Float64},Base.Iterators.Pairs{Symbol,StepRangeLen{Float64,Base.TwicePrecision{Float64},Base.TwicePrecision{Float64}},Tuple{Symbol},NamedTuple{(:saveat,),Tuple{StepRangeLen{Float64,Base.TwicePrecision{Float64},Base.TwicePrecision{Float64}}}}},getfield(Main, Symbol("##17#18")),SDEProblem{SimType{Float64},Tuple{Float64,Float64},true,Array{Float64,1},Nothing,SDEFunction{true,typeof(lotka_volterra),typeof(noiseModelSystem),LinearAlgebra.UniformScaling{Bool},Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing},typeof(noiseModelSystem),Nothing,Nothing},Tuple{SOSRI}},Float64}}(36.5543,0.0,-273.851,0.0,0.0,299.119,0.0,11.2855), Dual{ForwardDiff.Tag{getfield(DiffEqFlux, Symbol("##5#10")){SimType{Float64},Base.Iterators.Pairs{Symbol,StepRangeLen{Float64,Base.TwicePrecision{Float64},Base.TwicePrecision{Float64}},Tuple{Symbol},NamedTuple{(:saveat,),Tuple{StepRangeLen{Float64,Base.TwicePrecision{Float64},Base.TwicePrecision{Float64}}}}},getfield(Main, Symbol("##17#18")),SDEProblem{SimType{Float64},Tuple{Float64,Float64},true,Array{Float64,1},Nothing,SDEFunction{true,typeof(lotka_volterra),typeof(noiseModelSystem),LinearAlgebra.UniformScaling{Bool},Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing},typeof(noiseModelSystem),Nothing,Nothing},Tuple{SOSRI}},Float64}}(28.8204,0.0,0.0,110.377,0.0,0.0,-81.5563,0.0)]
-
-#   now : 
-#   ┌ Info: SDEProblem with uType SimType{Float64} and tType Float64. In-place: true
-#   │ timespan: (0.0, 10.0)
-#   └ u0: [1.01, 1.0, 1.0]
-#   p = [0.9, 1.0, 1.0, 1.1, 1.0, 1.0, 1.0]
-#   du = [0.0, 0.0, 0.0]
-
-
-#   Erkenntnis:
-#   er lässt jetzt irgendwie die ForwardDiff.Dual() Matrixschreibweise weg
-
-#   Wenn man nur 'sol = solve(prob,choosenSolver)' laufen lässt, bekommt man auch
-#   keine Matrixschreibweise raus! (in test.jl validiert)
-
-#   """
-
-#   @show predict_fd_sde()  
-
-
-
-#   # odeData = solve(remake(prob,p=Flux.data(neuralParameter)),choosenSolver,saveat=t,maxiters = 1e5)
-#   # odeData = solve(prob,p=Flux.data(neuralParameter),choosenSolver,saveat=t,maxiters = 1e5)
-#   # display only the first ODE in the same figure as the data
-#   scatter(t,testSol,color=[1],label = "first ODE data")
-
-#   display(plot!(t,odeData[1,:],ylim=(0,10),label="fit"))
-
-# end
-
-# cb = function()
-#   @info "loss function:" loss_fd_sde()
-# end 
-
-@info "alles ok vorm Flux"
-
-# NOTE: cb habe ich rausgenommen, da sich sonst die Simulationsanzahl verdoppelt
-
-Flux.train!(loss_fd_sde, [neuralParameter], data, opt)#, cb = cb)
+# train the model
+# Flux.train!(loss_fd_sde, [neuralParameter], data, opt)
 
 simulationData = predict_fd_sde()
+odeData = Tracker.data(simulationData)
+# sol = solve(prob,Tsit5(),callback = cbs, tstops=tstop)
 
-@info "loss function:" loss_fd_sde()
+
+
+# @info "loss function:" loss_fd_sde()
 @info "trained parameters:" neuralParameter
 
 # scatter(t,testSol,color=[1],label = "first ODE data")
 
-# display(plot!(t,Tracker.data(simulationData),ylim=(0,10),label="fit"))
+# display(plot!(t,odeData,ylim=(0,10),label="fit"))
+
+# # You may wish to save models so that they can be loaded and run in a later 
+# # session. The easiest way to do this is via BSON.jl.
+# @save "mymodel.bson" neuralParameter

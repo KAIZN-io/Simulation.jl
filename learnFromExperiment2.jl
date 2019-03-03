@@ -53,6 +53,9 @@ timeRange = (0.0,10.0)
 # start:step:stop
 t = timeRange[1]:0.2:timeRange[2]
 
+# time points array 
+timePoints = collect(t)
+
 # impuls events
 tstop = [5.0;6.0]
 
@@ -62,14 +65,14 @@ stimulus = 5.5
 # # # # # # # # # # # #
 
 # make the unmutable parameter global 
-for i = 1:size(myParameterList)[1]
+for i = 1:length(myParameterList)
   ex = Meta.parse(myParameterList[i])
   eval(ex)
 end
 
 # preparation --> assign the equations to a dict 
 equationDict = Dict()
-for i = 1:size(variableMatrix)[1]
+for i = 1:length(variableMatrix)
   equationDict[variableMatrix[i]] = inputTermArray[i]
 end
 
@@ -77,7 +80,7 @@ end
 function getMaxTermCount(arrayTerms)
   maxTermCount = 0
   for row in eachindex(arrayTerms)
-    arraySize = size(arrayTerms[row])[1]
+    arraySize = length(arrayTerms[row])
     if arraySize > maxTermCount
       maxTermCount = arraySize
     end
@@ -96,27 +99,27 @@ function fillTermMatrix(fillMatrix, arrayTerms)
 end
 
 # get the len of the array
-myArraySize = size(variableMatrix)[1]
+myArraySize = length(variableMatrix)
 
 # get the maximal term count
 maxTermCount = getMaxTermCount(inputTermArray)
 
 # create the generel term matrix
 emptyTermMatrix = fill("", myArraySize, maxTermCount)
-emptyOdeMatrix = fill("", size(odeNames)[1], maxTermCount)
+emptyOdeMatrix = fill("", length(odeNames), maxTermCount)
 
 # fill the term matrix with the terms
 termMatrix = fillTermMatrix(emptyTermMatrix,inputTermArray)
 realOdeMatrix = fillTermMatrix(emptyOdeMatrix,odeMatrix)
 
 # create the neuronal network matrix filled with ones
-neuronalNetworkMatrix = ones(size(odeNames)[1],maxTermCount)
+neuronalNetworkMatrix = ones(length(odeNames),maxTermCount)
 
 # create the parameters of the neural network --> copy the array dimensions
 neuronalNetworkMatrixVariable = similar(neuronalNetworkMatrix, String)
 
 # fill the neuronalNetworkMatrixVariable with the parameters
-for row in 1:size(odeNames)[1]
+for row in 1:length(odeNames)
   for column in 1:maxTermCount
     if realOdeMatrix[row,column] == ""
       neuronalNetworkMatrix[row,column] = 0
@@ -140,7 +143,7 @@ valuesForNN = zeros(0)
 variablesForNN = String[]
 
 # reduce the vectors for NN for value == 0 
-for i in 1:size(rawValuesForNN)[1]
+for i in 1:length(rawValuesForNN)
   if rawValuesForNN[i] == 1
     append!(valuesForNN,rawValuesForNN[i])
     push!(variablesForNN,rawVariablesForNN[i])
@@ -154,7 +157,7 @@ end
 function evalExpressionForSolver(u,du,placeHolder)
 
   # evaluate the initial values 
-  for i = 1:size(u)[1]
+  for i = 1:length(u)
     strPosition = findlast("(", string(u[i]))
     stringTuple = string(u[i])[strPosition[1]:end]
     
@@ -173,13 +176,13 @@ function evalExpressionForSolver(u,du,placeHolder)
   A = copy(placeHolder)
 
   # how long the vector is
-  sizeA = size(rawValuesForNN)[1]
-  
+  sizeA = length(rawValuesForNN)
+
   # how long the vector should be
   B = resize!(A, sizeA)
   
   # reshape the matrix 
-  NNMatrix = reshape(B, size(odeNames)[1], maxTermCount)
+  NNMatrix = reshape(B, length(odeNames), maxTermCount)
   
   # empty the matrix
   NNMatrix = fill!(NNMatrix, 0.0)
@@ -253,30 +256,58 @@ returns the solution of the x(t) variable
 """
 
 function predict_fd_sde()
-  diffeq_fd(neuralParameter,sol->sol[1,:],size(t)[1] + size(tstop)[1],prob,choosenSolver,saveat=t,callback = cbs, tstops=tstop )
+  
+  """  
+  f = sol -> sol[1:3,:]
+
+  function diffeq_fd(p,f,n,prob,args...;u0=prob.u0,kwargs...)
+
+    f(solve(_prob,args...;kwargs...))
+  end
+  """
+  
+  # NOTE: next code line works 
+  # diffeq_fd(neuralParameter,sol->sol[1,:],size(t)[1] + size(tstop)[1],prob,choosenSolver,saveat=t,callback = cbs, tstops=tstop )
+  diffeq_fd(neuralParameter,sol->sol[1:length(odeNames),:],length(t)*length(odeNames),prob,choosenSolver,saveat=t)
+
+  # ERROR: LoadError: DimensionMismatch("new dimensions (153, 7) must be consistent with array size 357")
+
+
   # diffeq_fd(neuralParameter,sol->sol[1,:],size(t)[1],prob,choosenSolver,saveat=t)
 end
+# NOTE: nehme die Werte der 1 bis x Reihe und davon alle Spalten
+# NOTE:  b = sol->sol[1:size(odeNames)[1],:]
+
 
 # cost function 
-loss_fd_sde() = sum(abs2,hcat((predict_fd_sde() - testSol)))
+# loss_fd_sde() = sum(abs2,hcat((predict_fd_sde() - testSol)))
 
 # number of repeated simulations
-data = Iterators.repeated((), nIteration)
+# data = Iterators.repeated((), nIteration)
 
 # optimize function : (optimiser) update the model parameters appropriately
-opt = ADAM(0.1)
+# opt = ADAM(0.1)
 
 # train the model
 # Flux.train!(loss_fd_sde, [neuralParameter], data, opt)
 
 simulationData = predict_fd_sde()
 odeData = Tracker.data(simulationData)
-# sol = solve(prob,Tsit5(),callback = cbs, tstops=tstop)
 
+# sort the time-series per substance in the following matrix
+simulationDataMatrix = zeros(length(t),length(odeNames))
 
+for j in 1:length(odeNames)
+  iterNum = 1 
+  for i in j:3:length(odeData)
 
-# @info "loss function:" loss_fd_sde()
-@info "trained parameters:" neuralParameter
+    simulationDataMatrix[iterNum,j] = odeData[i]
+    iterNum +=1
+
+  end 
+end     
+
+plot(simulationDataMatrix)
 
 # scatter(t,testSol,color=[1],label = "first ODE data")
 

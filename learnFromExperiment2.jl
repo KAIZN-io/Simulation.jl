@@ -27,7 +27,7 @@ testSol = hcat(solTest...)[1,:]
 choosenSolver = SOSRI()
 
 # run n iteration
-nIteration = 5
+nIteration = 3
 
 # get the parameter for the model
 myParameterList = ["σ=10.0", "ρ=28.0", "β=8/3"]
@@ -53,11 +53,16 @@ timeRange = (0.0,10.0)
 # start:step:stop
 t = timeRange[1]:0.2:timeRange[2]
 
-# time points array 
-timePoints = collect(t)
-
 # impuls events
-tstop = [5.0;6.0]
+tstop = [5.0; 6.0]
+
+# time points array 
+# timePoints = collect(copy(t))
+# for i in tstop
+#   filter!(x->x≠i,timePoints)
+# end
+
+timePoints = sort(append!(collect(t),tstop)) 
 
 # apply a stimulus value
 stimulus = 5.5
@@ -233,6 +238,7 @@ function affect!(integrator)
 end
 
 cb = DiscreteCallback(condition, affect!)
+
 # could be a set of callback
 cbs = CallbackSet(cb)
 
@@ -255,59 +261,96 @@ or a diffeq_fd (for SDE) layer function that takes the parameters and
 returns the solution of the x(t) variable
 """
 
+""" Infos about the solver
+
+returns = n-element Array{Array{Float64,1},1}
+saveat: Denotes specific times to save the solution at
+maxiters: Maximum number of iterations before stopping. Defaults to 1e5.
+"""
+
 function predict_fd_sde()
-  
-  """  
-  f = sol -> sol[1:3,:]
+  #  ERROR: LoadError: DimensionMismatch("new dimensions (165, 7) must be consistent with array size 1071") 
+  # 165 * 7 = 1155
+  # 1155 - 1071 = 84
 
-  function diffeq_fd(p,f,n,prob,args...;u0=prob.u0,kwargs...)
-
-    f(solve(_prob,args...;kwargs...))
-  end
-  """
-  
-  # NOTE: next code line works 
   # diffeq_fd(neuralParameter,sol->sol[1,:],size(t)[1] + size(tstop)[1],prob,choosenSolver,saveat=t,callback = cbs, tstops=tstop )
-  diffeq_fd(neuralParameter,sol->sol[1:length(odeNames),:],length(t)*length(odeNames),prob,choosenSolver,saveat=t)
+  # diffeq_fd(neuralParameter,sol->sol[1:length(odeNames),:],length(timePoints)*length(odeNames),prob,choosenSolver,saveat=timePoints,callback = cbs, tstops=tstop)
+  diffeq_fd(neuralParameter,sol->sol[1:length(odeNames),:],(length(t)+length(tstop))*length(odeNames),prob,choosenSolver,saveat=t,callback = cbs, tstops=tstop)
 
-  # ERROR: LoadError: DimensionMismatch("new dimensions (153, 7) must be consistent with array size 357")
-
-
-  # diffeq_fd(neuralParameter,sol->sol[1,:],size(t)[1],prob,choosenSolver,saveat=t)
 end
-# NOTE: nehme die Werte der 1 bis x Reihe und davon alle Spalten
-# NOTE:  b = sol->sol[1:size(odeNames)[1],:]
-
 
 # cost function 
 # loss_fd_sde() = sum(abs2,hcat((predict_fd_sde() - testSol)))
-
-# number of repeated simulations
-# data = Iterators.repeated((), nIteration)
-
-# optimize function : (optimiser) update the model parameters appropriately
-# opt = ADAM(0.1)
-
-# train the model
-# Flux.train!(loss_fd_sde, [neuralParameter], data, opt)
+ 
 
 simulationData = predict_fd_sde()
 odeData = Tracker.data(simulationData)
 
 # sort the time-series per substance in the following matrix
-simulationDataMatrix = zeros(length(t),length(odeNames))
+simulationDataMatrix = zeros(length(timePoints),length(odeNames)+1)
+
+# append time points to matrix
+simulationDataMatrix[:,1] += timePoints 
 
 for j in 1:length(odeNames)
   iterNum = 1 
   for i in j:3:length(odeData)
 
-    simulationDataMatrix[iterNum,j] = odeData[i]
+    simulationDataMatrix[iterNum,j+1] = odeData[i]
     iterNum +=1
 
   end 
-end     
+end   
 
-plot(simulationDataMatrix)
+# # improved cost function
+
+# function loss_fd_sde()
+
+#   lossFunction = 0
+#   simulationData = predict_fd_sde()
+#   odeData = Tracker.data(simulationData)
+
+#   # sort the time-series per substance in the following matrix
+#   simulationDataMatrix = zeros(length(t),length(odeNames))
+
+#   for j in 1:length(odeNames)
+#     iterNum = 1 
+#     for i in j:3:length(odeData)
+
+#       simulationDataMatrix[iterNum,j] = odeData[i]
+#       iterNum +=1
+
+#     end 
+#   end   
+ 
+
+#   for i in 1:length(odeNames)
+#     lossFunction += sum(abs2,hcat((simulationDataMatrix[:,i]  - testSol)))
+#   end
+
+#   # devide through the number of substances 
+#   lossFunction /= length(odeNames)
+
+#   return lossFunction
+
+# end 
+
+
+# # number of repeated simulations
+# data = Iterators.repeated((), nIteration)
+
+# # optimize function : (optimiser) update the model parameters appropriately
+# opt = ADAM(0.1)
+
+# # train the model
+# Flux.train!(loss_fd_sde, [neuralParameter], data, opt)
+
+
+
+# @show "NN parameter:", neuralParameter
+
+
+# plot(simulationDataMatrix)
 
 # scatter(t,testSol,color=[1],label = "first ODE data")
 

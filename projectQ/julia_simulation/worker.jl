@@ -2,26 +2,18 @@ using Pkg
 Pkg.add("AMQPClient")
 
 using AMQPClient: Message, MessageChannel
-using Dates
 
 include("on.jl")
 include("emit.jl")
 include("simulate.jl")
+include("event_creators.jl")
 
 
 SERVICE_SIMULATION_WORKER = ENV["SERVICE_SIMULATION_WORKER"]
 
 function onSimulationScheduled(ch::MessageChannel, msg::Message, event::Dict, payload::Dict)
     @info string(payload["id"], " - Starting simulation, type: ", payload["type"])
-    emit(
-         Dict(
-              "routing_key" => "simulation.started",
-              "emitted_at" => Dates.now(),
-              "payload" => Dict(
-                                "id" => payload["id"]
-                               )
-             )
-        )
+    emit(simulationStarted(payload["id"]))
 
     results = Dict()
     try
@@ -30,18 +22,7 @@ function onSimulationScheduled(ch::MessageChannel, msg::Message, event::Dict, pa
     catch err
         @error string(payload["id"], " - Simulation failed. Error: ", err)
 
-        emit(
-             Dict(
-                  "routing_key" => "simulation.failed",
-                  "emitted_at" => Dates.now(),
-                  "payload" => Dict(
-                                    "id" => payload["id"],
-                                    "error" => Dict(
-                                                    "message" => err
-                                                   )
-                                   )
-                 )
-            )
+        emit(simulationFailed(payload["id"], string(err)))
 
         # discard the message form the queue
         basic_reject(ch, msg.delivery_tag)
@@ -49,20 +30,7 @@ function onSimulationScheduled(ch::MessageChannel, msg::Message, event::Dict, pa
     end
 
     @info string(payload["id"], " - Simulation finished.")
-    emit(
-         Dict(
-              "routing_key" => "simulation.finished",
-              "emitted_at" => Dates.now(),
-              "payload" => Dict(
-                                "id" => payload["id"],
-                                "extrt" => results["extrt"],
-                                "exdose" => results["exdose"],
-                                "exstdtc_array" => results["exstdtc_array"],
-                                "image_path" => results["image_path"],
-                                "pds" => results["pds"]
-                               )
-             )
-        )
+    emit(simulationFinished(payload["id"], results))
 
     # confirm that the message was received and processed
     basic_ack(ch, msg.delivery_tag)

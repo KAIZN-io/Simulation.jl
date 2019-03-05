@@ -1,295 +1,235 @@
 using Pkg
-
-Pkg.add("Flux")
 Pkg.add("DiffEqFlux")
 Pkg.add("DifferentialEquations")
-Pkg.add("Plots")
-Pkg.add("Logging")
-Pkg.add("Documenter")
 
-using Flux, DiffEqFlux, DifferentialEquations, Plots, Logging
-using Flux.Tracker
+using DiffEqFlux, DifferentialEquations
 
 
-mutable struct SimType{T} <: DEDataVector{T}
-    x::Array{T,1}
-    f1::T
+function generateNoiseFunction(noise=0.01)
+    return noiseFunction(du,u,p,t) = @.(du = noise)
 end
 
+"""
+Generates a dynamic derive function for an SDE problem
 
-function getMaxTermCount(arrayTerms)
-    maxTermCount = 0
-    for row in eachindex(arrayTerms)
-        arraySize = length(arrayTerms[row])
-        if arraySize > maxTermCount
-            maxTermCount = arraySize
+This function will use its arguments to create a dynamic derive function that
+can be used in a SDE problem.
+
+Dynamic meaning it can work with any number of differential equations. It does
+so by not having any hard coded deriviatives, but works on the given `model`,
+`initialValues` and `parameters` using eval.
+
+It expets to find the differential equations inside the `model` dict. It will
+evaluate all the given parameters in the beginning. This way these never
+changing parameters can be accessed in the inner `derive` function - even when
+the returned `derive` function is called inside a SDE solver.
+
+The arguments need to have the shape as dclared for the `simulate` function.
+"""
+function generateDeriveFunction(model::Dict, initialValues::Dict, parameters::Dict)
+    # List of initial value and parameter variables. The keys of the dicts are
+    # variable names. We declare them here, so they can be used in the `derive`
+    # function below.
+    initialValueKeys = collect(keys(initialValues))
+    parameterKeys = collect(keys(parameters))
+
+    # Evaluate all parameters so we can work with them later in the `derive`
+    # function.
+    for (parameter, value) in parameters
+        eval(Meta.parse(string(parameter, "=", value)))
+    end
+
+    """
+    The dynamic derive function
+
+    This derive function can work with a variable amount of differential
+    equations.
+    """
+    function derive(du, valueList, parameterList, t)
+        # Evaluate the current values (u) to be used in declaring the
+        # derivatives. We enumerate the values, so that we have an numeric
+        # index for each value. With this index, we can retrieve the variable
+        # name from the initial values (using the `initialValueKeys` list).
+        for (index, value) in enumerate(valueList)
+            eval(Meta.parse(string(initialValueKeys[index], "=", value)))
+        end
+
+        # With the current values (u) evaluated, we can evaluate the algebraic
+        # equations from the `model`. We need to do this tep here, as the
+        # algebraic equations can be dependent on the (initial) values (u).
+        for (var, terms) in model["algebraic"]
+            eval(Meta.parse(string(var, "=", join(terms))))
+        end
+
+        # Calculate derivatives
+        # Here we enumerate the `valueList` again to have a numeric index. This
+        # index is used to retrieve the name of the variable from the
+        # (initial) values (using the `initialValueKeys` list). With the name
+        # of that variable, we can look up the corresponding differential
+        # equation from the `model` by prepending a 'd' to the variable name.
+        for (index, value) in enumerate(valueList)
+            # Get the name of the variable
+            var = initialValueKeys[index]
+            # look up its corresponding differential equation
+            diffeq = model["differential"][string("d", var)]
+            # evaluate the differential equation
+            du[index] = eval(Meta.parse(join(diffeq)))
         end
     end
-    return maxTermCount
+
+    return derive
 end
 
-function fillTermMatrix(fillMatrix, arrayTerms)
-    for row in eachindex(arrayTerms)
-        y = arrayTerms[row]
-        for column in eachindex(y)
-            fillMatrix[row,column] = y[column]
-        end
-    end
-    return fillMatrix
+"""
+Generate a SDE problem dynamic in the amount of differential equations
+
+This function generates a SDE problem where the amount of differential
+equations can be dynamic. This amount is defined by the differential equations
+found in the `model` parameter.
+It does that by using a special derive function that has no static code but
+uses eval on the given `model`, `initialValues` and `parameters`.
+
+The arguments need to be in the same shape as defined for the `simulate`
+function.
+"""
+function generateSdeProblem(model::Dict, initialValues::Dict, parameters::Dict, start::Float64, stop::Float64, seed = 1234)
+    # Get the derive function
+    derive = generateDeriveFunction(model, initialValues, parameters)
+
+    # Get the noise function
+    noise = generateNoiseFunction()
+
+    # Set the time span
+    timeSpan = (start, stop)
+
+    # declare the SDE problem
+    return SDEProblem(derive, noise, values(initialValues), timeSpan, values(parameters), seed = seed)
 end
 
-function evalExpressionForSolver(odeNames,odeVariable,maxTermCount,equationDict,rawValuesForNN,realOdeMatrix,u,du,placeHolder)
+"""
+Generate a solving function for a given SDE problem
 
-    # evaluate the initial values
-    for i = 1:length(u)
-        strPosition = findlast("(", string(u[i]))
-        stringTuple = string(u[i])[strPosition[1]:end]
+Given an SDE problem, the desired step size and a list of stimuli, this
+function sets some values, creates and finally returns a function that can be
+used to solve the given SDE problem.
 
-        initPlaceHolder = eval(Meta.parse(stringTuple))
+The values are set inside this function, so that the inner `solve` function can
+access and work with these values.
 
-        eval(Meta.parse(string(odeVariable[i],"=",initPlaceHolder[1])))
+The stimuli array and the initial values need to be in the same shape as for
+the `simulate` function.
+"""
+function generateSolveFunction(sdeProblem, initialValues::Dict, stimuli::Array, stepSize::Float64, solver=SOSRI())
+    # Retrieve time values from the given SDE problem
+    start = sdeProblem.tspan[1]
+    stop = sdeProblem.tspan[2]
+
+    # Retrieve the parameters from the SDE problem
+    parameters = sdeProblem.p
+
+    # Create a list with all stimuli time points at which we want to interrupt
+    # the solving to let our stimuli take effect.
+    stimuliTimePoints = map((stimulus)->stimulus["time"],stimuli)
+
+    # Create a list of time points that we want to retrieve results for. This
+    # list will include time points as floating point numbers. From `start` to
+    # `stop` we will have an entry every `stepSize`. Additionally, we add the
+    # points, where stimuli need to be actiavted.
+    frames = sort(unique(append!(collect(start:stepSize:stop), stimuliTimePoints)))
+
+    ### Define callbacks for setting stimuli###
+
+    # Callback to check whether a stimuli needs to be triggered
+    function isStimulusActive(u,t,integrator)
+        return t in stimuliTimePoints
     end
 
-    # eval the algebraic equations and sde
-    for (key,value) in equationDict
-        ex = Meta.parse(string(key, "=",sum([eval(Meta.parse(iterator)) for iterator in value])))
-        eval(ex)
-    end
-
-    # copy is important to not change the original matrix
-    A = copy(placeHolder)
-
-    # how long the vector is
-    sizeA = length(rawValuesForNN)
-
-    # how long the vector should be
-    B = resize!(A, sizeA)
-
-    # reshape the matrix
-    NNMatrix = reshape(B, length(odeNames), maxTermCount)
-
-    # empty the matrix
-    NNMatrix = fill!(NNMatrix, 0.0)
-
-    # iteration number for parameter Placeholder vector
-    iterNum = 1
-    for j = 1:size(realOdeMatrix,2)
-        for i = 1:size(realOdeMatrix,1)
-            if realOdeMatrix[i,j] != ""
-            ex =  Meta.parse(realOdeMatrix[i,j])
-
-            # calculate the solution of the NN affected Matrix
-            NNMatrix[i,j] = placeHolder[iterNum] * eval(ex)
-            iterNum += 1
+    # Callback to activate a stimuli, adding its value to a value in the SDE
+    # problem.
+    initialValueKeys = collect(keys(initialValues))
+    function activateStimulus!(integrator)
+        # Iterate over all stimuli to find active ones
+        for stimulus in stimuli
+            # If the time for the stimulus to be active has come
+            if stimulus["time"] == integrator.t
+                # Find the index of the stimulus substance in the (initial) values
+                index = findfirst(val -> val == stimulus["substance"], initialValueKeys)
+                # Add the stimulus amount to its corresponding value
+                integrator.u[index] += stimulus["amount"]
             end
         end
     end
 
-    iterNum = 1
-    for i in odeNames
-        du[iterNum] = sum(NNMatrix[iterNum,:])
-        iterNum +=1
-    end
+    # This discrete callback will use the `isStimuliActive` function to check and
+    # calls the `activateStimulus!` function when `isStimuliActive` returns
+    # true, meaning when a stimulus needs to take effect.
+    stimuliCallback = DiscreteCallback(isStimulusActive, activateStimulus!)
 
-    return du
-end
-
-# define the noise
-noiseModelSystem(du,u,p,t) = @.(du = 0.01)
-
-
-function simulate(model, parameter, initialValues, stimuli, start, stop, stepSize)
-
-    # get the parameter for the model
-    myParameterList = map((key)->string(key,"=",parameter[key]),collect(keys(parameter)))
-
-    # array with the algebraic keys
-    keysAlgebraic = collect(keys(model["algebraic"]))
-
-    # array with the ODEs
-    odeNames = collect(keys(model["differential"]))
-
-    variableMatrix = [keysAlgebraic; odeNames]
-
-    # array of arrays
-    odeMatrix = map((var)->model["differential"][var],odeNames)
-    algebraicMatrix = map((var)->model["algebraic"][var],keysAlgebraic)
-
-    inputTermArray = [algebraicMatrix; odeMatrix]
-
-    odeVariable = collect(keys(initialValues))
-
-    # define the initial Values --> [n*1] vector
-    initialValuesList = map((var)->initialValues[var],odeVariable)
-
-    initialValues = SimType(initialValuesList, 0.0)
-
-    # time array (must be a tuple)
-    timeRange = (start, stop)
-
-    # start:step:stop
-    t = timeRange[1]:stepSize:timeRange[2]
-
-    # impuls events
-    tstop = map((stimulus)->stimulus["time"],stimuli)
-
-    # apply a stimulus value
-    stimulus = 5.5
-
-
-    # choose a solver: SOSRI(), Tsit5()
-    choosenSolver = SOSRI()
-
-    # run n iteration
-    nIteration = 3
-
-    timePoints = sort(append!(collect(t),tstop))
-
-    # make the unmutable parameter global
-    for i = 1:length(myParameterList)
-        ex = Meta.parse(myParameterList[i])
-        eval(ex)
-    end
-
-    # preparation --> assign the equations to a dict
-    equationDict = Dict()
-    for i = 1:length(variableMatrix)
-        equationDict[variableMatrix[i]] = inputTermArray[i]
-    end
-
-    # get the len of the array
-    myArraySize = length(variableMatrix)
-
-    # get the maximal term count
-    maxTermCount = getMaxTermCount(inputTermArray)
-
-    # create the generel term matrix
-    emptyTermMatrix = fill("", myArraySize, maxTermCount)
-    emptyOdeMatrix = fill("", length(odeNames), maxTermCount)
-
-    # fill the term matrix with the terms
-    termMatrix = fillTermMatrix(emptyTermMatrix,inputTermArray)
-    realOdeMatrix = fillTermMatrix(emptyOdeMatrix,odeMatrix)
-
-    # create the neuronal network matrix filled with ones
-    neuronalNetworkMatrix = ones(length(odeNames),maxTermCount)
-
-    # create the parameters of the neural network --> copy the array dimensions
-    neuronalNetworkMatrixVariable = similar(neuronalNetworkMatrix, String)
-
-    # fill the neuronalNetworkMatrixVariable with the parameters
-    for row in 1:length(odeNames)
-        for column in 1:maxTermCount
-            if realOdeMatrix[row,column] == ""
-                neuronalNetworkMatrix[row,column] = 0
-            end
-            if neuronalNetworkMatrix[row,column] == 1
-            # add strings with '*' together
-                neuronalNetworkMatrixVariable[row,column] = "m"*string(row)*string(column)
-
-            else
-                neuronalNetworkMatrixVariable[row,column] = ""
-            end
-        end
-    end
-
-    # create the raw vectors for the NN matrix as the NN layer
-    rawValuesForNN = vcat(neuronalNetworkMatrix...)
-    rawVariablesForNN = vcat(neuronalNetworkMatrixVariable...)
-
-    # initialize the vectors for NN for value == 0
-    valuesForNN = zeros(0)
-    variablesForNN = String[]
-
-    # reduce the vectors for NN for value == 0
-    for i in 1:length(rawValuesForNN)
-        if rawValuesForNN[i] == 1
-            append!(valuesForNN,rawValuesForNN[i])
-            push!(variablesForNN,rawVariablesForNN[i])
-        end
-    end
-
-    function condition(u,t,integrator)
-        t in tstop
-    end
-
-    function affect!(integrator)
-        # add the term to the ode
-        integrator.u[1] += stimulus
-    end
-
-    cb = DiscreteCallback(condition, affect!)
-
-    # could be a set of callback
-    cbs = CallbackSet(cb)
-
-    # change the Gaussian white noise
-    choosenNoise = WienerProcess(0.0,0.0,0.0)
-
-    # define the Problem
-    prob = SDEProblem(
-        (du,u,p,t)->evalExpressionForSolver(odeNames,odeVariable,maxTermCount,equationDict,rawValuesForNN,realOdeMatrix,u,du,p),
-        noiseModelSystem,
-        initialValues,
-        timeRange,
-        valuesForNN,
-        seed=1234
-    )#, noise=choosenNoise)
-
-    """Initial Parameter Vector
-    which will be changed by the training algorithm.
-    """
-
-    neuralParameter = param(valuesForNN)
-
-
-    """
-    Next we define a single layer neural network that uses the diffeq_rd (for ODE)
-    or a diffeq_fd (for SDE) layer function that takes the parameters and
-    returns the solution of the x(t) variable
-    """
-
-    """ Infos about the solver
-
-    returns = n-element Array{Array{Float64,1},1}
-    saveat: Denotes specific times to save the solution at
-    maxiters: Maximum number of iterations before stopping. Defaults to 1e5.
-    """
-
-    function predict_fd_sde()
-
+    function solve()
         diffeq_fd(
-            neuralParameter,
-            sol->sol[1:length(odeNames),:],
-            (length(t)+length(tstop))*length(odeNames),
-            prob,
-            choosenSolver,
-            saveat=t,
-            callback = cbs,
-            tstops=tstop
+            parameters,
+            sol->sol[1,:],
+            101,
+            sdeProblem,
+            solver,
+            saveat = frames,
+            callback = stimuliCallback,
+            tstops = stimuliTimePoints
         )
-
     end
 
-
-    simulationData = predict_fd_sde()
-    odeData = Tracker.data(simulationData)
-
-    # sort the time-series per substance in the following matrix
-    simulationDataMatrix = zeros(length(timePoints),length(odeNames)+1)
-
-    # append time points to matrix
-    simulationDataMatrix[:,1] += timePoints
-
-    for j in 1:length(odeNames)
-        iterNum = 1
-        for i in j:3:length(odeData)
-
-            simulationDataMatrix[iterNum,j+1] = odeData[i]
-            iterNum +=1
-
-        end
-    end
+    return solve
 end
 
+"""
+Run a simulation with a dynamic amount of differential equations
+
+This function solves a SDE problem given a dynamic set of differential
+equations, initial values and parameters.
+
+The arguments are expected to look like this:
+
+```
+model = Dict(
+    "algebraic" => Dict(
+        "e" => ["+3*x", "-2*x"],
+        ...
+    ),
+    "differential" => Dict(
+        "dx" => ["+σ*x", "-σ*x"],
+        ...
+    )
+)
+
+initialValues = Dict(
+    "x" => 1.01,
+    ...
+)
+
+parameters = Dict(
+    "σ" => 10.0,
+    ...
+)
+
+stimuli = [
+    Dict(
+        "time" => 5.0,
+        "amount" => 5.5,
+        "substance" => "x"
+    ),
+    ...
+]
+```
+"""
+function simulate(model::Dict, initialValues::Dict, parameters::Dict, stimuli::Array, start::Float64, stop::Float64, stepSize::Float64)
+    # generate the SDE problem from the given arguments
+    sdeProblem = generateSdeProblem(model, initialValues, parameters, start, stop)
+
+    # generate the solving function for the SDE problem
+    solve = generateSolveFunction(sdeProblem, initialValues, stimuli, stepSize)
+
+    # solve the sde problem
+    res = solve()
+    @show res
+end
 

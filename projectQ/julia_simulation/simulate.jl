@@ -38,7 +38,7 @@ function fillTermMatrix(fillMatrix, arrayTerms)
     return fillMatrix
 end
 
-function evalExpressionForSolver(u,du,placeHolder)
+function evalExpressionForSolver(odeNames,odeVariable,maxTermCount,equationDict,rawValuesForNN,realOdeMatrix,u,du,placeHolder)
 
     # evaluate the initial values
     for i = 1:length(u)
@@ -97,18 +97,6 @@ end
 # define the noise
 noiseModelSystem(du,u,p,t) = @.(du = 0.01)
 
-
-
-# callbacks
-function condition(u,t,integrator)
-    t in tstop
-end
-
-function affect!(integrator)
-    # add the term to the ode
-    integrator.u[1] += stimulus
-
-end
 
 function simulate(model, parameter, initialValues, stimuli, start, stop, stepSize)
 
@@ -169,9 +157,6 @@ function simulate(model, parameter, initialValues, stimuli, start, stop, stepSiz
         equationDict[variableMatrix[i]] = inputTermArray[i]
     end
 
-
-
-
     # get the len of the array
     myArraySize = length(variableMatrix)
 
@@ -224,7 +209,14 @@ function simulate(model, parameter, initialValues, stimuli, start, stop, stepSiz
         end
     end
 
+    function condition(u,t,integrator)
+        t in tstop
+    end
 
+    function affect!(integrator)
+        # add the term to the ode
+        integrator.u[1] += stimulus
+    end
 
     cb = DiscreteCallback(condition, affect!)
 
@@ -235,7 +227,14 @@ function simulate(model, parameter, initialValues, stimuli, start, stop, stepSiz
     choosenNoise = WienerProcess(0.0,0.0,0.0)
 
     # define the Problem
-    prob = SDEProblem((du,u,p,t)->evalExpressionForSolver(u,du,p), noiseModelSystem, initialValues, timeRange, valuesForNN, seed=1234)#, noise=choosenNoise)
+    prob = SDEProblem(
+        (du,u,p,t)->evalExpressionForSolver(odeNames,odeVariable,maxTermCount,equationDict,rawValuesForNN,realOdeMatrix,u,du,p),
+        noiseModelSystem,
+        initialValues,
+        timeRange,
+        valuesForNN,
+        seed=1234
+    )#, noise=choosenNoise)
 
     """Initial Parameter Vector
     which will be changed by the training algorithm.
@@ -259,7 +258,16 @@ function simulate(model, parameter, initialValues, stimuli, start, stop, stepSiz
 
     function predict_fd_sde()
 
-        diffeq_fd(neuralParameter,sol->sol[1:length(odeNames),:],(length(t)+length(tstop))*length(odeNames),prob,choosenSolver,saveat=t,callback = cbs, tstops=tstop)
+        diffeq_fd(
+            neuralParameter,
+            sol->sol[1:length(odeNames),:],
+            (length(t)+length(tstop))*length(odeNames),
+            prob,
+            choosenSolver,
+            saveat=t,
+            callback = cbs,
+            tstops=tstop
+        )
 
     end
 

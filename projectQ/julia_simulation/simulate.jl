@@ -1,4 +1,15 @@
-# dummy implementation of the simulation function
+using Pkg
+
+Pkg.add("Flux")
+Pkg.add("DiffEqFlux")
+Pkg.add("DifferentialEquations")
+Pkg.add("Plots")
+Pkg.add("Logging")
+Pkg.add("Documenter")
+
+using Flux, DiffEqFlux, DifferentialEquations, Plots, Logging
+using Flux.Tracker
+
 
 mutable struct SimType{T} <: DEDataVector{T}
     x::Array{T,1}
@@ -23,17 +34,17 @@ function fillTermMatrix(fillMatrix, arrayTerms)
         for column in eachindex(y)
             fillMatrix[row,column] = y[column]
         end
-    end  
-    return fillMatrix 
+    end
+    return fillMatrix
 end
 
 function evalExpressionForSolver(u,du,placeHolder)
 
-    # evaluate the initial values 
+    # evaluate the initial values
     for i = 1:length(u)
         strPosition = findlast("(", string(u[i]))
         stringTuple = string(u[i])[strPosition[1]:end]
-        
+
         initPlaceHolder = eval(Meta.parse(stringTuple))
 
         eval(Meta.parse(string(odeVariable[i],"=",initPlaceHolder[1])))
@@ -54,20 +65,20 @@ function evalExpressionForSolver(u,du,placeHolder)
     # how long the vector should be
     B = resize!(A, sizeA)
 
-    # reshape the matrix 
+    # reshape the matrix
     NNMatrix = reshape(B, length(odeNames), maxTermCount)
 
     # empty the matrix
     NNMatrix = fill!(NNMatrix, 0.0)
 
-    # iteration number for parameter Placeholder vector 
+    # iteration number for parameter Placeholder vector
     iterNum = 1
     for j = 1:size(realOdeMatrix,2)
         for i = 1:size(realOdeMatrix,1)
             if realOdeMatrix[i,j] != ""
             ex =  Meta.parse(realOdeMatrix[i,j])
 
-            # calculate the solution of the NN affected Matrix 
+            # calculate the solution of the NN affected Matrix
             NNMatrix[i,j] = placeHolder[iterNum] * eval(ex)
             iterNum += 1
             end
@@ -88,7 +99,7 @@ noiseModelSystem(du,u,p,t) = @.(du = 0.01)
 
 
 
-# callbacks 
+# callbacks
 function condition(u,t,integrator)
     t in tstop
 end
@@ -96,7 +107,7 @@ end
 function affect!(integrator)
     # add the term to the ode
     integrator.u[1] += stimulus
-    
+
 end
 
 function simulate(model, parameter, initialValues, stimuli, start, stop, stepSize)
@@ -112,17 +123,17 @@ function simulate(model, parameter, initialValues, stimuli, start, stop, stepSiz
 
     variableMatrix = [keysAlgebraic; odeNames]
 
-    # array of arrays 
+    # array of arrays
     odeMatrix = map((var)->model["differential"][var],odeNames)
     algebraicMatrix = map((var)->model["algebraic"][var],keysAlgebraic)
 
     inputTermArray = [algebraicMatrix; odeMatrix]
-    
+
     odeVariable = collect(keys(initialValues))
-    
-    # define the initial Values --> [n*1] vector 
+
+    # define the initial Values --> [n*1] vector
     initialValuesList = map((var)->initialValues[var],odeVariable)
-    
+
     initialValues = SimType(initialValuesList, 0.0)
 
     # time array (must be a tuple)
@@ -144,15 +155,15 @@ function simulate(model, parameter, initialValues, stimuli, start, stop, stepSiz
     # run n iteration
     nIteration = 3
 
-    timePoints = sort(append!(collect(t),tstop)) 
+    timePoints = sort(append!(collect(t),tstop))
 
-    # make the unmutable parameter global 
+    # make the unmutable parameter global
     for i = 1:length(myParameterList)
         ex = Meta.parse(myParameterList[i])
         eval(ex)
     end
 
-    # preparation --> assign the equations to a dict 
+    # preparation --> assign the equations to a dict
     equationDict = Dict()
     for i = 1:length(variableMatrix)
         equationDict[variableMatrix[i]] = inputTermArray[i]
@@ -190,22 +201,22 @@ function simulate(model, parameter, initialValues, stimuli, start, stop, stepSiz
             if neuronalNetworkMatrix[row,column] == 1
             # add strings with '*' together
                 neuronalNetworkMatrixVariable[row,column] = "m"*string(row)*string(column)
-            
+
             else
                 neuronalNetworkMatrixVariable[row,column] = ""
             end
         end
-    end  
+    end
 
-    # create the raw vectors for the NN matrix as the NN layer 
+    # create the raw vectors for the NN matrix as the NN layer
     rawValuesForNN = vcat(neuronalNetworkMatrix...)
     rawVariablesForNN = vcat(neuronalNetworkMatrixVariable...)
 
-    # initialize the vectors for NN for value == 0 
+    # initialize the vectors for NN for value == 0
     valuesForNN = zeros(0)
     variablesForNN = String[]
 
-    # reduce the vectors for NN for value == 0 
+    # reduce the vectors for NN for value == 0
     for i in 1:length(rawValuesForNN)
         if rawValuesForNN[i] == 1
             append!(valuesForNN,rawValuesForNN[i])
@@ -223,7 +234,7 @@ function simulate(model, parameter, initialValues, stimuli, start, stop, stepSiz
     # change the Gaussian white noise
     choosenNoise = WienerProcess(0.0,0.0,0.0)
 
-    # define the Problem 
+    # define the Problem
     prob = SDEProblem((du,u,p,t)->evalExpressionForSolver(u,du,p), noiseModelSystem, initialValues, timeRange, valuesForNN, seed=1234)#, noise=choosenNoise)
 
     """Initial Parameter Vector
@@ -235,7 +246,7 @@ function simulate(model, parameter, initialValues, stimuli, start, stop, stepSiz
 
     """
     Next we define a single layer neural network that uses the diffeq_rd (for ODE)
-    or a diffeq_fd (for SDE) layer function that takes the parameters and 
+    or a diffeq_fd (for SDE) layer function that takes the parameters and
     returns the solution of the x(t) variable
     """
 
@@ -260,17 +271,17 @@ function simulate(model, parameter, initialValues, stimuli, start, stop, stepSiz
     simulationDataMatrix = zeros(length(timePoints),length(odeNames)+1)
 
     # append time points to matrix
-    simulationDataMatrix[:,1] += timePoints 
+    simulationDataMatrix[:,1] += timePoints
 
     for j in 1:length(odeNames)
-        iterNum = 1 
+        iterNum = 1
         for i in j:3:length(odeData)
 
             simulationDataMatrix[iterNum,j+1] = odeData[i]
             iterNum +=1
 
-        end 
-    end   
+        end
+    end
 end
 
 

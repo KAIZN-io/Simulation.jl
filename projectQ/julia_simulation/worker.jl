@@ -17,8 +17,45 @@ function onSimulationScheduled(ch::MessageChannel, msg::Message, event::Dict, pa
 
     results = Dict()
     try
+        model = Dict(
+            "algebraic" => Dict(
+                "e" => ["+3*x", "-2*y"],
+                "d" => ["+4*y", "-x"],
+            ),
+            "differential" => Dict(
+                "dx" => ["+σ*y", "-σ*x"],
+                "dy" => ["+x*ρ" ,"-x*z" ,"- y"],
+                "dz" => ["+x*y" ,"- β*z"]
+            )
+        )
+
+        parameter = Dict(
+            "σ" => 10.0, 
+            "ρ" => 28.0,
+            "β" => 8/3
+        )
+
+        initialValues = Dict(
+            "x" => 1.01,
+            "y" => 1.0,
+            "z" => 1.0
+        )
+
+        start = 0.0
+        stop = 10.0 
+        stepSize = 0.2 
+
+        stimuli = [Dict(
+            "time" => 5.0,
+            "amount" => 5.5,
+            "substance" => "x"
+        )]
+
+
+
         # here would be the call to start the actual simulation
-        results = simulate(payload)
+        results = simulate(model, parameter, initialValues, stimuli, start, stop, stepSize)
+
     catch err
         @error string(payload["id"], " - Simulation failed. Error: ", err)
 

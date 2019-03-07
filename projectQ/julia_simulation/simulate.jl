@@ -130,12 +130,14 @@ function generateSolveFunction(sdeProblem, initialValues::Dict, stimuli::Array, 
     # Create a list with all stimuli time points at which we want to interrupt
     # the solving to let our stimuli take effect.
     stimuliTimePoints = map((stimulus)->stimulus["time"],stimuli)
+    @info string("Stimuli time points: ", stimuliTimePoints)
 
     # Create a list of time points that we want to retrieve results for. This
     # list will include time points as floating point numbers. From `start` to
     # `stop` we will have an entry every `stepSize`. Additionally, we add the
     # points, where stimuli need to be actiavted.
     frames = sort(unique(append!(collect(start:stepSize:stop), stimuliTimePoints)))
+    @info string("Frames: ", frames)
 
     ### Define callbacks for setting stimuli###
 
@@ -165,11 +167,18 @@ function generateSolveFunction(sdeProblem, initialValues::Dict, stimuli::Array, 
     # true, meaning when a stimulus needs to take effect.
     stimuliCallback = DiscreteCallback(isStimulusActive, activateStimulus!)
 
+
+    # Getting sunstance and frame count so that we get results for all substances back
+    substanceCount = length(initialValueKeys)
+    frameCount = length(frames)
+    resultLength = (frameCount + 1) * substanceCount # +1 for the initial value column in the result matrix
+    @info string("Calculated result length: ", resultLength)
+
     function solve()
         diffeq_fd(
             parameters,
-            sol->sol[1,:],
-            101,
+            sol->sol[1:substanceCount,:],
+            resultLength,
             sdeProblem,
             solver,
             saveat = frames,
@@ -230,6 +239,10 @@ function simulate(model::Dict, initialValues::Dict, parameters::Dict, stimuli::A
 
     # solve the sde problem
     res = solve()
+    @info string("Actual result length:.... ", length(res))
+    @info "Results:"
     @show res
+
+    return res
 end
 

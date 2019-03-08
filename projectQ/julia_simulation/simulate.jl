@@ -127,17 +127,9 @@ function generateSolveFunction(sdeProblem, initialValues::Dict, stimuli::Array, 
     # Retrieve the parameters from the SDE problem
     parameters = sdeProblem.p
 
-    # Create a list with all stimuli time points at which we want to interrupt
-    # the solving to let our stimuli take effect.
-    stimuliTimePoints = map((stimulus)->stimulus["time"],stimuli)
-    @info string("Stimuli time points: ", stimuliTimePoints)
+    stimuliTimePoints = getStimuliTimePoints(stimuli)
 
-    # Create a list of time points that we want to retrieve results for. This
-    # list will include time points as floating point numbers. From `start` to
-    # `stop` we will have an entry every `stepSize`. Additionally, we add the
-    # points, where stimuli need to be actiavted.
-    frames = sort(unique(append!(collect(start:stepSize:stop), stimuliTimePoints)))
-    @info string("Frames: ", frames)
+    timePoints = getTimePoints(stepSize,start,stop,stimuli)
 
     ### Define callbacks for setting stimuli###
 
@@ -170,10 +162,11 @@ function generateSolveFunction(sdeProblem, initialValues::Dict, stimuli::Array, 
 
     # Getting sunstance and frame count so that we get results for all substances back
     substanceCount = length(initialValueKeys)
-    frameCount = length(frames)
-    resultLength = (frameCount + 1) * substanceCount # +1 for the initial value column in the result matrix
+    timePointCount = length(timePoints) + length(stimuliTimePoints)
+    resultLength = (timePointCount) * substanceCount # +1 for the initial value column in the result matrix
     @info string("Calculated result length: ", resultLength)
 
+    # 
     function solve()
         diffeq_fd(
             parameters,
@@ -181,7 +174,7 @@ function generateSolveFunction(sdeProblem, initialValues::Dict, stimuli::Array, 
             resultLength,
             sdeProblem,
             solver,
-            saveat = frames,
+            saveat = timePoints,
             callback = stimuliCallback,
             tstops = stimuliTimePoints
         )
@@ -243,6 +236,36 @@ function simulate(model::Dict, initialValues::Dict, parameters::Dict, stimuli::A
     @info "Results:"
     @show res
 
-    return res
+    odeData = Tracker.data(res)
+
+    timePoints = sort(append!(collect(getTimePoints(stepSize,start,stop,stimuli)),getStimuliTimePoints(stimuli)))
+    @show size(odeData)
+    @show size(timePoints)
+    return hcat(timePoints, odeData')
+
 end
 
+
+
+function getTimePoints(stepSize, start, stop,stimuli)
+
+    # Create a list of time points that we want to retrieve results for. This
+    # list will include time points as floating point numbers. From `start` to
+    # `stop` we will have an entry every `stepSize`. Additionally, we add the
+    # points, where stimuli need to be actiavted.
+    timePoints = sort(unique(append!(collect(start:stepSize:stop),getStimuliTimePoints(stimuli))))
+
+    return timePoints 
+
+end
+
+function getStimuliTimePoints(stimuli)
+    # Create a list with all stimuli time points at which we want to interrupt
+    # the solving to let our stimuli take effect.
+    stimuliTimePoints = unique(map((stimulus)->stimulus["time"],stimuli))
+    @info string("Stimuli time points: ", stimuliTimePoints)
+
+
+    return stimuliTimePoints 
+
+end

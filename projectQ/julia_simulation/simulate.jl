@@ -1,8 +1,4 @@
-using Pkg
-Pkg.add("DiffEqFlux")
-Pkg.add("DifferentialEquations")
-
-using DiffEqFlux, DifferentialEquations
+using DifferentialEquations, DiffEqFlux
 
 
 function generateNoiseFunction(noise=0.01)
@@ -236,13 +232,10 @@ function simulate(model::Dict, initialValues::Dict, parameters::Dict, stimuli::A
     @info "Results:"
     @show res
 
-    odeData = Tracker.data(res)
-
     timePoints = sort(append!(collect(getTimePoints(stepSize,start,stop,stimuli)),getStimuliTimePoints(stimuli)))
-    @show size(odeData)
+    @show size(res)
     @show size(timePoints)
-    return hcat(timePoints, odeData')
-
+    return hcat(timePoints, res')
 end
 
 

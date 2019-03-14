@@ -1,9 +1,4 @@
-using Pkg
-Pkg.add("JSON")
-Pkg.add("AMQPClient")
-
-using JSON
-using AMQPClient
+using JSON, AMQPClient
 
 
 # get environmetn variables

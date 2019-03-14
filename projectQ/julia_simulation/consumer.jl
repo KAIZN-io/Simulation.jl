@@ -1,6 +1,3 @@
-using Pkg
-Pkg.add("AMQPClient")
-
 using AMQPClient
 
 

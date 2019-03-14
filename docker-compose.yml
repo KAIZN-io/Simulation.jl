@@ -32,7 +32,9 @@ services:
       - userDb:/var/lib/postgresql/data/
 
   server:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile-py
     # The command is appended to the entrypoint specified in the Dockerfile
     command: ["-m", "server"]
     # Defining which other services are needed for this service to work
@@ -55,7 +57,7 @@ services:
       - DB_USER
       - DB_PASSWORD
       - EXCHANGE_EVENTS
-    image: janpiotraschke/projectq:0.4.0
+    image: janpiotraschke/projectq:py-0.4.0_julia-integration
     networks:
       - db
       - messageBroker
@@ -79,7 +81,7 @@ services:
       - DB_PASSWORD
       - EXCHANGE_EVENTS
       - SERVICE_DB_WORKER
-    image: janpiotraschke/projectq:0.4.0
+    image: janpiotraschke/projectq:py-0.4.0_julia-integration
     networks:
       - db
       - messageBroker
@@ -95,14 +97,17 @@ services:
       - DEBUG
       - EXCHANGE_EVENTS
       - SERVICE_SIMULATION_WORKER
-    image: janpiotraschke/projectq:0.4.0
+    image: janpiotraschke/projectq:py-0.4.0_julia-integration
     networks:
       - messageBroker
     volumes:
       - ./projectQ/:/ProjektQ/
 
   julia_simulation:
-    command: ["julia", "worker.jl"]
+    build:
+      context: .
+      dockerfile: Dockerfile-julia
+    command: ["projectQ/julia_simulation/worker.jl"]
     depends_on:
       messageBroker:
         condition: service_healthy
@@ -110,11 +115,11 @@ services:
       - DEBUG
       - EXCHANGE_EVENTS
       - SERVICE_SIMULATION_WORKER
-    image: julia
+    image: janpiotraschke/projectq:julia-0.1.0_julia-integration
     networks:
       - messageBroker
     volumes:
-      - ./projectQ/julia_simulation/:/ProjektQ/
+      - ./:/ProjektQ/
     working_dir: /ProjektQ
 
   messageBroker:
@@ -143,7 +148,7 @@ services:
 
   test_python:
     command: ["-u", "-m", "unittest", "discover"]
-    image: janpiotraschke/projectq:0.4.0
+    image: janpiotraschke/projectq:py-0.4.0_julia-integration
     volumes:
       - ./projectQ/:/ProjektQ/
 

@@ -159,14 +159,16 @@ function generateSolveFunction(sdeProblem, initialValues::Dict, stimuli::Array, 
     # true, meaning when a stimulus needs to take effect.
     stimuliCallback = DiscreteCallback(isStimulusActive, activateStimulus!)
 
-
     # Getting sunstance and frame count so that we get results for all substances back
     substanceCount = length(initialValueKeys)
     timePointCount = length(timePoints) + length(stimuliTimePoints)
     resultLength = (timePointCount) * substanceCount # +1 for the initial value column in the result matrix
     @info string("Calculated result length: ", resultLength)
 
-    # 
+    # `saveat` must be a set of all time points and all stimuli points. Not the
+    # word 'set'. Every time point can only be included once!
+    # `tstops` must be a set of all stimuli points. Again, only unique
+    # timepoints, even if there are multiple stimuli at the same time.
     function solve()
         diffeq_fd(
             parameters,
@@ -245,18 +247,14 @@ function simulate(model::Dict, initialValues::Dict, parameters::Dict, stimuli::A
 
 end
 
-
-
 function getTimePoints(stepSize, start, stop,stimuli)
-
     # Create a list of time points that we want to retrieve results for. This
     # list will include time points as floating point numbers. From `start` to
     # `stop` we will have an entry every `stepSize`. Additionally, we add the
     # points, where stimuli need to be actiavted.
     timePoints = sort(unique(append!(collect(start:stepSize:stop),getStimuliTimePoints(stimuli))))
 
-    return timePoints 
-
+    return timePoints
 end
 
 function getStimuliTimePoints(stimuli)
@@ -265,7 +263,6 @@ function getStimuliTimePoints(stimuli)
     stimuliTimePoints = unique(map((stimulus)->stimulus["time"],stimuli))
     @info string("Stimuli time points: ", stimuliTimePoints)
 
-
-    return stimuliTimePoints 
-
+    return stimuliTimePoints
 end
+

@@ -1,7 +1,4 @@
-using Pkg
-Pkg.add("AMQPClient")
-
-using AMQPClient: Message, MessageChannel
+using AMQPClient
 
 include("on.jl")
 include("emit.jl")
@@ -11,7 +8,7 @@ include("event_creators.jl")
 
 SERVICE_SIMULATION_WORKER = ENV["SERVICE_SIMULATION_WORKER"]
 
-function onSimulationScheduled(ch::MessageChannel, msg::Message, event::Dict, payload::Dict)
+function onSimulationScheduled(ch::AMQPClient.MessageChannel, msg::AMQPClient.Message, event::Dict, payload::Dict)
     @info string(payload["id"], " - Starting simulation, type: ", payload["type"])
     emit(simulationStarted(payload["id"]))
 

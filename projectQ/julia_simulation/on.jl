@@ -1,7 +1,3 @@
-using Pkg
-Pkg.add("JSON")
-Pkg.add("AMQPClient")
-
 using JSON
 using AMQPClient: Message, MessageChannel, basic_reject
 

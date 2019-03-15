@@ -166,6 +166,8 @@ function generateSolveFunction(sdeProblem, initialValues::Dict, stimuli::Array, 
     # `tstops` must be a set of all stimuli points. Again, only unique
     # timepoints, even if there are multiple stimuli at the same time.
     function solve()
+        @info "solving..."
+
         diffeq_fd(
             parameters,
             sol->sol[1:substanceCount,:],
@@ -224,9 +226,13 @@ stimuli = [
 function simulate(model::Dict, initialValues::Dict, parameters::Dict, stimuli::Array, start::Float64, stop::Float64, stepSize::Float64)
     # generate the SDE problem from the given arguments
     sdeProblem = generateSdeProblem(model, initialValues, parameters, start, stop)
+    @info "SDE Problem:"
+    @show sdeProblem
 
     # generate the solving function for the SDE problem
     solve = generateSolveFunction(sdeProblem, initialValues, stimuli, stepSize)
+    @info "solve function:"
+    @show solve
 
     # solve the sde problem
     res = solve()
@@ -235,8 +241,6 @@ function simulate(model::Dict, initialValues::Dict, parameters::Dict, stimuli::A
     @show res
 
     timePoints = sort(append!(collect(getTimePoints(stepSize,start,stop,stimuli)),getStimuliTimePoints(stimuli)))
-    @show size(res)
-    @show size(timePoints)
     return hcat(timePoints, res')
 end
 
@@ -246,6 +250,7 @@ function getTimePoints(stepSize, start, stop,stimuli)
     # `stop` we will have an entry every `stepSize`. Additionally, we add the
     # points, where stimuli need to be actiavted.
     timePoints = sort(unique(append!(collect(start:stepSize:stop),getStimuliTimePoints(stimuli))))
+    @info string("Simulation time points: ", timePoints)
 
     return timePoints
 end

@@ -8,50 +8,75 @@ include("event_creators.jl")
 
 SERVICE_SIMULATION_WORKER = ENV["SERVICE_SIMULATION_WORKER"]
 
+function prepareModel(model::Dict)
+    @info model
+    algebraic = Dict()
+    differential = Dict()
+    for (variable, equation) in model["equation"]
+        algebraic[variable] = values(equation["component"])
+    end
+    for (variable, equation) in model["ODE"]
+        differential[variable] = values(equation["component"])
+    end
+    return Dict(
+        "algebraic" => algebraic,
+        "differential" => differential
+    )
+end
+
+function prepareParameters(parameterSet::Array)
+    ret = Dict()
+    for parameter in parameterSet
+        ret[parameter["testcd"]] = parameter["orres"]
+    end
+    return ret
+end
+
+function prepareInitialValues(InitialValueSet::Array)
+    ret = Dict()
+    for initialValue in InitialValueSet
+        ret[initialValue["testcd"]] = initialValue["orres"]
+    end
+    return ret
+end
+
+function prepareStimuli(Stimuli::Array)
+    ret = []
+    for stimulus in Stimuli
+        # ret[initialValue["testcd"]] = initialValue["orres"]
+        for target in stimulus["targets"]
+            for timePoint in stimulus["timings"]
+                push!(ret, Dict(
+                    "time" => timePoint,
+                    "amount" => stimulus["amount"],
+                    "substance" => target
+                ))
+            end
+        end
+    end
+    return ret
+end
+
 function onSimulationScheduled(ch::AMQPClient.MessageChannel, msg::AMQPClient.Message, event::Dict, payload::Dict)
     @info string(payload["id"], " - Starting simulation, type: ", payload["type"])
     emit(simulationStarted(payload["id"]))
 
     results = Dict()
     try
-        model = Dict(
-            "algebraic" => Dict(
-                "e" => ["+3*x", "-2*y"],
-                "d" => ["+4*y", "-x"],
-            ),
-            "differential" => Dict(
-                "dx" => ["+σ*y", "-σ*x"],
-                "dy" => ["+x*ρ" ,"-x*z" ,"- y"],
-                "dz" => ["+x*y" ,"- β*z"]
-            )
-        )
+        model = prepareModel(payload["model"])
+        @info model
 
-        parameter = Dict(
-            "σ" => 10.0, 
-            "ρ" => 28.0,
-            "β" => 8/3
-        )
+        parameters = prepareParameters(payload["parameter_set"])
+        @info parameters
 
-        initialValues = Dict(
-            "x" => 1.01,
-            "y" => 1.0,
-            "z" => 1.0
-        )
+        initialValues = prepareInitialValues(payload["initial_value_set"])
+        @info initialValues
 
-        start = 0.0
-        stop = 10.0 
-        stepSize = 0.2 
-
-        stimuli = [Dict(
-            "time" => 5.0,
-            "amount" => 5.5,
-            "substance" => "x"
-        )]
-
-
+        stimuli = prepareStimuli(payload["stimuli"])
+        @info stimuli
 
         # here would be the call to start the actual simulation
-        results = simulate(model, parameter, initialValues, stimuli, start, stop, stepSize)
+        results = simulate(model, initialValues, parameter, stimuli, payload["start"], payload["stop"], payload["step_size"])
 
     catch err
         @error string(payload["id"], " - Simulation failed. Error: ", err)

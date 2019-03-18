@@ -88,18 +88,18 @@ uses eval on the given `model`, `initialValues` and `parameters`.
 The arguments need to be in the same shape as defined for the `simulate`
 function.
 """
-function generateSdeProblem(model::Dict, initialValues::Dict, parameters::Dict, start::Float64, stop::Float64, seed = 1234)
+function generateSdeProblem(model::Dict, initialValues::Dict, parameters::Dict, start::Float64, stop::Float64, noise_level=0.01, seed=1337)
     # Get the derive function
     derive = generateDeriveFunction(model, initialValues, parameters)
 
     # Get the noise function
-    noise = generateNoiseFunction()
+    noise = generateNoiseFunction(noise_level)
 
     # Set the time span
     timeSpan = (start, stop)
 
     # declare the SDE problem
-    return SDEProblem(derive, noise, values(initialValues), timeSpan, values(parameters), seed = seed)
+    return SDEProblem(derive, noise, getEvaluatedValues(initialValues), timeSpan, getEvaluatedValues(parameters), seed = seed)
 end
 
 """
@@ -223,9 +223,9 @@ stimuli = [
 ]
 ```
 """
-function simulate(model::Dict, initialValues::Dict, parameters::Dict, stimuli::Array, start::Float64, stop::Float64, stepSize::Float64)
+function simulate(model::Dict, initialValues::Dict, parameters::Dict, stimuli::Array, start::Float64, stop::Float64, stepSize::Float64, noise_level::Float64, seed::Int)
     # generate the SDE problem from the given arguments
-    sdeProblem = generateSdeProblem(model, initialValues, parameters, start, stop)
+    sdeProblem = generateSdeProblem(model, initialValues, parameters, start, stop, noise_level, seed)
     @info "SDE Problem:"
     @show sdeProblem
 
@@ -240,8 +240,17 @@ function simulate(model::Dict, initialValues::Dict, parameters::Dict, stimuli::A
     @info "Results:"
     @show res
 
-    timePoints = sort(append!(collect(getTimePoints(stepSize,start,stop,stimuli)),getStimuliTimePoints(stimuli)))
-    return hcat(timePoints, res')
+    # timePoints = sort(append!(collect(getTimePoints(stepSize,start,stop,stimuli)),getStimuliTimePoints(stimuli)))
+    # return hcat(timePoints, res')
+    return simulationResultsToVarDict(res, initialValues)
+end
+
+function simulationResultsToVarDict(res, initialValues)
+    ret = Dict()
+    for (index, name) in enumerate(keys(initialValues))
+        ret[name] = res[index, :]
+    end
+    return ret
 end
 
 function getTimePoints(stepSize, start, stop,stimuli)
@@ -262,5 +271,22 @@ function getStimuliTimePoints(stimuli)
     @info string("Stimuli time points: ", stimuliTimePoints)
 
     return stimuliTimePoints
+end
+
+function getEvaluatedValues(values)
+    ret = []
+    # Evaluate all initial values to get a numeric value for each one
+    for (name, expr) in values
+        # get the var name
+        sym = Symbol(name)
+        # evaluate the variables expression to a numeric value
+        val = eval(Meta.parse(expr))
+        # make the variable available for following expressions
+        eval(:($sym = $val))
+        # add the numeric value to the list that shall be returned
+        push!(ret, val)
+    end
+    @info ret
+    return ret
 end
 

@@ -70,7 +70,7 @@ function staticSimpleSimulation()
 
     prob = SDEProblem(diff,noise,initialValues,(start,stop),parameters,seed=seed)
 
-    res = diffeq_fd(prob.p,sol->sol[1:2,:],20,prob,SOSRI(),saveat=step_size)
+    res = diffeq_fd(prob.p,sol->sol[1:2,:],22,prob,SOSRI(),saveat=step_size)
 
     return Dict(
         "a" => res[1, :],

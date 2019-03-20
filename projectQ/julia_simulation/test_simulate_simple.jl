@@ -9,25 +9,25 @@ noise_level = 0.0
 seed = 1337
 
 function dynamicSimpleSimulation()
-    initialValues = Dict{String,String}(
-        "a"=>"1.0",
-        "b"=>"2.0"
-    )
+    initialValues = [
+         Dict("testcd"=>"a", "orres"=>"1.0"),
+         Dict("testcd"=>"b", "orres"=>"2.0")
+    ]
 
-    parameters = Dict{String,String}(
-        "roh"=>"0.5",
-        "phi"=>"0.25"
-    )
+    parameters = [
+         Dict("testcd"=>"roh", "orres"=>"0.5"),
+         Dict("testcd"=>"phi", "orres"=>"0.25")
+    ]
 
-    model = Dict{String,Dict}(
-        "algebraic"=>Dict{String,Array{String}}(
-            "a_roh"=>String["a + roh"],
-            "b_phi"=>String["b + phi"]
-        ),
-        "differential"=>Dict{String,Array{String}}(
-            "da"=>String["a / a_roh"],
-            "db"=>String["b / b_phi"]
-        )
+    model = Dict(
+        "algebraic"=>[
+            Dict("testcd"=>"a_roh", "orres"=>["a + roh"]),
+            Dict("testcd"=>"b_phi", "orres"=>["b + phi"])
+        ],
+        "differential"=>[
+            Dict("testcd"=>"da", "orres"=>["a / a_roh"]),
+            Dict("testcd"=>"db", "orres"=>["b / b_phi"])
+        ]
     )
 
     res = simulate(model, initialValues, parameters, [], start, stop, step_size, noise_level, seed)

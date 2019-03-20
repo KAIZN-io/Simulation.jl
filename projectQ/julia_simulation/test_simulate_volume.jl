@@ -10,53 +10,53 @@ seed = 1337
 
 function dynamicVolumeSimulation()
     model = Dict(
-        "algebraic"=>Dict(
-            "R_refdt"=>["phi*R_ref*r/(2*d)*max(pi_t-pi_c,0)"],
-            "r_bdt"=>["0.2*R_refdt"],
-            "R_ref"=>["r/(1+(1-nu)*(pi_t*r)/(E*2*d))"],
-            "V"=>["4/3*pi*10^(-15)*r^3"],
-            "pi_i"=>["c_i/V*R*T"],
-            "V_ref"=>["4/3*pi*10^(-15)*R_ref^3"],
-            "G"=>["4*pi*r^2"],
-            "r_osdt"=>["-Lp*(pi_t+pi_e-pi_i)"],
-            "rdt"=>["0.2*R_refdt", "-Lp*(pi_t+pi_e-pi_i)"]
-        ),
-        "differential"=>Dict(
-            "dr_b"=>["r_bdt"],
-            "dc_i"=>["(k_uptake*G-k_consumption*V*(10^15))"],
-            "dr_os"=>["r_osdt"],
-            "dr"=>["rdt"],
-            "dR_ref"=>["R_refdt"],
-            "dpi_t"=>["E*2*d/(1-nu)*(rdt/r^2-R_refdt/(R_ref*r))", "-rdt/r*pi_t"]
-        )
+        "algebraic"=>[
+            Dict("testcd"=>"R_refdt", "orres"=>["phi*R_ref*r/(2*d)*max(pi_t-pi_c,0)"]),
+            Dict("testcd"=>"r_bdt",   "orres"=>["0.2*R_refdt"]),
+            Dict("testcd"=>"R_ref",   "orres"=>["r/(1+(1-nu)*(pi_t*r)/(E*2*d))"]),
+            Dict("testcd"=>"V",       "orres"=>["4/3*pi*10^(-15)*r^3"]),
+            Dict("testcd"=>"pi_i",    "orres"=>["c_i/V*R*T"]),
+            Dict("testcd"=>"V_ref",   "orres"=>["4/3*pi*10^(-15)*R_ref^3"]),
+            Dict("testcd"=>"G",       "orres"=>["4*pi*r^2"]),
+            Dict("testcd"=>"r_osdt",  "orres"=>["-Lp*(pi_t+pi_e-pi_i)"]),
+            Dict("testcd"=>"rdt",     "orres"=>["0.2*R_refdt", "-Lp*(pi_t+pi_e-pi_i)"])
+        ],
+        "differential"=>[
+            Dict("testcd"=>"dr_b",   "orres"=>["r_bdt"]),
+            Dict("testcd"=>"dc_i",   "orres"=>["(k_uptake*G-k_consumption*V*(10^15))"]),
+            Dict("testcd"=>"dr_os",  "orres"=>["r_osdt"]),
+            Dict("testcd"=>"dr",     "orres"=>["rdt"]),
+            Dict("testcd"=>"dR_ref", "orres"=>["R_refdt"]),
+            Dict("testcd"=>"dpi_t",  "orres"=>["E*2*d/(1-nu)*(rdt/r^2-R_refdt/(R_ref*r))", "-rdt/r*pi_t"])
+        ]
     )
 
-    initialValues = Dict(
-        "r_b"=>"0.496161324363",
-        "c_i"=>"0.00000000000638904517734",
-        "r_os"=>"1.18773900649",
-        "r"=>"1.68390033085",
-        "R_ref"=>"1.36108685239",
-        "pi_t"=>"200000.0"
-    )
+    initialValues = [
+        Dict("testcd"=>"r_b"   ,"orres"=>"0.496161324363"),
+        Dict("testcd"=>"c_i"   ,"orres"=>"0.00000000000638904517734"),
+        Dict("testcd"=>"r_os"  ,"orres"=>"1.18773900649"),
+        Dict("testcd"=>"r"     ,"orres"=>"1.68390033085"),
+        Dict("testcd"=>"R_ref" ,"orres"=>"1.36108685239"),
+        Dict("testcd"=>"pi_t"  ,"orres"=>"200000.0"),
+    ]
 
-    parameters = Dict(
-        "nu"=>"0.5",
-        "modulus_adjustment"=>"(1 - nu ^ 2) ^ (-1)",
-        "T"=>"303.15",
-        "pi_e"=>"604594.08",
-        "phi"=>"0.0001",
-        "k_consumption"=>"0.00000000000000025",
-        "Lp"=>"0.00000119",
-        "d"=>"0.115",
-        "E_3D"=>"2580000.0",
-        "c_e"=>"240",
-        "E"=>"modulus_adjustment * E_3D",
-        "k_uptake"=>"0.0000000000000002",
-        "pi_c"=>"200000.0",
-        "R"=>"8.314",
-        "F"=>"96485"
-    )
+    parameters = [
+        Dict("testcd"=>"nu"                 ,"orres"=>"0.5"),
+        Dict("testcd"=>"modulus_adjustment" ,"orres"=>"(1 - nu ^ 2) ^ (-1)"),
+        Dict("testcd"=>"T"                  ,"orres"=>"303.15"),
+        Dict("testcd"=>"pi_e"               ,"orres"=>"604594.08"),
+        Dict("testcd"=>"phi"                ,"orres"=>"0.0001"),
+        Dict("testcd"=>"k_consumption"      ,"orres"=>"0.00000000000000025"),
+        Dict("testcd"=>"Lp"                 ,"orres"=>"0.00000119"),
+        Dict("testcd"=>"d"                  ,"orres"=>"0.115"),
+        Dict("testcd"=>"E_3D"               ,"orres"=>"2580000.0"),
+        Dict("testcd"=>"c_e"                ,"orres"=>"240"),
+        Dict("testcd"=>"E"                  ,"orres"=>"modulus_adjustment * E_3D"),
+        Dict("testcd"=>"k_uptake"           ,"orres"=>"0.0000000000000002"),
+        Dict("testcd"=>"pi_c"               ,"orres"=>"200000.0"),
+        Dict("testcd"=>"R"                  ,"orres"=>"8.314"),
+        Dict("testcd"=>"F"                  ,"orres"=>"96485")
+    ]
 
     res = simulate(model, initialValues, parameters, [], start, stop, step_size, noise_level, seed)
 
@@ -73,7 +73,7 @@ function staticVolumeSimulation()
         200000.0                   # pi_t
     ]
 
-    parameters = Float64[
+    parameters = [
         0.5,                 # nu
         303.15,              # T
         604594.08,           # pi_e

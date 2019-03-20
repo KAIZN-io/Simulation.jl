@@ -4,58 +4,10 @@ include("on.jl")
 include("emit.jl")
 include("simulate.jl")
 include("event_creators.jl")
+include("simulationData.jl")
 
 
 SERVICE_SIMULATION_WORKER = ENV["SERVICE_SIMULATION_WORKER"]
-
-function prepareModel(model::Dict)
-    @info model
-    algebraic = Dict()
-    differential = Dict()
-    for (variable, equation) in model["equation"]
-        algebraic[variable] = values(equation["component"])
-    end
-    for (variable, equation) in model["ODE"]
-        differential[variable] = values(equation["component"])
-    end
-    return Dict(
-        "algebraic" => algebraic,
-        "differential" => differential
-    )
-end
-
-function prepareParameters(parameterSet::Array)
-    ret = Dict()
-    for parameter in parameterSet
-        ret[parameter["testcd"]] = parameter["orres"]
-    end
-    return ret
-end
-
-function prepareInitialValues(InitialValueSet::Array)
-    ret = Dict()
-    for initialValue in InitialValueSet
-        ret[initialValue["testcd"]] = initialValue["orres"]
-    end
-    return ret
-end
-
-function prepareStimuli(Stimuli::Array)
-    ret = []
-    for stimulus in Stimuli
-        # ret[initialValue["testcd"]] = initialValue["orres"]
-        for target in stimulus["targets"]
-            for timePoint in stimulus["timings"]
-                push!(ret, Dict(
-                    "time" => timePoint,
-                    "amount" => stimulus["amount"],
-                    "substance" => target
-                ))
-            end
-        end
-    end
-    return ret
-end
 
 function onSimulationScheduled(ch::AMQPClient.MessageChannel, msg::AMQPClient.Message, event::Dict, payload::Dict)
     @info string(payload["id"], " - Starting simulation, type: ", payload["type"])

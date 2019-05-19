@@ -2,7 +2,7 @@ FROM julia:1.1.0-stretch
 LABEL maintainer = "Jan Piotraschke"
 
 # working wir in the image
-WORKDIR /ProjektQ/
+WORKDIR /projectQ/
 
 # install required packages
 ADD Project.toml ./

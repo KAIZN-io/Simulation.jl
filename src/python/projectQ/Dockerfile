@@ -2,7 +2,7 @@ FROM python:3.6.8-slim-stretch
 LABEL maintainer = "Jan Piotraschke"
 
 # working wir in the image
-WORKDIR /ProjektQ/
+WORKDIR /projectQ/
 
 # update pip
 RUN pip install --upgrade --no-cache-dir pip

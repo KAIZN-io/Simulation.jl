@@ -33,8 +33,7 @@ services:
 
   server:
     build:
-      context: .
-      dockerfile: Dockerfile-py
+      context: ./src/python/projectQ
     # The command is appended to the entrypoint specified in the Dockerfile
     command: ["-m", "server"]
     # Defining which other services are needed for this service to work
@@ -65,7 +64,7 @@ services:
       - "8080:5000"
     # Mount the project code into the container, so the container can run it. <host-path>:<container-path>
     volumes:
-      - ./projectQ/:/ProjektQ/
+      - ./src/python/projectQ/:/projectQ/
 
   dbWorker:
     command: ["-u", "-m", "dbWorker"]
@@ -86,7 +85,7 @@ services:
       - db
       - messageBroker
     volumes:
-      - ./projectQ/:/ProjektQ/
+      - ./src/python/projectQ/:/projectQ/
 
   py_simulation:
     command: ["-u", "-m", "py_simulation"]
@@ -101,12 +100,11 @@ services:
     networks:
       - messageBroker
     volumes:
-      - ./projectQ/:/ProjektQ/
+      - ./projectQ/:/projectQ/
 
   julia_simulation:
     build:
-      context: .
-      dockerfile: Dockerfile-julia
+      context: ./src/julia/projectQ/services/simulation
     command: ["projectQ/julia_simulation/worker.jl"]
     depends_on:
       messageBroker:
@@ -119,8 +117,8 @@ services:
     networks:
       - messageBroker
     volumes:
-      - ./:/ProjektQ/
-    working_dir: /ProjektQ
+      - ./src/julia/projectQ/:/projectQ/
+    working_dir: /projectQ
 
   messageBroker:
     healthcheck:
@@ -136,21 +134,21 @@ services:
     command: sh -c "npm ci && npm run build"
     image: node:11.10.0-alpine
     volumes:
-      - ./:/ProjektQ/
-    working_dir: /ProjektQ/
+      - ./:/projectQ/
+    working_dir: /projectQ/
 
   test_webApp:
     command: sh -c "npm ci && npm run test"
     image: node:11.10.0-alpine
     volumes:
-      - ./:/ProjektQ/
-    working_dir: /ProjektQ/
+      - ./:/projectQ/
+    working_dir: /projectQ/
 
   test_python:
     command: ["-u", "-m", "unittest", "discover"]
     image: janpiotraschke/projectq:py-0.4.0_julia-integration
     volumes:
-      - ./projectQ/:/ProjektQ/
+      - ./projectQ/:/projectQ/
 
 # Define named volumes for use in the service definitions
 volumes:

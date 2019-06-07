@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, redirect
 
 from projectQ.packages.eventSystem import emit, SimulationScheduled
 from projectQ.packages.db import sessionScope
-from projectQ.packages.simulation import getSimulationFromFormData, getScheduledSimulations, getFinishedSimulations
+from projectQ.services.server.simulation import getSimulationFromFormData, getScheduledSimulations, getFinishedSimulations
 
 from projectQ.services.server.form import SimulationForm
 

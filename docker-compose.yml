@@ -35,7 +35,7 @@ services:
     build:
       context: ./src/python/projectQ
     # The command is appended to the entrypoint specified in the Dockerfile
-    command: ["-m", "server"]
+    command: ["-m", "projectQ.services.server"]
     # Defining which other services are needed for this service to work
     # This will automatically start all dependencies when running `dc up web`
     depends_on:
@@ -65,6 +65,7 @@ services:
     # Mount the project code into the container, so the container can run it. <host-path>:<container-path>
     volumes:
       - ./src/python/:/projectQ/
+      - ./static/:/projectQ/static
 
   dbWorker:
     command: ["-u", "-m", "dbWorker"]

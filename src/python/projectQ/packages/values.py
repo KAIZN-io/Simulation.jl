@@ -22,9 +22,8 @@ SERVICE_SIMULATION_WORKER = os.environ.get('SERVICE_SIMULATION_WORKER')
 SERVICE_DB_WORKER = os.environ.get('SERVICE_DB_WORKER')
 
 # set the root dir
-ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-STATIC_DIR = ROOT_DIR + '/server/static'
-TEMPLATE_DIR = ROOT_DIR + '/server/templates'
+ROOT_DIR = '/projectQ'
+STATIC_DIR = ROOT_DIR + '/static'
 RESULT_IMAGE_DIR = STATIC_DIR + '/images'
 
 # the default date format used for encoding and decoding messages

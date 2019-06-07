@@ -1,7 +1,8 @@
+import os
 from flask import Flask
 from logging.config import dictConfig
 
-from projectQ.packages.values import DEBUG
+from projectQ.packages.values import DEBUG, STATIC_DIR
 
 
 """Configure logging"""
@@ -25,8 +26,8 @@ dictConfig({
 # setup flask
 app = Flask(
     'ProjectQ',
-    template_folder='server/templates',
-    static_folder='server/static',
+    template_folder=os.path.dirname(os.path.abspath(__file__)) + '/templates',
+    static_folder=STATIC_DIR,
     static_url_path='/static'
 )
 

@@ -2,7 +2,7 @@ import json
 import datetime
 from schema import SchemaError, Schema, Use, Regex
 
-from values import RFC3339_REGEX, RFC3339_DATE_FORMAT
+from projectQ.packages.values import RFC3339_REGEX, RFC3339_DATE_FORMAT
 
 
 class Event:

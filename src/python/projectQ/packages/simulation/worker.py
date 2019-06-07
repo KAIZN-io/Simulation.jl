@@ -1,9 +1,9 @@
 import eventlet
 import traceback
 
-from eventSystem import on, emit, SimulationScheduled, SimulationStarted, SimulationFinished, SimulationFailed
-from values import RFC3339_DATE_FORMAT, SERVICE_SIMULATION_WORKER
-from py_simulation import simulate
+from projectQ.packages.eventSystem import on, emit, SimulationScheduled, SimulationStarted, SimulationFinished, SimulationFailed
+from projectQ.packages.values import RFC3339_DATE_FORMAT, SERVICE_SIMULATION_WORKER
+from projectQ.packages.simulation import simulate
 
 
 def run():

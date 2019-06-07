@@ -1,2 +1,2 @@
-from py_simulation.simulate import simulate
-import py_simulation.worker as worker
+from projectQ.packages.simulation.simulate import simulate
+import projectQ.packages.simulation.worker as worker

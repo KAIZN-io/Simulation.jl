@@ -3,8 +3,8 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 import datetime
 
-from db.base import base
-from values import SimulationTypes
+from projectQ.packages.db.base import base
+from projectQ.packages.values import SimulationTypes
 
 # Pd = PharmacoDynamics
 class Pd(base):

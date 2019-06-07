@@ -2,8 +2,8 @@ import namesgenerator
 from wtforms.validators import InputRequired, NumberRange, Length
 from flask_wtf import FlaskForm
 
-from server.fields import BSFloatField, BSIntegerField, BSRadioField, BSBooleanField, BSNumberInput, BSStringField, BSSelectField
-from server.fields.validators import NumberRangeExclusive, BiggerOrEqualToField, BiggerThanField, SmallerThanField, IntegerList, Conditional
+from projectQ.services.server.fields import BSFloatField, BSIntegerField, BSRadioField, BSBooleanField, BSNumberInput, BSStringField, BSSelectField
+from projectQ.services.server.fields.validators import NumberRangeExclusive, BiggerOrEqualToField, BiggerThanField, SmallerThanField, IntegerList, Conditional
 
 
 simulation_models = {

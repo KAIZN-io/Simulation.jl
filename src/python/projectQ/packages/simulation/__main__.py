@@ -1,4 +1,4 @@
-from py_simulation import worker
+from projectQ.packages.simulation import worker
 
 worker.run()
 

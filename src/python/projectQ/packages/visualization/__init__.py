@@ -1,1 +1,1 @@
-from visualization.Visualizer import Visualizer
+from projectQ.packages.visualization.Visualizer import Visualizer

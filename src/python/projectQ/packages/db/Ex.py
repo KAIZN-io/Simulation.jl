@@ -6,12 +6,12 @@ import datetime
 import uuid
 import json
 
-from db.base import base
-from db.Impulse import Impulse
-from db.Stimulus import Stimulus
-from db.InitialValueSet import InitialValue
-from db.ParameterSet import Parameter
-from values import SimulationTypes, RFC3339_DATE_FORMAT, RFC3339_REGEX
+from projectQ.packages.db.base import base
+from projectQ.packages.db.Impulse import Impulse
+from projectQ.packages.db.Stimulus import Stimulus
+from projectQ.packages.db.InitialValueSet import InitialValue
+from projectQ.packages.db.ParameterSet import Parameter
+from projectQ.packages.values import SimulationTypes, RFC3339_DATE_FORMAT, RFC3339_REGEX
 
 
 # Ex stands for 'Exposure' of an organism with a substance

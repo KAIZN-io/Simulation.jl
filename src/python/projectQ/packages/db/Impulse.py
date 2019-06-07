@@ -4,7 +4,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from schema import Schema, Use
 import datetime
 
-from db.base import base
+from projectQ.packages.db.base import base
 
 
 class Impulse(base):

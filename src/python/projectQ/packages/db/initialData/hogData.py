@@ -1,5 +1,5 @@
-from values import SimulationTypes
-from db.initialData.ModelData import ModelData, ParameterData as P, InitialValueData as I
+from projectQ.packages.values import SimulationTypes
+from projectQ.packages.db.initialData.ModelData import ModelData, ParameterData as P, InitialValueData as I
 
 
 hogData = ModelData(

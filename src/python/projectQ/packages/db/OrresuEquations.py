@@ -2,8 +2,8 @@ from sqlalchemy import Column, String, DateTime, Integer, Enum, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 import datetime
 
-from db.base import base
-from values import SimulationTypes
+from projectQ.packages.db.base import base
+from projectQ.packages.values import SimulationTypes
 
 class OrresuEquations(base):
     __tablename__ = 'orresu_equations'

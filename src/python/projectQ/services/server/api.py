@@ -3,7 +3,7 @@ from pprint import pformat
 from flask_restful import Resource
 from sqlalchemy import desc
 
-from db import sessionScope, Ex
+from projectQ.packages.db import sessionScope, Ex
 
 
 logger = logging.getLogger(__name__)

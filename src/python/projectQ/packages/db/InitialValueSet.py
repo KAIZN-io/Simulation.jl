@@ -5,9 +5,9 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 from schema import Schema, Use
 
-from values import SimulationTypes
-from db.base import base
-from db.initialData import initialDataList
+from projectQ.packages.values import SimulationTypes
+from projectQ.packages.db.base import base
+from projectQ.packages.db.initialData import initialDataList
 
 
 logger = logging.getLogger(__name__)

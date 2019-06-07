@@ -1,5 +1,5 @@
-from eventSystem.Event import Event
-from db import Ex
+from projectQ.packages.eventSystem.Event import Event
+from projectQ.packages.db import Ex
 
 class SimulationScheduled(Event):
     routing_key = 'simulation.scheduled'

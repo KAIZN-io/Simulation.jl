@@ -1,4 +1,4 @@
-from values import SimulationTypes
+from projectQ.packages.values import SimulationTypes
 
 
 class ModelData:

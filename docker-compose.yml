@@ -64,7 +64,7 @@ services:
       - "8080:5000"
     # Mount the project code into the container, so the container can run it. <host-path>:<container-path>
     volumes:
-      - ./src/python/projectQ/:/projectQ/
+      - ./src/python/:/projectQ/
 
   dbWorker:
     command: ["-u", "-m", "dbWorker"]

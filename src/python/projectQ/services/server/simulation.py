@@ -1,8 +1,8 @@
 import os
 from sqlalchemy import func, desc
 
-from db import Ex, Model, InitialValueSet, ParameterSet, Impulse, Stimulus
-from values import SimulationTypes
+from projectQ.packages.db import Ex, Model, InitialValueSet, ParameterSet, Impulse, Stimulus
+from projectQ.packages.values import SimulationTypes
 
 
 def getScheduledSimulations(session):

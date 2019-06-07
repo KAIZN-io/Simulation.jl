@@ -1,10 +1,11 @@
 import json
 from flask import Blueprint, render_template, redirect
 
-from eventSystem import emit, SimulationScheduled
-from db import sessionScope
-from server.simulation import getSimulationFromFormData, getScheduledSimulations, getFinishedSimulations
-from server.form import SimulationForm
+from projectQ.packages.eventSystem import emit, SimulationScheduled
+from projectQ.packages.db import sessionScope
+from projectQ.packages.simulation import getSimulationFromFormData, getScheduledSimulations, getFinishedSimulations
+
+from projectQ.services.server.form import SimulationForm
 
 
 routes = Blueprint('routes', __name__)

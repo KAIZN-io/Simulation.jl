@@ -1,8 +1,8 @@
 import unittest
 import datetime
 
-from eventSystem import SimulationStarted
-from values import RFC3339_DATE_FORMAT
+from projectQ.packages.eventSystem import SimulationStarted
+from projectQ.packages.values import RFC3339_DATE_FORMAT
 
 
 class TestSimulationStarted(unittest.TestCase):

@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.ext.declarative import declarative_base
 from contextlib import contextmanager
 
-from values import DB_NAME, DB_USER, DB_PASSWORD, HN_DB
+from projectQ.packages.values import DB_NAME, DB_USER, DB_PASSWORD, HN_DB
 
 dbURL = 'postgresql://{user}:{password}@{host}/{dbName}'.format(
     host = HN_DB,

@@ -1,16 +1,16 @@
 import logging
 from sqlalchemy import event
 
-import db.initialData
-from db.base import base, ThreadScopedSession, sessionScope
-from db.Ex import Ex
-from db.Pd import Pd
-from db.Model import Model
-from db.InitialValueSet import InitialValueSet, InitialValue
-from db.ParameterSet import ParameterSet, Parameter
-from db.Impulse import Impulse
-from db.Stimulus import Stimulus
-from db.OrresuEquations import OrresuEquations
+import projectQ.packages.db.initialData
+from projectQ.packages.db.base import base, ThreadScopedSession, sessionScope
+from projectQ.packages.db.Ex import Ex
+from projectQ.packages.db.Pd import Pd
+from projectQ.packages.db.Model import Model
+from projectQ.packages.db.InitialValueSet import InitialValueSet, InitialValue
+from projectQ.packages.db.ParameterSet import ParameterSet, Parameter
+from projectQ.packages.db.Impulse import Impulse
+from projectQ.packages.db.Stimulus import Stimulus
+from projectQ.packages.db.OrresuEquations import OrresuEquations
 
 
 logger = logging.getLogger(__name__)

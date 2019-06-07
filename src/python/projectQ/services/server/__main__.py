@@ -7,12 +7,13 @@ import json
 from flask_socketio import SocketIO
 from flask_restful import Api
 
-from server.app import app
-from server.routings import routes
-from server.api import Simulation, SimulationList
-from values import DEBUG, RFC3339_DATE_FORMAT, RESULT_IMAGE_DIR, STATIC_DIR
-from db.base import base, ThreadScopedSession
-from eventSystem import on, SimulationScheduled, SimulationStarted, SimulationFinished, SimulationFailed
+from projectQ.packages.values import DEBUG, RFC3339_DATE_FORMAT, RESULT_IMAGE_DIR, STATIC_DIR
+from projectQ.packages.db.base import base, ThreadScopedSession
+from projectQ.packages.eventSystem import on, SimulationScheduled, SimulationStarted, SimulationFinished, SimulationFailed
+
+from projectQ.services.server.app import app
+from projectQ.services.server.routings import routes
+from projectQ.services.server.api import Simulation, SimulationList
 
 
 logger = logging.getLogger(__name__)

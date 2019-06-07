@@ -9,9 +9,9 @@ import numpy as np
 import pandas as pd
 import itertools
 
-from visualization import Visualizer
-from values import SimulationTypes
-from py_simulation.Solver import Solver
+from projectQ.packages.visualization import Visualizer
+from projectQ.packages.values import SimulationTypes
+from projectQ.packages.simulation.Solver import Solver
 
 
 STUDYID = 'Yeast_BSc'

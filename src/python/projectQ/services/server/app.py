@@ -1,7 +1,7 @@
 from flask import Flask
 from logging.config import dictConfig
 
-from values import DEBUG
+from projectQ.packages.values import DEBUG
 
 
 """Configure logging"""

@@ -1,6 +1,6 @@
 from schema import Schema, Use
 
-from eventSystem.Event import Event
+from projectQ.packages.eventSystem.Event import Event
 
 
 class SimulationStarted(Event):

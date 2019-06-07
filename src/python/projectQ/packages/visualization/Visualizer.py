@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from values import RESULT_IMAGE_DIR, STATIC_DIR
+from projectQ.packages.values import RESULT_IMAGE_DIR, STATIC_DIR
 
 
 NOT_TO_VISUALIZE = [

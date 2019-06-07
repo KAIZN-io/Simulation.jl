@@ -5,8 +5,8 @@ from sqlalchemy import Column, String, DateTime, Integer, Enum, ForeignKey, Uniq
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID, JSON
 
-from db.base import base
-from values import SimulationTypes, ROOT_DIR
+from projectQ.packages.db.base import base
+from projectQ.packages.values import SimulationTypes, ROOT_DIR
 
 
 logger = logging.getLogger(__name__)

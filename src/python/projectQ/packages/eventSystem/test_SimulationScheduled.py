@@ -1,8 +1,8 @@
 import unittest
 import datetime
 
-from eventSystem import SimulationScheduled
-from values import RFC3339_DATE_FORMAT
+from projectQ.packages.eventSystem import SimulationScheduled
+from projectQ.packages.values import RFC3339_DATE_FORMAT
 
 
 payload = {

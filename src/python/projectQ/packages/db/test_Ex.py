@@ -1,7 +1,7 @@
 import unittest
 import datetime
 
-from db import Ex
+from projectQ.packages.db import Ex
 
 class TestEvent(unittest.TestCase):
     def test_ex_dict_validation(self):

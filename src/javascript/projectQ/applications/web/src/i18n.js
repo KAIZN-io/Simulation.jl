@@ -1,7 +1,7 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 
-import locale_de_DE from './locales/de-DE.json';
+import locale_de_DE from '../locales/de-DE.json';
 
 
 // Initialize the localization adapter

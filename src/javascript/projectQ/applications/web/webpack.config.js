@@ -2,7 +2,7 @@ const webpack = require('webpack');
 
 module.exports = (env, options) => {
   return {
-    entry: './projectQ/web/App.jsx',
+    entry: './src/App.jsx',
     module: {
       rules: [
         {
@@ -16,7 +16,7 @@ module.exports = (env, options) => {
       extensions: ['*', '.js', '.jsx']
     },
     output: {
-      path: __dirname + '/projectQ/server/static',
+      path: __dirname + '/static',
       publicPath: '/',
       filename: 'bundle.js'
     },

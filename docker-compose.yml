@@ -135,7 +135,8 @@ services:
     command: sh -c "npm ci && npm run build"
     image: node:11.10.0-alpine
     volumes:
-      - ./:/projectQ/
+      - ./src/javascript/projectQ/applications/web:/projectQ/
+      - ./static/:/projectQ/static/
     working_dir: /projectQ/
 
   test_webApp:

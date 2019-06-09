@@ -43,7 +43,7 @@ services:
         condition: service_healthy
       messageBroker:
         condition: service_healthy
-      julia_simulation:
+      julia_simulator:
         condition: service_started
       dbWorker:
         condition: service_started
@@ -103,9 +103,9 @@ services:
     volumes:
       - ./projectQ/:/projectQ/
 
-  julia_simulation:
+  julia_simulator:
     build:
-      context: ./src/julia/projectQ/services/simulation
+      context: ./src/julia/projectQ/services/Simulator
     command: ["projectQ/julia_simulation/worker.jl"]
     depends_on:
       messageBroker:
@@ -119,7 +119,7 @@ services:
       - messageBroker
     volumes:
       - ./src/julia/projectQ/:/projectQ/
-    working_dir: /projectQ
+    working_dir: /projectQ/services/Simulator
 
   messageBroker:
     healthcheck:

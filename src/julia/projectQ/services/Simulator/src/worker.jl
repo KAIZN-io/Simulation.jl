@@ -1,9 +1,6 @@
 using AMQPClient
-
-include("on.jl")
-include("emit.jl")
-include("simulate.jl")
-include("event_creators.jl")
+using EventSystem: on, emit, simulationStarted, simulationFailed, simulationFinished
+using Simulation: simulate
 
 
 SERVICE_SIMULATION_WORKER = ENV["SERVICE_SIMULATION_WORKER"]

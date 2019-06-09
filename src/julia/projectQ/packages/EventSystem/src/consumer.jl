@@ -5,6 +5,7 @@ using AMQPClient
 EXCHANGE_EVENTS = ENV["EXCHANGE_EVENTS"]
 
 # Authentication values
+# TODO: Make this dynamic and not plain text
 login = "guest"
 password = "guest"
 

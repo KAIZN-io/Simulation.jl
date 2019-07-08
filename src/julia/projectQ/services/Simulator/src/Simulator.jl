@@ -1,12 +1,12 @@
+module Simulator
+
 using AMQPClient
-
-include("on.jl")
-include("emit.jl")
-include("simulate.jl")
-include("event_creators.jl")
+using EventSystem: on, emit, simulationStarted, simulationFailed, simulationFinished
+using Simulation: simulate
 
 
-SERVICE_SIMULATION_WORKER = ENV["SERVICE_SIMULATION_WORKER"]
+# TODO: rename env var to service / package naming convention
+SERVICE_SIMULATION_WORKER = get( ENV, "SERVICE_SIMULATION_WORKER", "simulator" )
 
 function prepareModel(model::Dict)
     @info model
@@ -97,10 +97,14 @@ function onSimulationScheduled(ch::AMQPClient.MessageChannel, msg::AMQPClient.Me
     @info string(payload["id"], " - Done.")
 end
 
-on("simulation.scheduled", onSimulationScheduled, SERVICE_SIMULATION_WORKER)
+function run()
+    on("simulation.scheduled", onSimulationScheduled, SERVICE_SIMULATION_WORKER)
 
-# do nothing, to keep the container running. Otherwise, it would just shut down immediately
-while true
-    sleep(1000)
+    # do nothing, to keep the container running. Otherwise, it would just shut down immediately
+    while true
+        sleep(1000)
+    end
 end
+
+end # module Simulator
 

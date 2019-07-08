@@ -43,7 +43,7 @@ services:
         condition: service_healthy
       messageBroker:
         condition: service_healthy
-      julia_simulation:
+      julia_simulator:
         condition: service_started
       dbWorker:
         condition: service_started
@@ -103,10 +103,11 @@ services:
     volumes:
       - ./projectQ/:/projectQ/
 
-  julia_simulation:
+  julia_simulator:
     build:
-      context: ./src/julia/projectQ/services/simulation
-    command: ["projectQ/julia_simulation/worker.jl"]
+      context: ./src/julia/projectQ
+      dockerfile: ./services/Simulator/Dockerfile
+    command: ["-e", "using Simulator; Simulator.run()"]
     depends_on:
       messageBroker:
         condition: service_healthy
@@ -114,12 +115,11 @@ services:
       - DEBUG
       - EXCHANGE_EVENTS
       - SERVICE_SIMULATION_WORKER
-    image: janpiotraschke/projectq:julia-0.1.0_julia-integration
+    image: janpiotraschke/projectq:julia-0.2.0_restructuring
     networks:
       - messageBroker
     volumes:
       - ./src/julia/projectQ/:/projectQ/
-    working_dir: /projectQ
 
   messageBroker:
     healthcheck:

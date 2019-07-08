@@ -2,7 +2,7 @@ using AMQPClient
 
 
 # get environmetn variables
-EXCHANGE_EVENTS = ENV["EXCHANGE_EVENTS"]
+EXCHANGE_EVENTS = get( ENV, "EXCHANGE_EVENTS", "default-exchange" )
 
 # Authentication values
 # TODO: Make this dynamic and not plain text

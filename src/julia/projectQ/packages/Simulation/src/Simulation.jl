@@ -1,6 +1,6 @@
 module Simulation
 
-inclide("simulate.jl")
+include("simulate.jl")
 
 export simulate
 

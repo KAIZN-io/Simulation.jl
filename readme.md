@@ -24,15 +24,14 @@ DB_USER=postgres
 DB_PASSWORD=password
 
 # Web settings
-FLASK_ENV=develompent
+FLASK_ENV=developent
 
 # exchange names
-EXCHANGE_EVENTS=events
+EXCHANGE_EVENTS=exchange.events
 
 # service names
-SERVICE_SIMULATION_WORKER=service.simulation-worker
-SERVICE_DB_WORKER=service.db-worker
-
+SERVICE_SIMULATOR=service.simulator
+SERVICE_PERSISTOR=service.persistor
 ```
 ### Starting
 
@@ -48,7 +47,7 @@ To start the project, you just need to:
 To start the project with the old simulation worker, do the following:
 
 - Open a terminal in the root of the project.
-- Run `docker-compose up -d bundler dbWorker py_simulation`
+- Run `docker-compose up -d bundler persistor py_simulator`
 - Run `docker-compose up --no-deps server`
 - Wait for everything to be up and running
 - Open your browser and go to: [localhost:8080](http://localhost:8080/)
@@ -58,14 +57,16 @@ To start the project with the old simulation worker, do the following:
 #### Develop the Web-App
 - Have [npm](https://www.npmjs.com/get-npm) installed
 - Open a terminal in the same location and run `docker-compose up server`
-- After the project is running, open **another** terminal in the root of the project and run `npm run dev-server`
+- After the project is running, open **another** terminal in the projects root directory
+- Change into the web apps code directory by running `cd ./src/javascript/projectQ/applications/web`
+- Start the development server with `npm run dev:serve`
 - Open your browser and go to: [localhost:808**1**](http://localhost:8081/)
 
 This will automatically rebuild the code for the Web-App on changes and even hot-swap changed components and reload your browser automatically.
 
 #### Running tests
-To run the unit tests for the web app, execute: `docker-compose up test_webApp`; To run them locally: `npm run test`
-To run the unit tests for the python code, execute: `docker-compose up test_python`; To run them locally: `python -m unittest discover projectQ`
+To run the unit tests for the web app, execute: `docker-compose up test_webApp`; To run them locally run `npm run test` in the web apps root dir.
+To run the unit tests for the python code, execute: `docker-compose up test_python`; To run them locally run `python -m unittest discover projectQ` in the python root dir.
 
 ### Using `make`
 The project contains a make file that offers some targets for easier interaction with the project. Run `make help` to see which actions are supported.
@@ -79,7 +80,7 @@ All python dependencies are found in the `requirements.txt` file. You can add, r
 Our web app uses node packages. Management is done with `npm` or compatible node package managers.
 
 #### Julia
-In the root of our project we have the `Project.toml` and `Manifest.toml` files. These contain the package definitions for Julia. This allwos us to manage packages with Julias built-in package manager. This is how you manage packages with it:
+In the root of the Julia package we have the `Project.toml` and `Manifest.toml` files. These contain the package definitions for Julia. This allwos us to manage packages with Julias built-in package manager. This is how you manage packages with it:
 
 - Open a terminal in the root of the project
 - Run `julia`

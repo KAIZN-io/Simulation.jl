@@ -14,8 +14,8 @@ py_up:
 
 PHONY += test
 test: clean
-	$(DC_CMD) up test_webApp
-	$(DC_CMD) up test_python
+	$(DC_CMD) up test_webApp && \
+	$(DC_CMD) up test_python && \
 	$(MAKE) up
 
 PHONY += down
@@ -25,8 +25,8 @@ down:
 PHONY += clean
 clean: down
 	$(DC_CMD) down --rmi local --volumes
-	rm -rf ./projectQ/server/static
-	rm -rf ./node_modules
+	rm -rf ./static
+	rm -rf ./src/javascript/projectQ/applications/web/node_modules
 
 PHONY += help
 help:
@@ -34,6 +34,8 @@ help:
 	@echo ""
 	@echo "default:        -> up"
 	@echo "up:             start local development stack."
+	@echo "py_up:          start local development stack using the python simulator."
+	@echo "test:           clean everything up, then run all unit tests."
 	@echo "down:           stop all containers and removes them."
 	@echo "clean:          stop all containers and removes them, removes images and volumes as well. Removes npm packages. And cleanes up generated files like the web-apps javascript bundle and generated result images."
 

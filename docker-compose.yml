@@ -144,14 +144,14 @@ services:
     command: sh -c "npm ci && npm run test"
     image: node:11.10.0-alpine
     volumes:
-      - ./:/projectQ/
+      - ./src/javascript/projectQ/applications/web:/projectQ/
     working_dir: /projectQ/
 
   test_python:
     command: ["-u", "-m", "unittest", "discover"]
     image: janpiotraschke/projectq:py-0.4.0_julia-integration
     volumes:
-      - ./projectQ/:/projectQ/
+      - ./src/python/projectQ/:/projectQ/projectQ
 
 # Define named volumes for use in the service definitions
 volumes:

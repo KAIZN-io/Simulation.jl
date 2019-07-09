@@ -1,0 +1,8 @@
+name = "Simulation"
+uuid = "79852434-8abf-11e9-0560-f138e12b7672"
+authors = ["Jan-Luca Klees <email@janlucaklees.de>"]
+version = "0.1.0"
+
+[deps]
+DiffEqFlux = "aae7a2af-3d4f-5e19-a356-7da93b79d9d0"
+DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"

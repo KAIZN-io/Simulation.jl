@@ -5,7 +5,13 @@ default: up
 
 PHONY += up
 up:
-	$(DC_CMD) up dbWorker simulation server
+	$(DC_CMD) up persistor py_simulator server
+
+PHONY += py_up
+julia_up:
+	$(DC_CMD) up -d bundler persistor julia_simulator
+	$(DC_CMD) up -d --no-deps server
+	$(DC_CMD) logs -f persistor julia_simulator server
 
 PHONY += build
 build:
@@ -13,8 +19,8 @@ build:
 
 PHONY += test
 test: clean build
-	$(DC_CMD) up test_webApp
-	$(DC_CMD) up test_python
+	$(DC_CMD) up test_webApp && \
+	$(DC_CMD) up test_python && \
 	$(MAKE) up
 
 PHONY += down
@@ -24,8 +30,8 @@ down:
 PHONY += clean
 clean: down
 	$(DC_CMD) down --rmi local --volumes
-	rm -rf ./projectQ/server/static
-	rm -rf ./node_modules
+	rm -rf ./static
+	rm -rf ./src/javascript/projectQ/applications/web/node_modules
 
 PHONY += help
 help:
@@ -33,6 +39,7 @@ help:
 	@echo -e ""
 	@echo -e "default:        -> up"
 	@echo -e "up:             Start local development stack."
+	@echo -e "julia_up:       start local development stack using the julia simulator."
 	@echo -e "build:          Builds the docker images for the project."
 	@echo -e "test:           -> down build\n" \
 	          "               Runs all test, then starts the project for manual\n" \

@@ -43,7 +43,7 @@ services:
         condition: service_healthy
       messageBroker:
         condition: service_healthy
-      julia_simulator:
+      py_simulator:
         condition: service_started
       persistor:
         condition: service_started

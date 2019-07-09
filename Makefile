@@ -5,12 +5,13 @@ default: up
 
 PHONY += up
 up:
-	$(DC_CMD) up persistor julia_simulator server
+	$(DC_CMD) up persistor py_simulator server
 
 PHONY += py_up
-py_up:
-	$(DC_CMD) up -d bundler persistor py_simulator
-	$(DC_CMD) up --no-deps server
+julia_up:
+	$(DC_CMD) up -d bundler persistor julia_simulator
+	$(DC_CMD) up -d --no-deps server
+	$(DC_CMD) logs -f persistor julia_simulator server
 
 PHONY += test
 test: clean

@@ -7,11 +7,13 @@ import json
 from flask_socketio import SocketIO
 from flask_restful import Api
 
+# I need to be imported here, because otherwise the logging does not work
+from projectQ.services.server.app import app
+
 from projectQ.packages.values import DEBUG, RFC3339_DATE_FORMAT, RESULT_IMAGE_DIR, STATIC_DIR
 from projectQ.packages.db.base import base, ThreadScopedSession
 from projectQ.packages.eventSystem import on, SimulationScheduled, SimulationStarted, SimulationFinished, SimulationFailed
 
-from projectQ.services.server.app import app
 from projectQ.services.server.routings import routes
 from projectQ.services.server.api import Simulation, SimulationList
 

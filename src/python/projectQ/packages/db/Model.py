@@ -57,15 +57,18 @@ class Model(base):
     def _getInitialModelJson(cls, type):
         assert isinstance(type, SimulationTypes)
 
-        path = ROOT_DIR + '/db/initialData/json/' + type.name + '.json'
+        # TODO: No project root relative path, module reltaive would be better
+        path = ROOT_DIR + '/projectQ/packages/db/initialData/json/' + type.name + '.json'
+        logger.debug('Model JSON path: ' + path)
 
         try:
             fileHandle = open(path)
             modelJson = json.load(fileHandle)
+            return modelJson
         except IOError as e:
             logger.error('Could not load module json file: ' + str(e))
         except ValueError as e:
             logger.error('Could not decode JSON: ' + str(e))
-
-        return modelJson
+        except e:
+            logger.error('Something went wrong: ' + str(e))
 

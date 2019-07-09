@@ -48,7 +48,7 @@ To start the project, you just need to:
 To start the project with the old simulation worker, do the following:
 
 - Open a terminal in the root of the project.
-- Run `docker-compose up -d bundler dbWorker py_simulation`
+- Run `docker-compose up -d bundler persistor py_simulator`
 - Run `docker-compose up --no-deps server`
 - Wait for everything to be up and running
 - Open your browser and go to: [localhost:8080](http://localhost:8080/)

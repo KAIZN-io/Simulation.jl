@@ -45,7 +45,7 @@ services:
         condition: service_healthy
       julia_simulator:
         condition: service_started
-      dbWorker:
+      persistor:
         condition: service_started
       bundler:
         condition: service_started
@@ -64,11 +64,11 @@ services:
       - "8080:5000"
     # Mount the project code into the container, so the container can run it. <host-path>:<container-path>
     volumes:
-      - ./src/python/:/projectQ/
+      - ./src/python/projectQ/:/projectQ/projectQ
       - ./static/:/projectQ/static
 
-  dbWorker:
-    command: ["-u", "-m", "dbWorker"]
+  persistor:
+    command: ["-u", "-m", "projectQ.services.persistor"]
     depends_on:
       db:
         condition: service_healthy
@@ -86,10 +86,10 @@ services:
       - db
       - messageBroker
     volumes:
-      - ./src/python/projectQ/:/projectQ/
+      - ./src/python/:/projectQ/
 
-  py_simulation:
-    command: ["-u", "-m", "py_simulation"]
+  py_simulator:
+    command: ["-u", "-m", "projectQ.services.simulator"]
     depends_on:
       messageBroker:
         condition: service_healthy
@@ -101,7 +101,8 @@ services:
     networks:
       - messageBroker
     volumes:
-      - ./projectQ/:/projectQ/
+      - ./src/python/projectQ/:/projectQ/projectQ
+      - ./static/:/projectQ/static
 
   julia_simulator:
     build:

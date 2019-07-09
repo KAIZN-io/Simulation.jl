@@ -6,7 +6,7 @@ using Simulation: simulate
 
 
 # TODO: rename env var to service / package naming convention
-SERVICE_SIMULATION_WORKER = get( ENV, "SERVICE_SIMULATION_WORKER", "simulator" )
+SERVICE_SIMULATOR = get( ENV, "SERVICE_SIMULATOR", "simulator" )
 
 function prepareModel(model::Dict)
     @info model
@@ -98,7 +98,7 @@ function onSimulationScheduled(ch::AMQPClient.MessageChannel, msg::AMQPClient.Me
 end
 
 function run()
-    on("simulation.scheduled", onSimulationScheduled, SERVICE_SIMULATION_WORKER)
+    on("simulation.scheduled", onSimulationScheduled, SERVICE_SIMULATOR)
 
     # do nothing, to keep the container running. Otherwise, it would just shut down immediately
     while true

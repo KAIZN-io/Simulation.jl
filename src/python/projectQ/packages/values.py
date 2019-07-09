@@ -18,8 +18,8 @@ DB_PASSWORD = os.environ.get('DB_PASSWORD')
 EXCHANGE_EVENTS = os.environ.get('EXCHANGE_EVENTS')
 
 # get the service names
-SERVICE_SIMULATION_WORKER = os.environ.get('SERVICE_SIMULATION_WORKER')
-SERVICE_DB_WORKER = os.environ.get('SERVICE_DB_WORKER')
+SERVICE_SIMULATOR = os.environ.get('SERVICE_SIMULATOR')
+SERVICE_PERSISTOR = os.environ.get('SERVICE_PERSISTOR')
 
 # set the root dir
 ROOT_DIR = '/projectQ'

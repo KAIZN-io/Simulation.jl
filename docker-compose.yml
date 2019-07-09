@@ -80,7 +80,7 @@ services:
       - DB_USER
       - DB_PASSWORD
       - EXCHANGE_EVENTS
-      - SERVICE_DB_WORKER
+      - SERVICE_PERSISTOR
     image: janpiotraschke/projectq:py-0.4.0_julia-integration
     networks:
       - db
@@ -96,7 +96,7 @@ services:
     environment:
       - DEBUG
       - EXCHANGE_EVENTS
-      - SERVICE_SIMULATION_WORKER
+      - SERVICE_SIMULATOR
     image: janpiotraschke/projectq:py-0.4.0_julia-integration
     networks:
       - messageBroker
@@ -115,7 +115,7 @@ services:
     environment:
       - DEBUG
       - EXCHANGE_EVENTS
-      - SERVICE_SIMULATION_WORKER
+      - SERVICE_SIMULATOR
     image: janpiotraschke/projectq:julia-0.2.0_restructuring
     networks:
       - messageBroker

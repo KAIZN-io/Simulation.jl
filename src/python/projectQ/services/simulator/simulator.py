@@ -2,12 +2,12 @@ import eventlet
 import traceback
 
 from projectQ.packages.eventSystem import on, emit, SimulationScheduled, SimulationStarted, SimulationFinished, SimulationFailed
-from projectQ.packages.values import RFC3339_DATE_FORMAT, SERVICE_SIMULATION_WORKER
+from projectQ.packages.values import RFC3339_DATE_FORMAT, SERVICE_SIMULATOR
 from projectQ.packages.simulation import simulate
 
 
 def run():
-    @on(SimulationScheduled, SERVICE_SIMULATION_WORKER)
+    @on(SimulationScheduled, SERVICE_SIMULATOR)
     def processSimulationScheduled(ch, method, properties, event, payload):
         print(str(payload['id']) + ' - Starting simulation, type: ' + payload['type'])
 

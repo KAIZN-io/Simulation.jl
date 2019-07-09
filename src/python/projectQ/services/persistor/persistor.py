@@ -1,13 +1,13 @@
 import eventlet
 
 from projectQ.packages.eventSystem import on, SimulationScheduled, SimulationStarted, SimulationFinished, SimulationFailed
-from projectQ.packages.values import RFC3339_DATE_FORMAT, SERVICE_DB_WORKER
+from projectQ.packages.values import RFC3339_DATE_FORMAT, SERVICE_PERSISTOR
 from projectQ.packages.db import sessionScope, Ex, Pd
 
 
 def run():
 
-    @on(SimulationScheduled, SERVICE_DB_WORKER)
+    @on(SimulationScheduled, SERVICE_PERSISTOR)
     def processSimulationScheduled(ch, method, properties, event, payload):
 
         print(str(payload['id']) + ' - Persisting scheduled...')
@@ -24,7 +24,7 @@ def run():
 
         print(str(payload['id']) + ' - Done persisting scheduled.')
 
-    @on(SimulationStarted, SERVICE_DB_WORKER)
+    @on(SimulationStarted, SERVICE_PERSISTOR)
     def processSimulationStarted(ch, method, properties, event, payload):
 
         print(str(payload['id']) + ' - Persisting started...')
@@ -41,7 +41,7 @@ def run():
 
         print(str(payload['id']) + ' - Done persisting started.')
 
-    @on(SimulationFinished, SERVICE_DB_WORKER)
+    @on(SimulationFinished, SERVICE_PERSISTOR)
     def processSimulationFinished(ch, method, properties, event, payload):
 
         print(str(payload['id']) + ' - Persisting finished...')
@@ -69,7 +69,7 @@ def run():
 
         print(str(payload['id']) + ' - Done persisting finished.')
 
-    @on(SimulationFailed, SERVICE_DB_WORKER)
+    @on(SimulationFailed, SERVICE_PERSISTOR)
     def processSimulationFailed(ch, method, properties, event, payload):
 
         print(str(payload['id']) + ' - Persisting failed...')

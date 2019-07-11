@@ -1,7 +1,0 @@
-name = "Simulator"
-uuid = "d9cc4e0a-8ac2-11e9-366c-11031a6cd161"
-authors = ["Jan-Luca Klees <email@janlucaklees.de>"]
-version = "0.1.0"
-
-[deps]
-AMQPClient = "79c8b4cd-a41a-55fa-907c-fab5288e1383"

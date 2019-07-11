@@ -1,9 +1,0 @@
-name = "EventSystem"
-uuid = "49a98c30-8abc-11e9-3a5d-a526c8e943b3"
-authors = ["Jan-Luca Klees <email@janlucaklees.de>"]
-version = "0.1.0"
-
-[deps]
-AMQPClient = "79c8b4cd-a41a-55fa-907c-fab5288e1383"
-Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
-JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"

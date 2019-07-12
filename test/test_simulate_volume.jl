@@ -1,6 +1,7 @@
 using Test
+using DifferentialEquations, DiffEqFlux
+using Simulation
 
-include("simulate.jl")
 
 start = 0.0
 stop = 1.0

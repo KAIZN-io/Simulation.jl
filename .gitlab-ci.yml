@@ -1,0 +1,9 @@
+image: "julia:1.1.0-stretch"
+
+before_script:
+  - julia --project -e "using Pkg; Pkg.instantiate()"
+
+test:
+  script:
+    - julia --project -e "using Pkg; Pkg.test()"
+

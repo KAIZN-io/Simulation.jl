@@ -22,17 +22,17 @@ the returned `derive` function is called inside a SDE solver.
 
 The arguments need to have the shape as dclared for the `simulate` function.
 """
-function generateDeriveFunction(model::Dict, initialValues::Dict, parameters::Dict)
+function generateDeriveFunction(model::Dict, initialValues::Array, parameters::Array)
     # List of initial value and parameter variables. The keys of the dicts are
     # variable names. We declare them here, so they can be used in the `derive`
     # function below.
-    initialValueKeys = collect(keys(initialValues))
-    parameterKeys = collect(keys(parameters))
+    initialValueKeys = getInitialValueKeys(initialValues)
+    diffenrentialKeys = getInitialValueKeys(model["differential"])
 
     # Evaluate all parameters so we can work with them later in the `derive`
     # function.
-    for (parameter, value) in parameters
-        eval(Meta.parse(string(parameter, "=", value)))
+    for parameter in parameters
+        eval(Meta.parse(string(parameter["testcd"], "=", parameter["orres"])))
     end
 
     """
@@ -53,8 +53,8 @@ function generateDeriveFunction(model::Dict, initialValues::Dict, parameters::Di
         # With the current values (u) evaluated, we can evaluate the algebraic
         # equations from the `model`. We need to do this tep here, as the
         # algebraic equations can be dependent on the (initial) values (u).
-        for (var, terms) in model["algebraic"]
-            eval(Meta.parse(string(var, "=", join(terms))))
+        for equation in model["algebraic"]
+            eval(Meta.parse(string(equation["testcd"], "=", join(equation["orres"]))))
         end
 
         # Calculate derivatives
@@ -65,11 +65,17 @@ function generateDeriveFunction(model::Dict, initialValues::Dict, parameters::Di
         # equation from the `model` by prepending a 'd' to the variable name.
         for (index, value) in enumerate(valueList)
             # Get the name of the variable
-            var = initialValueKeys[index]
+            var = "d" * initialValueKeys[index]
             # look up its corresponding differential equation
-            diffeq = model["differential"][string("d", var)]
+            modelIndex = findfirst(x -> x==var, diffenrentialKeys)
+            diffeq = model["differential"][modelIndex]["orres"]
             # evaluate the differential equation
-            du[index] = eval(Meta.parse(join(diffeq)))
+            try
+                du[index] = eval(Meta.parse(join(diffeq)))
+            catch err
+                @error err
+                @error "When evaluating '" * var
+            end
         end
     end
 
@@ -88,18 +94,18 @@ uses eval on the given `model`, `initialValues` and `parameters`.
 The arguments need to be in the same shape as defined for the `simulate`
 function.
 """
-function generateSdeProblem(model::Dict, initialValues::Dict, parameters::Dict, start::Float64, stop::Float64, seed = 1234)
+function generateSdeProblem(model::Dict, initialValues::Array, parameters::Array, start::Float64, stop::Float64, noise_level=0.01, seed=1337)
     # Get the derive function
     derive = generateDeriveFunction(model, initialValues, parameters)
 
     # Get the noise function
-    noise = generateNoiseFunction()
+    noise = generateNoiseFunction(noise_level)
 
     # Set the time span
     timeSpan = (start, stop)
 
     # declare the SDE problem
-    return SDEProblem(derive, noise, values(initialValues), timeSpan, values(parameters), seed = seed)
+    return SDEProblem(derive, noise, getEvaluatedValues(initialValues), timeSpan, getEvaluatedValues(parameters), seed = seed)
 end
 
 """
@@ -115,7 +121,7 @@ access and work with these values.
 The stimuli array and the initial values need to be in the same shape as for
 the `simulate` function.
 """
-function generateSolveFunction(sdeProblem, initialValues::Dict, stimuli::Array, stepSize::Float64, solver=SOSRI())
+function generateSolveFunction(sdeProblem, initialValues::Array, stimuli::Array, stepSize::Float64, solver=SOSRI())
     # Retrieve time values from the given SDE problem
     start = sdeProblem.tspan[1]
     stop = sdeProblem.tspan[2]
@@ -136,7 +142,7 @@ function generateSolveFunction(sdeProblem, initialValues::Dict, stimuli::Array, 
 
     # Callback to activate a stimuli, adding its value to a value in the SDE
     # problem.
-    initialValueKeys = collect(keys(initialValues))
+    initialValueKeys = getInitialValueKeys(initialValues)
     function activateStimulus!(integrator)
         # Iterate over all stimuli to find active ones
         for stimulus in stimuli
@@ -166,6 +172,8 @@ function generateSolveFunction(sdeProblem, initialValues::Dict, stimuli::Array, 
     # `tstops` must be a set of all stimuli points. Again, only unique
     # timepoints, even if there are multiple stimuli at the same time.
     function solve()
+        @info "solving..."
+
         diffeq_fd(
             parameters,
             sol->sol[1:substanceCount,:],
@@ -221,12 +229,16 @@ stimuli = [
 ]
 ```
 """
-function simulate(model::Dict, initialValues::Dict, parameters::Dict, stimuli::Array, start::Float64, stop::Float64, stepSize::Float64)
+function simulate(model::Dict, initialValues::Array, parameters::Array, stimuli::Array, start::Float64, stop::Float64, stepSize::Float64, noise_level::Float64, seed::Int)
     # generate the SDE problem from the given arguments
-    sdeProblem = generateSdeProblem(model, initialValues, parameters, start, stop)
+    sdeProblem = generateSdeProblem(model, initialValues, parameters, start, stop, noise_level, seed)
+    @info "SDE Problem:"
+    @show sdeProblem
 
     # generate the solving function for the SDE problem
     solve = generateSolveFunction(sdeProblem, initialValues, stimuli, stepSize)
+    @info "solve function:"
+    @show solve
 
     # solve the sde problem
     res = solve()
@@ -234,10 +246,17 @@ function simulate(model::Dict, initialValues::Dict, parameters::Dict, stimuli::A
     @info "Results:"
     @show res
 
-    timePoints = sort(append!(collect(getTimePoints(stepSize,start,stop,stimuli)),getStimuliTimePoints(stimuli)))
-    @show size(res)
-    @show size(timePoints)
-    return hcat(timePoints, res')
+    # timePoints = sort(append!(collect(getTimePoints(stepSize,start,stop,stimuli)),getStimuliTimePoints(stimuli)))
+    # return hcat(timePoints, res')
+    return simulationResultsToVarDict(res, initialValues)
+end
+
+function simulationResultsToVarDict(res, initialValues)
+    ret = Dict()
+    for (index, name) in enumerate(getInitialValueKeys(initialValues))
+        ret[name] = res[index, :]
+    end
+    return ret
 end
 
 function getTimePoints(stepSize, start, stop,stimuli)
@@ -246,6 +265,7 @@ function getTimePoints(stepSize, start, stop,stimuli)
     # `stop` we will have an entry every `stepSize`. Additionally, we add the
     # points, where stimuli need to be actiavted.
     timePoints = sort(unique(append!(collect(start:stepSize:stop),getStimuliTimePoints(stimuli))))
+    @info string("Simulation time points: ", timePoints)
 
     return timePoints
 end
@@ -257,5 +277,28 @@ function getStimuliTimePoints(stimuli)
     @info string("Stimuli time points: ", stimuliTimePoints)
 
     return stimuliTimePoints
+end
+
+function getEvaluatedValues(values)
+    ret = Float64[]
+    # Evaluate all initial values to get a numeric value for each one
+    for value in values
+        name = value["testcd"]
+        expr = value["orres"]
+        # get the var name
+        sym = Symbol(name)
+        # evaluate the variables expression to a numeric value
+        val = Float64(eval(Meta.parse(expr)))
+        # make the variable available for following expressions
+        eval(:($sym = $val))
+        # add the numeric value to the list that shall be returned
+        push!(ret, val)
+    end
+    @info ret
+    return ret
+end
+
+function getInitialValueKeys(initialValues)
+    return [iv["testcd"] for iv in initialValues]
 end
 

@@ -1,6 +1,7 @@
 using Test
+using DifferentialEquations, DiffEqFlux
+using Simulation
 
-include("simulate.jl")
 
 function testGenerateDeriveFuntion()
     model = Dict(
@@ -38,5 +39,25 @@ function testGenerateDeriveFuntion()
     @test [1.0, 1.0, 1.0] == du
 end
 
-testGenerateDeriveFuntion()
+function testSimulate()
+    model = Dict(
+        "algebraic" => Dict(
+            "a" => ["+2*x"],
+        ),
+        "differential" => Dict(
+            "dx" => ["+σ*x", "+a"],
+        )
+    )
+
+    initialValues = Dict(
+        "x" => 1.0,
+    )
+
+    parameters = Dict(
+        "σ" => 1.0,
+    )
+
+    results = simulate(model, initialValues, parameters, [], 0.0, 1.0, 0.1)
+    @show results
+end
 
